@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iterator>
 
-
 #include "utils.h"
 
 glm::vec3 ZVEC3 = { 0,0,0 };
@@ -227,3 +226,19 @@ namespace lybyte {
 	void cfile_close() { cfile.clear(); }
 
 };
+
+namespace lyarr {
+
+	int findis(std::string arr[], const std::string& val) {
+		for (unsigned int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+			if (arr[i] == val) { return i; }
+		} return -1;
+	}
+
+	void prints(std::string arr[], std::string separator, std::string prefix = "*.") {
+		for (unsigned int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+			std::cout << prefix + arr[i] + separator;
+		}
+	}
+
+}

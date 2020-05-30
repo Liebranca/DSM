@@ -7,7 +7,6 @@
 
 extern glm::vec3 ZVEC3;
 
-
 namespace lymath {
 
 	struct bf {
@@ -63,5 +62,15 @@ namespace lybyte {
 	void cfile_close();
 
 };
+
+namespace lyarr {	
+	
+	//	find index of value in string array
+	int findis(std::string arr[], const std::string& val);
+
+	//	print values inside string array
+	void prints(std::string arr[], std::string separator = ", ", std::string prefix = "*.");
+
+}
 
 #endif // LYUTILS_H

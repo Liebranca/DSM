@@ -13,6 +13,13 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# I put dependencies inside the project folder, get them off the repo
+# to download (its just 1.4 MB), get them from this here MEGA link:
+# https://mega.nz/file/krZAxC4L#TdcPaSvcxMEI2ROPCLPwtsYAVGMxDupajQ_mxy2RDYY
+# just unzip inside dsm, itll spit out lib and include
+lib/
+include/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
