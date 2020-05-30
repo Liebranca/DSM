@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\lymath">
+      <UniqueIdentifier>{744466a4-4890-42f4-8c97-3fa68b72e9d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lymath">
+      <UniqueIdentifier>{0ecffa8a-4f3b-40d3-a4d6-fd778a4fd9ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lybyte">
+      <UniqueIdentifier>{053ebe66-1370-4dfe-b5d7-05318a54679a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lybyte">
+      <UniqueIdentifier>{cefbe692-d11d-4bc3-ba1e-d212e2b3c880}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lymath\iops.h">
+      <Filter>Header Files\lymath</Filter>
+    </ClInclude>
+    <ClInclude Include="lymath\fops.h">
+      <Filter>Header Files\lymath</Filter>
+    </ClInclude>
+    <ClInclude Include="lymath\vops.h">
+      <Filter>Header Files\lymath</Filter>
+    </ClInclude>
+    <ClInclude Include="lybyte\types.h">
+      <Filter>Header Files\lybyte</Filter>
+    </ClInclude>
+    <ClInclude Include="lybyte\files.h">
+      <Filter>Header Files\lybyte</Filter>
+    </ClInclude>
+    <ClInclude Include="Zajec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lymath\iops.cpp">
+      <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="lymath\fops.cpp">
+      <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="lymath\vops.cpp">
+      <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="lybyte\types.cpp">
+      <Filter>Source Files\lybyte</Filter>
+    </ClCompile>
+    <ClCompile Include="lybyte\files.cpp">
+      <Filter>Source Files\lybyte</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

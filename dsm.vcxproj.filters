@@ -63,9 +63,6 @@
     <ClCompile Include="src\backbone\reyn.cpp">
       <Filter>Source Files\backbone</Filter>
     </ClCompile>
-    <ClCompile Include="src\lymath\utils.cpp">
-      <Filter>Source Files\lymath</Filter>
-    </ClCompile>
     <ClCompile Include="src\backbone\space.cpp">
       <Filter>Source Files\backbone</Filter>
     </ClCompile>
@@ -115,9 +112,6 @@
     </ClInclude>
     <ClInclude Include="src\backbone\reyn.h">
       <Filter>Source Files\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="src\lymath\utils.h">
-      <Filter>Source Files\lymath</Filter>
     </ClInclude>
     <ClInclude Include="src\backbone\space.h">
       <Filter>Source Files\backbone</Filter>

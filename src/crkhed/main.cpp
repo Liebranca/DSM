@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "../lymath/utils.h"
+#include "lymath/iops.h"
 
 //		0.	CONTAINERS
 //	--- 	--- 	--- 	--- 	---
@@ -46,7 +46,9 @@ int main(int argc, char* argv[])
 			extension = filepath.substr(fromdot+1, filepath.npos);
 		}
 
-		int index = lyarr::findis(dsm_extensions, extension);
+		lymath::gmini(2, 1);
+
+		/*int index = lyarr::findis(dsm_extensions, extension);
 		if (index != -1) {
 			if		(extension == "crk") { ; } //call crk converter
 			else if (extension == "joj") { ; } //call joj converter
@@ -55,7 +57,7 @@ int main(int argc, char* argv[])
 		else { 
 			std::cout << "invalid file extension. accepted files are: ";
 			lyarr::prints(dsm_extensions);
-		}
+		}*/
 
 	}
 	else { std::cout << "you need to provide arguments for this call, asshole."; }
