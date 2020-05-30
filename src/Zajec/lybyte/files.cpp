@@ -4,7 +4,7 @@
 
 namespace files {
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
 	void frombin(const std::string& filename) {
 		std::ifstream input(filename, std::ios::binary);
@@ -13,7 +13,7 @@ namespace files {
 		input.close();
 	}
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 	
 	byte sumbytes(bytearray arr) {
 		byte b;
@@ -26,7 +26,7 @@ namespace files {
 		return b;
 	}
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
 	byte curfile_sec(uint iStart, uint iEnd) {
 		bytearray arr;
@@ -36,7 +36,7 @@ namespace files {
 		return sumbytes(arr);
 	}
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
 	std::string cpath_fromreg(uint obid, const std::string& regpath) {
 		uint regid = uint(obid / 256);
@@ -59,19 +59,19 @@ namespace files {
 		return found;
 	}
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
-	uint cuint2(uint i) { types::uint2(curfile_sec(i, i + 2)); }
-	uint cuint3(uint i) { types::uint3(curfile_sec(i, i + 3)); }
+	uint cuint2(uint i) { types::touint(curfile_sec(i, i + 2)); }
+	uint cuint3(uint i) { types::touint(curfile_sec(i, i + 3)); }
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
 	float cfloat2(uint i) {
-		return types::float2( types::tobits(curfile[i], 8),
+		return types::tofloat2( types::tobits(curfile[i], 8),
 							  types::tobits(curfile[i + 1], 8) );
 	}
 
-//		· --- · --- · --- · --- ·
+//	- --- - --- - --- - --- -
 
 	void cfile_close() { curfile.clear(); }
 

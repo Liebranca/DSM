@@ -1,5 +1,7 @@
 #include "iops.h"
 
+//	- --- - --- - --- - --- -
+
 namespace iops {
 	int clampi(int v, int min, int max) {
 		if (v < min) { v = min; } if (v > max) { v = max; }

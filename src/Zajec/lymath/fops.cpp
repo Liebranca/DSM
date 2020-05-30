@@ -1,6 +1,8 @@
 #include <math.h>
 #include "fops.h"
 
+//	- --- - --- - --- - --- -
+
 namespace fops {
 
 	bool approxf(float v1, float v2, float m) {
@@ -24,6 +26,8 @@ namespace fops {
 		return v * dirn;
 	}
 
+//	- --- - --- - --- - --- -
+
 	float gmaxf(float v1, float v2) {
 		if (v1 > v2) { return v1; } return v2;
 	}
@@ -35,6 +39,8 @@ namespace fops {
 	float submaxf(float v1, float v2) {
 		return gmaxf(v1, v2) - gminf(v1, v2);
 	}
+
+//	- --- - --- - --- - --- -
 
 	float compolarf(float v1, float v2) {
 		if ((v1 < 0 && v2 > 0) || (v1 > 0 && v2 < 0)) { return -v1; } return v1;
