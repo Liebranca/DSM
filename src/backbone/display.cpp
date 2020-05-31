@@ -1,12 +1,16 @@
 #include "display.h"
 #include <iostream>
 
+//	- --- - --- - --- - --- -
+
 int kFWD = SDLK_w; int kBCK = SDLK_s;
 int kLFT = SDLK_a; int kRGT = SDLK_d;
 int kSPC = SDLK_SPACE; int kLCTRL = SDLK_LCTRL;
 int kUSE = SDLK_e;
 
 int kESC = SDLK_ESCAPE;
+
+//	- --- - --- - --- - --- -
 
 DS_DISPLAY::DS_DISPLAY(const std::string& title, int width, int height)
 {
@@ -17,8 +21,6 @@ DS_DISPLAY::DS_DISPLAY(const std::string& title, int width, int height)
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
 	SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
@@ -37,6 +39,8 @@ DS_DISPLAY::DS_DISPLAY(const std::string& title, int width, int height)
 
 };
 
+//	- --- - --- - --- - --- -
+
 DS_DISPLAY::~DS_DISPLAY()
 {
 	SDL_ShowCursor(SDL_ENABLE);
@@ -46,6 +50,8 @@ DS_DISPLAY::~DS_DISPLAY()
 
 };
 
+//	- --- - --- - --- - --- -
+
 bool DS_DISPLAY::getIsClosed() { return isClosed; }
 
 void DS_DISPLAY::swapBuffers()
@@ -53,6 +59,8 @@ void DS_DISPLAY::swapBuffers()
 	SDL_GL_SwapWindow(window);
 
 };
+
+//	- --- - --- - --- - --- -
 
 void DS_DISPLAY::mouseWrap() {
 	/*int x = mousePos[0], y = mousePos[1];
@@ -67,6 +75,8 @@ void DS_DISPLAY::mouseWrap() {
 	mouseIgnore = true; mouseRel = { 0,0 };
 
 }
+
+//	- --- - --- - --- - --- -
 
 void DS_DISPLAY::pollEvents(){
 	SDL_Event event; int k;

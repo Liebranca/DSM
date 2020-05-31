@@ -42,17 +42,11 @@
     <ClCompile Include="src\rend\texture.cpp">
       <Filter>Source Files\rend</Filter>
     </ClCompile>
-    <ClCompile Include="src\lymath\transform.cpp">
-      <Filter>Source Files\lymath</Filter>
-    </ClCompile>
     <ClCompile Include="src\game\camera.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="src\rend\importcrk.cpp">
       <Filter>Source Files\rend</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lymath\time.cpp">
-      <Filter>Source Files\lymath</Filter>
     </ClCompile>
     <ClCompile Include="src\game\node.cpp">
       <Filter>Source Files\game</Filter>
@@ -89,9 +83,6 @@
     <ClInclude Include="src\rend\texture.h">
       <Filter>Source Files\rend</Filter>
     </ClInclude>
-    <ClInclude Include="src\lymath\transform.h">
-      <Filter>Source Files\lymath</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\camera.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
@@ -100,9 +91,6 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\lymath\time.h">
-      <Filter>Source Files\lymath</Filter>
     </ClInclude>
     <ClInclude Include="src\game\node.h">
       <Filter>Source Files\game</Filter>

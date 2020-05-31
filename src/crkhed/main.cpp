@@ -1,12 +1,7 @@
-//--- --- --- --- --- --- --- --- ---
 //	THIS FILE HANDLES CONVERSION TO DSM FORMATS
 //	WE READ FROM HEXDUMPS CREATED FROM BLENDER PYTHON
 
-//--- --- --- --- --- --- --- --- ---
-//	SETUP
-//--- --- --- --- --- --- --- --- ---
-//		0.	LIBRARIES
-//	--- 	--- 	--- 	--- 	---
+//	- --- - --- - --- - --- -
 
 #include <iostream>
 #include <string>
@@ -14,19 +9,10 @@
 
 #include "lyarr/strarr.h"
 
-//		0.	CONTAINERS
-//	--- 	--- 	--- 	--- 	---
-
 //static container for valid extension names
 const strvec dsm_extensions = {"crk", "joj", "ans"};
 
-//		666.	DONE	.999 || ->DS
-//--- END CRK BLOCK --- --- --- --- --- --- --- ---
-
-
-//--- --- --- --- --- --- --- --- ---
-//	CRK BLOCK
-//--- --- --- --- --- --- --- --- ---
+//	- --- - --- - --- - --- -
 
 // crkhed entry point
 //* never call this from dsm
@@ -34,10 +20,7 @@ const strvec dsm_extensions = {"crk", "joj", "ans"};
 int main(int argc, char* argv[])
 {
 
-//		0.	HANDLE ARGS
-//
-//		argv == {crkhed, filepath}
-//	--- 	--- 	--- 	--- 	---
+//	argv == {crkhed, filepath}
 	std::string filepath, extension = "";
 	if (argc > 1) {
 		filepath = argv[1];
@@ -45,6 +28,8 @@ int main(int argc, char* argv[])
 		if (fromdot != std::string::npos) {
 			extension = filepath.substr(fromdot+1, filepath.npos);
 		}
+
+//		- --- - --- - --- - --- -
 
 		if (lyarr::hasstr(dsm_extensions, extension)) {
 			if		(extension == "crk") { ; } //call crk converter
@@ -57,7 +42,10 @@ int main(int argc, char* argv[])
 		}
 
 	}
-	else { std::cout << "You need to provide arguments for this call, asshole.\n"; }
+
+//	- --- - --- - --- - --- -
+
+	else { std::cout << "You need to provide arguments for this call.\n"; }
 
 	return 0;
 }

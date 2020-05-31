@@ -171,8 +171,6 @@
     <ClCompile Include="src\game\camera.cpp" />
     <ClCompile Include="src\game\node.cpp" />
     <ClCompile Include="src\lymath\Gaoler.cpp" />
-    <ClCompile Include="src\lymath\time.cpp" />
-    <ClCompile Include="src\lymath\transform.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rend\importcrk.cpp" />
     <ClCompile Include="src\rend\joj.cpp" />
@@ -194,8 +192,6 @@
     <ClInclude Include="src\game\spawnman.h" />
     <ClInclude Include="src\game\worldman.h" />
     <ClInclude Include="src\lymath\Gaoler.h" />
-    <ClInclude Include="src\lymath\time.h" />
-    <ClInclude Include="src\lymath\transform.h" />
     <ClInclude Include="src\rend\importcrk.h" />
     <ClInclude Include="src\rend\joj.h" />
     <ClInclude Include="src\rend\Light.h" />

@@ -31,6 +31,12 @@
     <Filter Include="Source Files\lyarr">
       <UniqueIdentifier>{9ab4849d-ee8c-4293-aed6-4c45b386bbef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\spatial">
+      <UniqueIdentifier>{478074e1-f792-465d-bc95-a9a8784b3617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\spatial">
+      <UniqueIdentifier>{d7b6352d-3135-4311-be54-06503f870119}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lymath\iops.h">
@@ -54,6 +60,12 @@
     <ClInclude Include="lyarr\strarr.h">
       <Filter>Header Files\lyarr</Filter>
     </ClInclude>
+    <ClInclude Include="spatial\time.h">
+      <Filter>Header Files\spatial</Filter>
+    </ClInclude>
+    <ClInclude Include="spatial\transform.h">
+      <Filter>Header Files\spatial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lymath\iops.cpp">
@@ -73,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="lyarr\strarr.cpp">
       <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="spatial\time.cpp">
+      <Filter>Source Files\spatial</Filter>
+    </ClCompile>
+    <ClCompile Include="spatial\transform.cpp">
+      <Filter>Source Files\spatial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

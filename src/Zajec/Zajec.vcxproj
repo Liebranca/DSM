@@ -94,6 +94,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,6 +102,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,6 +160,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="lyarr\strarr.h" />
+    <ClInclude Include="spatial\time.h" />
+    <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\files.h" />
     <ClInclude Include="lybyte\types.h" />
@@ -167,6 +176,8 @@
     <ClCompile Include="lymath\fops.cpp" />
     <ClCompile Include="lymath\iops.cpp" />
     <ClCompile Include="lymath\vops.cpp" />
+    <ClCompile Include="spatial\time.cpp" />
+    <ClCompile Include="spatial\transform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
