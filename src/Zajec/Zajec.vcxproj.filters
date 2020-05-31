@@ -25,6 +25,12 @@
     <Filter Include="Header Files\lybyte">
       <UniqueIdentifier>{cefbe692-d11d-4bc3-ba1e-d212e2b3c880}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\lyarr">
+      <UniqueIdentifier>{3e95a81d-7962-4d73-a967-10e4c0a952cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lyarr">
+      <UniqueIdentifier>{9ab4849d-ee8c-4293-aed6-4c45b386bbef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lymath\iops.h">
@@ -45,6 +51,9 @@
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lyarr\strarr.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lymath\iops.cpp">
@@ -61,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="lybyte\files.cpp">
       <Filter>Source Files\lybyte</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\strarr.cpp">
+      <Filter>Source Files\lyarr</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

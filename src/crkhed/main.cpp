@@ -12,13 +12,13 @@
 #include <string>
 #include <vector>
 
-#include "lymath/iops.h"
+#include "lyarr/strarr.h"
 
 //		0.	CONTAINERS
 //	--- 	--- 	--- 	--- 	---
 
 //static container for valid extension names
-std::string dsm_extensions[] = {"crk", "joj", "ans"};
+const strvec dsm_extensions = {"crk", "joj", "ans"};
 
 //		666.	DONE	.999 || ->DS
 //--- END CRK BLOCK --- --- --- --- --- --- --- ---
@@ -46,21 +46,18 @@ int main(int argc, char* argv[])
 			extension = filepath.substr(fromdot+1, filepath.npos);
 		}
 
-		lymath::gmini(2, 1);
-
-		/*int index = lyarr::findis(dsm_extensions, extension);
-		if (index != -1) {
+		if (lyarr::hasstr(dsm_extensions, extension)) {
 			if		(extension == "crk") { ; } //call crk converter
 			else if (extension == "joj") { ; } //call joj converter
 			else if (extension == "ans") { ; } //call ans converter
 		}
 		else { 
-			std::cout << "invalid file extension. accepted files are: ";
-			lyarr::prints(dsm_extensions);
-		}*/
+			std::cout << "Invalid file extension. accepted files are: ";
+			lyarr::printstr(dsm_extensions);
+		}
 
 	}
-	else { std::cout << "you need to provide arguments for this call, asshole."; }
+	else { std::cout << "You need to provide arguments for this call, asshole.\n"; }
 
 	return 0;
 }

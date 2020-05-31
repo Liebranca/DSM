@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lyarr\strarr.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\files.h" />
     <ClInclude Include="lybyte\types.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="lyarr\strarr.cpp" />
     <ClCompile Include="lybyte\files.cpp" />
     <ClCompile Include="lybyte\types.cpp" />
     <ClCompile Include="lymath\fops.cpp" />

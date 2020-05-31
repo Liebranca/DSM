@@ -6,6 +6,10 @@
 #include <vector>
 #include "../Zajec.h"
 
+typedef std::vector<bool> byte;
+typedef std::vector<byte> bytearray;
+typedef std::vector<uchar> binfile;
+
 //	- --- - --- - --- - --- -
 
 namespace types {

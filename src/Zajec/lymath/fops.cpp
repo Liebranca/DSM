@@ -15,7 +15,7 @@ namespace fops {
 	}
 
 	float ilerpf(float i1, float i2, float l, float p) {
-		float d = fabs(i1 - i2) / l;
+		float d = (float)fabs(i1 - i2) / l;
 		int s = 1; if (i1 > i2) { s = -1; }
 		return i1 + d * (p * s);
 	}
@@ -47,7 +47,7 @@ namespace fops {
 	}
 
 	float codistf(float x1, float x2) {
-		return sqrt(pow(x2 - x1, 2));
+		return (float)sqrt(pow(x2 - x1, 2));
 	}
 
 }
