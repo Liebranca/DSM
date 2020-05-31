@@ -6,7 +6,7 @@
 namespace timeops {
 
 	float DS_TIME::calcCurr() {
-		curr = (ch::duration_cast<ch::duration<float>>(end - begin).count() / 3.14f) * scale;
+		curr = (float)((sleeptime + worktime).count() * scale);
 		return curr;
 	}
 

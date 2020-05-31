@@ -4,9 +4,6 @@
 //	- --- - --- - --- - --- -
 
 #include <iostream>
-#include <string>
-#include <vector>
-
 #include "lyarr/strarr.h"
 
 //static container for valid extension names
@@ -46,6 +43,5 @@ int main(int argc, char* argv[])
 //	- --- - --- - --- - --- -
 
 	else { std::cout << "You need to provide arguments for this call.\n"; }
-
 	return 0;
 }

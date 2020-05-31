@@ -33,9 +33,6 @@
     <ClCompile Include="src\rend\shader.cpp">
       <Filter>Source Files\rend</Filter>
     </ClCompile>
-    <ClCompile Include="src\backbone\display.cpp">
-      <Filter>Source Files\backbone</Filter>
-    </ClCompile>
     <ClCompile Include="src\rend\mesh.cpp">
       <Filter>Source Files\rend</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
   <ItemGroup>
     <ClInclude Include="src\rend\shader.h">
       <Filter>Source Files\rend</Filter>
-    </ClInclude>
-    <ClInclude Include="src\backbone\display.h">
-      <Filter>Source Files\backbone</Filter>
     </ClInclude>
     <ClInclude Include="src\rend\mesh.h">
       <Filter>Source Files\rend</Filter>

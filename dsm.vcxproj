@@ -164,7 +164,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\backbone\display.cpp" />
     <ClCompile Include="src\backbone\fbo.cpp" />
     <ClCompile Include="src\backbone\reyn.cpp" />
     <ClCompile Include="src\backbone\space.cpp" />
@@ -181,7 +180,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\backbone\display.h" />
     <ClInclude Include="src\backbone\fbo.h" />
     <ClInclude Include="src\backbone\reyn.h" />
     <ClInclude Include="src\backbone\space.h" />
