@@ -4,26 +4,26 @@
 #include "..\SIN.h"
 #include "material.h"
 
-//	- --- - --- - --- - --- -
+//  - --- - --- - --- - --- -
 
 class Mesh {
 public:
-	Mesh(VertexPacked verts[], uint indices[], char name[]);
+    Mesh(VertexPacked verts[], uint indices[], char name[]);
 
-	~Mesh();
+    ~Mesh();
 
-//	- --- - --- - --- - --- -
+//  - --- - --- - --- - --- -
 
 private:
-	uint drawmode, drawcount, numverts, id;
-	uint bufferPosition; size_t bufferOffset;
+    uint drawmode, drawcount, numverts, id;
+    uint bufferPosition; size_t bufferOffset;
 
-	std::vector<VertexPacked> verts_raw;
-	std::vector<uint> indices_raw;
+    std::vector<VertexPacked> verts_raw;
+    std::vector<uint> indices_raw;
 
-	Material* material;
+    Material* material;
 
-	// Also add pointer to batch buffer?
+    // Also add pointer to batch buffer?
 
 };
 

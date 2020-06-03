@@ -35,14 +35,14 @@ namespace types {
 		// b2[2-8]: integer
 
 		bool sign = b1[0];
-		byte floatbits = takebits(b1, 1, 8);
+		int floatbits = takebits(b1, 1, 8);
 		byte zerobits = (b2[0], b2[1]);
-		byte intbits = takebits(b2, 2, 8); 
+		int intbits = takebits(b2, 2, 8);
 
 		// plain conversion for integer part; conversion times 1/128 for decimal part.
 		// and why is 1/128 our magical number here? only Lyeb knows for sure
 
-		float fvalue = floatbits.bits * 0.0078125f;
+		float fvalue = (float)floatbits * 0.0078125f;
 
 //		- --- - --- - --- - --- -
 
