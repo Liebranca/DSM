@@ -16,24 +16,27 @@ namespace files {
 //	- --- - --- - --- - --- -
 	
 	byte sumbytes(bytearray arr) {
-		byte b;
+		/*byte b;
 		for (uint i = 0; i < arr.size(); i++) {
 			for (uint j = 0; j < arr[i].size(); j++) {
 				b.push_back(arr[i][j]);
 			}
 		}
 
-		return b;
+		return b;*/
+		return 0x00;
 	}
 
 //	- --- - --- - --- - --- -
 
 	byte curfile_sec(uint iStart, uint iEnd) {
-		bytearray arr;
+		/*bytearray arr;
 		for (uint i = iStart; i < iEnd; i++) {
 			arr.push_back(types::tobits(curfile[i], 8));
 		}
-		return sumbytes(arr);
+		return sumbytes(arr);*/
+
+		return 0x00;
 	}
 
 //	- --- - --- - --- - --- -
@@ -67,8 +70,9 @@ namespace files {
 //	- --- - --- - --- - --- -
 
 	float cfloat2(uint i) {
-		return types::tofloat2( types::tobits(curfile[i], 8),
-							  types::tobits(curfile[i + 1], 8) );
+		/*return types::tofloat2( types::tobits(curfile[i], 8),
+							  types::tobits(curfile[i + 1], 8) );*/
+		return 0;
 	}
 
 //	- --- - --- - --- - --- -

@@ -11,18 +11,6 @@
 #include "GL/glew.h"
 #include "../lymath/Gaoler.h"
 
-class DS_VERTEX_ARRAY
-{
-	public:
-		DS_VERTEX_ARRAY() {};
-		virtual ~DS_VERTEX_ARRAY() {};
-
-		std::vector<glm::vec3> xyz;
-		std::vector<glm::vec3> normal;
-		std::vector<glm::vec2> uv;
-
-};
-
 class DS_MESH
 {
 	public:

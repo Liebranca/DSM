@@ -1,3 +1,5 @@
+#include <iostream>
+#include <string>
 #include <vector>
 
 #include "types.h"
@@ -5,50 +7,23 @@
 
 
 namespace types {
-
+	
 //	- --- - --- - --- - --- -
 
-	uint todecimal(byte b) {
-		uint x = 0;
-		for (uint i = 0; i < b.size(); i++) {
-			x += b[i] * (int)pow(2, i);
-		}
-
-		return x;
-	}
-
-//	- --- - --- - --- - --- -
-
-	std::vector<bool> tobits(uint x, uint size) {
-		x = lymath::gmini(x, (int)pow(2, size) - 1);
-		byte b;
-
-		for (uint i = 0; i < size; i++) {
-			b.push_back(x % 2);
-			x = x / 2;
-		}
-
-		return b;
-	}
-
-//	- --- - --- - --- - --- -
-
-	byte takebits(byte b1, uint iStart, uint iEnd) {
+	int takebits(byte b1, uint iStart, uint iEnd) {
 		// maybe we should check that iEnd <= 8
-		// risking a segfault if some wanker doesn't know how to use this!
+		// risking a segfault if someone somehow doesn't realize how to use this!
 		
-		byte b2; b2.resize(iEnd - iStart);
-		for (unsigned int i = iStart; i < iEnd; i++) {
-			b2[i] = b1[i];
-		}
-		return b2;
+		int x = 0b0;
+		for (uint i = iStart; i < iEnd; i++)
+		{ x += (b1[i] << i); } return x;
 	}
 
 //	- --- - --- - --- - --- -
 
 	// lame to keep this one liner, it's only saving files.cpp a single call
 
-	uint touint(byte b) { return todecimal(b); }
+	uint touint(byte b) { return (uint)b; }
 
 //	- --- - --- - --- - --- -
 
@@ -59,15 +34,15 @@ namespace types {
 		// b2[0-1]: zeroes
 		// b2[2-8]: integer
 
-		bool sign = b1[0]; 
-		byte floatbits = takebits(b1, 1, 8); 
-		byte zerobits = { b2[0], b2[1] }; 
+		bool sign = b1[0];
+		byte floatbits = takebits(b1, 1, 8);
+		byte zerobits = (b2[0], b2[1]);
 		byte intbits = takebits(b2, 2, 8); 
 
 		// plain conversion for integer part; conversion times 1/128 for decimal part.
 		// and why is 1/128 our magical number here? only Lyeb knows for sure
 
-		uint ivalue = todecimal(intbits); float fvalue = (float)todecimal(floatbits) * 0.0078125f;
+		float fvalue = floatbits.bits * 0.0078125f;
 
 //		- --- - --- - --- - --- -
 
@@ -93,7 +68,7 @@ namespace types {
 
 		// add decimal and integer. invert result if sign
 		// sign goes like: (0/1) -> (+/-)
-		float result = ivalue + fvalue;
+		float result = intbits + fvalue;
 		if (sign) { result *= -1; }
 
 		return result;
