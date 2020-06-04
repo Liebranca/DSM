@@ -3,8 +3,7 @@
 
 //  - --- - --- - --- - --- -
 
-#include <vector>
-#include "../Zajec.h"
+#include "../lyutils/evil.h"
 
 static size_t arrsize(int arr[])       { return (sizeof(arr) / sizeof(arr[0]));                     }
 
@@ -17,6 +16,8 @@ struct byte                            {
     bool operator [] (size_t i)        { return (bits & (1 << i));                                  }
     void operator = (int _bits)        { this->bits = _bits;                                        }
     void operator += (int _bits)       { this->bits += _bits;                                       }
+    byte operator + (const int _bits)  { return bits + _bits;                                       }
+    byte operator + (const byte other) { return byte(this->bits + other.bits);                      }
     explicit operator int()            { return this->bits;                                         }
     operator bool()                    { return bits;                                               }
     size_t mbiton(int mask)            { std::vector<bool> masked;
@@ -26,7 +27,11 @@ struct byte                            {
 
                                                                                                     };
 
-typedef std::vector<byte> bytearray;
+//  - --- - --- - --- - --- -
+
+struct bytearray                       {
+    std::vector<byte> bytes;
+                                                                                                    };
 typedef std::vector<uchar> binfile;
 
 //  - --- - --- - --- - --- -
@@ -40,7 +45,7 @@ namespace types {
     uint touint(byte b);
 
     //  Converts two binary arrays to a fractionary number
-    float tofloat2(byte b1, byte b2);
+    float frac16tofloat(byte b1, byte b2);
 
 }
 
@@ -53,7 +58,7 @@ struct frac16                          {
     frac16(int _b1, int _b2)
         : b1(_b1), b2(_b2)             {                                                            }
     byte& operator [] (size_t i)       { return *((byte*)this + i);                                 }
-    explicit operator float() const    { return lybyte::tofloat2(b1, b2);                           }
+    explicit operator float() const    { return lybyte::frac16tofloat(b1, b2);                      }
                                                                                                     };
 
 //  - --- - --- - --- - --- -

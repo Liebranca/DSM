@@ -1,5 +1,5 @@
 #include <iostream>
-#include "..\Zajec.h"
+#include "..\lyutils\evil.h"
 #include "strarr.h"
 
 namespace strarr {

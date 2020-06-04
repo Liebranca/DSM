@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "types.h"
-#include "../lymath/iops.h"
+#include "../lymath/gops.h"
 
 
 namespace types {
@@ -27,7 +27,7 @@ namespace types {
 
 //	- --- - --- - --- - --- -
 
-	float tofloat2(byte b1, byte b2) {
+	float frac16tofloat(byte b1, byte b2) {
 		
 		// b1[0]: sign (+/-)
 		// b1[1-8]: decimals

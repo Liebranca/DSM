@@ -37,14 +37,11 @@
     <Filter Include="Header Files\spatial">
       <UniqueIdentifier>{d7b6352d-3135-4311-be54-06503f870119}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\lyutils">
+      <UniqueIdentifier>{45e3afb9-62f9-4778-92f1-2151ec524427}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lymath\iops.h">
-      <Filter>Header Files\lymath</Filter>
-    </ClInclude>
-    <ClInclude Include="lymath\fops.h">
-      <Filter>Header Files\lymath</Filter>
-    </ClInclude>
     <ClInclude Include="lymath\vops.h">
       <Filter>Header Files\lymath</Filter>
     </ClInclude>
@@ -66,14 +63,14 @@
     <ClInclude Include="spatial\transform.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
+    <ClInclude Include="lyutils\evil.h">
+      <Filter>Header Files\lyutils</Filter>
+    </ClInclude>
+    <ClInclude Include="lymath\gops.h">
+      <Filter>Header Files\lymath</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lymath\iops.cpp">
-      <Filter>Source Files\lymath</Filter>
-    </ClCompile>
-    <ClCompile Include="lymath\fops.cpp">
-      <Filter>Source Files\lymath</Filter>
-    </ClCompile>
     <ClCompile Include="lymath\vops.cpp">
       <Filter>Source Files\lymath</Filter>
     </ClCompile>

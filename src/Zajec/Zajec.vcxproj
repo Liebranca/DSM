@@ -160,21 +160,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="lyarr\strarr.h" />
+    <ClInclude Include="lymath\gops.h" />
+    <ClInclude Include="lyutils\evil.h" />
     <ClInclude Include="spatial\time.h" />
     <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\files.h" />
     <ClInclude Include="lybyte\types.h" />
-    <ClInclude Include="lymath\fops.h" />
-    <ClInclude Include="lymath\iops.h" />
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lyarr\strarr.cpp" />
     <ClCompile Include="lybyte\files.cpp" />
     <ClCompile Include="lybyte\types.cpp" />
-    <ClCompile Include="lymath\fops.cpp" />
-    <ClCompile Include="lymath\iops.cpp" />
     <ClCompile Include="lymath\vops.cpp" />
     <ClCompile Include="spatial\time.cpp" />
     <ClCompile Include="spatial\transform.cpp" />
