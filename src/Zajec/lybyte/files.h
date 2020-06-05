@@ -3,35 +3,41 @@
 
 //  - --- - --- - --- - --- -
 
-#include <string>
+#include <fstream>
 #include "types.h"
+
+typedef std::ifstream iFile;
+typedef std::ofstream oFile;
+
+//  - --- - --- - --- - --- -
+
+constexpr char crk_sign[16] = { 0x46, 0x43, 0x4b, 0x42,
+                                0x21, 0x54, 0x43, 0x48,
+                                0x45, 0x53, 0x47, 0x45,
+                                0x54, 0x24, 0x24, 0x24 };
+
+struct CrkFile {
+    const char magik[16] = { 0x46, 0x43, 0x4b, 0x42,
+                             0x21, 0x54, 0x43, 0x48,
+                             0x45, 0x53, 0x47, 0x45,
+                             0x54, 0x24, 0x24, 0x24 };
+
+    std::uint16_t numVerts, numIndices;
+
+    //MeshPacked verts;
+    std::vector<uint> inds;
+
+};
 
 //  - --- - --- - --- - --- -
 
 namespace files {
-    static binfile curfile;
+    
+    iFile*  curfile;
 
-    // Copies contents from dump into curfile
-    void frombin(const std::string& filename);
+    void    openbin        (const char filename[]);
+    void    writecrk   (const char filename[]);
 
-    //  Reinterpret bytearray as a single byte, ie flatten it.
-    byte sumbytes(bytearray arr);
-
-    // Returns a sub-array from curfile[iStart-iEnd]
-    byte curfile_sec(uint iStart, uint iEnd);
-
-    // Takes byte from curfile at position i and interprets as uint2
-    uint cuint2(uint i);
-
-    // Takes byte from curfile at position i and interprets as uint3
-    uint cuint3(uint i);
-
-    // Takes byte from curfile at position i and interprets as float2
-    float cfloat2(uint i);  
-
-    // Gets filepath from *.irf textfiles
-    std::string cpath_fromreg(uint obid, const std::string& regpath);
-    void cfile_close();
 }
 
 //  - --- - --- - --- - --- -

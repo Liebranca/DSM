@@ -4,23 +4,18 @@
 //  - --- - --- - --- - --- -
 
 #include <iostream>
+
 #include "lyarr/strarr.h"
 #include "lybyte/types.h"
 
 #include "Zajec.h"
 
-//static container for valid extension names
 const strvec dsm_extensions = {"crk", "joj", "ans"};
 
 //  - --- - --- - --- - --- -
 
-// crkhed entry point
-//* never call this from dsm
-//* meant to be used from blender
 int main(int argc, char* argv[])
 {
-//  argv == {crkhed, filepath}
-    
     /*std::string filepath, extension = "";
     if (argc > 1) {
         filepath = argv[1];

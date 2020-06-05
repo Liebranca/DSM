@@ -2,11 +2,6 @@
 
 //  - --- - --- - --- - --- -
 
-constexpr char signature[] = {  0x46, 0x43, 0x4b, 0x42,
-                                0x21, 0x54, 0x43, 0x48,
-                                0x45, 0x53, 0x47, 0x45,
-                                0x54, 0x24, 0x24, 0x24  };
-
 Mesh::Mesh(VertexPacked verts[], uint indices[], char name[]) {
     
     drawcount = sizeof(indices) / sizeof(indices[0]);

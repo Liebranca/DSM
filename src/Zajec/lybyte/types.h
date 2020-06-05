@@ -5,8 +5,6 @@
 
 #include "../lyutils/evil.h"
 
-static size_t arrsize(int arr[])       { return (sizeof(arr) / sizeof(arr[0]));                     }
-
 struct byte                            {
     uchar bits = 0b0;
     byte(const int _bits): bits(_bits) {                                                            }
@@ -29,22 +27,9 @@ struct byte                            {
 
 //  - --- - --- - --- - --- -
 
-struct bytearray                       {
-    std::vector<byte> bytes;
-                                                                                                    };
-typedef std::vector<uchar> binfile;
-
-//  - --- - --- - --- - --- -
-
 namespace types {
     
-    //  Takes sub-array from a binary array
     int takebits(byte b1, uint iStart, uint iEnd);
-
-    //  Converts binary array to uint
-    uint touint(byte b);
-
-    //  Converts two binary arrays to a fractionary number
     float frac16tofloat(byte b1, byte b2);
 
 }
@@ -55,20 +40,27 @@ namespace lybyte                       { using namespace types;                 
 
 struct frac16                          {
     byte b1; byte b2;
+    
+    frac16(float v);
     frac16(int _b1, int _b2)
         : b1(_b1), b2(_b2)             {                                                            }
+
     byte& operator [] (size_t i)       { return *((byte*)this + i);                                 }
     explicit operator float() const    { return lybyte::frac16tofloat(b1, b2);                      }
                                                                                                     };
 
 //  - --- - --- - --- - --- -
 
-// Printing methods for custom types
+//struct  VertexPacked                   { frac16 co[3]; frac16 n[3]; frac16 uv[2];                   };                                                                                                    };
+//typedef std::vector<VertexPacked>        MeshPacked;
 
-static std::ostream& operator << (
-    std::ostream& stream, byte& b)     { stream << b.bits; return stream;                           }
+//  - --- - --- - --- - --- -
 
-static std::ostream& operator << (
-    std::ostream& stream, frac16& f)   { stream << (float)f; return stream;                         }
+static  std::ostream& operator << (
+        std::ostream& stream,
+        byte& b)                       { stream << b.bits; return stream;                           }
+static  std::ostream& operator << (
+        std::ostream& stream,
+        frac16& f)                     { stream << (float)f; return stream;                         }
 
 #endif //LYBYTE_TYPES_H
