@@ -1,12 +1,12 @@
 #include "transform.h"
 
-#include "glm/gtx/transform.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include <glm/gtc/matrix_inverse.hpp>
+#include "../../../include/glm/gtx/transform.hpp"
+#include "../../../include/glm/gtc/quaternion.hpp"
+#include "../../../include/glm/gtc/matrix_inverse.hpp"
 
 //  - --- - --- - --- - --- -
-namespace threed {
-    glm::mat4 DS_TRANSFORM::getModel(bool ignoreParent) const
+namespace zjc {
+    glm::mat4 Trans3D::getModel(bool ignoreParent) const
     {
         glm::mat4 parentMatrix;
         glm::mat4 wPosMatrix = glm::translate(wPos);
@@ -21,16 +21,16 @@ namespace threed {
 
 //  - --- - --- - --- - --- -
 
-    glm::mat4 DS_TRANSFORM::getNormal(bool ignoreParent) const {
+    glm::mat4 Trans3D::getNormal(bool ignoreParent) const {
         return glm::inverseTranspose(getModel(ignoreParent));
     }
 
 //  - --- - --- - --- - --- -
 
-    bool DS_TRANSFORM::faceTo(glm::vec3 v, float elapsed, float rfac, bool fullRot) {
+    bool Trans3D::faceTo(glm::vec3 v, float elapsed, float rfac, bool fullRot) {
 
         glm::vec3 vecTo;
-        if (!fullRot) { vecTo = -(lymath::xzvec(v) - lymath::xzvec(this->worldPosition())); }
+        if (!fullRot) { vecTo = -(xzvec(v) - xzvec(this->worldPosition())); }
         else { vecTo = -(v - this->worldPosition()); }
         glm::quat twat = glm::quatLookAt(vecTo, yAxis);
         glm::quat& rot = this->worldOrientation();
@@ -49,7 +49,7 @@ namespace threed {
 
 //  - --- - --- - --- - --- -
 
-    void DS_TRANSFORM::rotate(glm::quat twat) {
+    void Trans3D::rotate(glm::quat twat) {
 
         this->worldOrientation() = glm::normalize(glm::cross(wRot, twat));
 
@@ -64,7 +64,7 @@ namespace threed {
 
 //  - --- - --- - --- - --- -
 
-    glm::vec3 DS_TRANSFORM::localizePos(glm::vec3& mvec, glm::vec3 fvec, glm::vec3 lvec) {
+    glm::vec3 Trans3D::localizePos(glm::vec3& mvec, glm::vec3 fvec, glm::vec3 lvec) {
         glm::vec3 displace = { 0,0,0 };
         if (mvec[2]) {
             displace += fvec * mvec[2];

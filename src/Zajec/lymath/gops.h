@@ -1,9 +1,12 @@
 #ifndef ZAJEC_GOPS_H
 #define ZAJEC_GOPS_H
 
+#include <iostream>
+#include "../lyarr/dynarray.h"
+
 //  - --- - --- - --- - --- -
 
-namespace gops                      {
+namespace zjc                       {
 
     template<typename T>
     T max(T v1, T v2)               { if (v1 > v2) { return v1; } return v2;                                }
@@ -58,22 +61,28 @@ namespace gops                      {
     class vRange {
 
     private:
-        std::vector<T> values;
         size_t mag; N step;
+        dynarray<T> values;
     
     public:
         vRange(size_t _mag,
-               N      _step)        { step = _step; mag = _mag;
-                                      values.reserve(mag); for(unsigned int i = 0; i < mag; i++)
-                                    { values.emplace_back(i*step); }                                        }
+               N      _step,
+               concha* loc[])
+             : step(_step),
+               mag(_mag),
+               values(mag, loc)
+                                    { for(unsigned int i = 0; i < mag; i++)
+                                    { values[i] = (i*step); }                                               }
+
+        ~vRange()                   { zjc::evil_free(values.buff);                                          }
    
         T& operator [] (size_t i)   { return values[i];                                                     }
-        size_t size()               { return values.size();                                                 }
+        size_t size()               { return values.size;                                                   }
 
-        size_t take_closest (T v) { N s = step/2; T dist = 999; T newdist; size_t closest = 0;
+        size_t take_closest (T v)   { N s = step/2; T dist = 999; T newdist; size_t closest = 0;
                                     for (unsigned int i = 0; i < mag; i++)
-                                  { newdist = approad(v, values[i], s); if ( newdist < dist )
-                                  { dist = newdist; closest = i; } } return closest;                        }
+                                    { newdist = approad(v, values[i], s); if ( newdist < dist )
+                                    { dist = newdist; closest = i; } } return closest;                      }
 
                                                                                                             };
 
@@ -81,6 +90,5 @@ namespace gops                      {
                                                                                                             }
 //  - --- - --- - --- - --- -
 
-namespace lymath                    { using namespace gops;                                                 }
 
 #endif // ZAJEC_GOPS_H

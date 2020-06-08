@@ -5,17 +5,20 @@
 
 #include <iostream>
 
-#include "lyarr/strarr.h"
-#include "lybyte/types.h"
+//#include "lyarr/strarr.h"
+#include "lyarr/dynarray.h"
+#include "lyutils/evil.h"
 
-#include "Zajec.h"
-
-const strvec dsm_extensions = {"crk", "joj", "ans"};
+//const strvec dsm_extensions = {"crk", "joj", "ans"};
 
 //  - --- - --- - --- - --- -
 
 int main(int argc, char* argv[])
-{
+{   
+    $ERRLOC;
+    zjc::fArray(2, ERRLOC);
+
+    //lybyte::writecrk("D:\\lieb_git\\dsm\\src\\BlackMagic\\Cube.crk");
     /*std::string filepath, extension = "";
     if (argc > 1) {
         filepath = argv[1];
@@ -27,7 +30,7 @@ int main(int argc, char* argv[])
 // - -- - --- - --- - --- - --- -
 
         if (lyarr::hasstr(dsm_extensions, extension)) {
-            if      (extension == "crk") { ; } //call crk converter
+            if      (extension == "crk") { lybyte::writecrk(filepath.c_str()); }
             else if (extension == "joj") { ; } //call joj converter
             else if (extension == "ans") { ; } //call ans converter
         }

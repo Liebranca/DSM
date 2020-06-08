@@ -40,6 +40,9 @@
     <Filter Include="Header Files\lyutils">
       <UniqueIdentifier>{45e3afb9-62f9-4778-92f1-2151ec524427}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\lyutils">
+      <UniqueIdentifier>{668e3d7b-b095-4cb9-831f-cae0e6a100de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lymath\vops.h">
@@ -54,9 +57,6 @@
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lyarr\strarr.h">
-      <Filter>Header Files\lyarr</Filter>
-    </ClInclude>
     <ClInclude Include="spatial\time.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
@@ -65,6 +65,15 @@
     </ClInclude>
     <ClInclude Include="lyutils\evil.h">
       <Filter>Header Files\lyutils</Filter>
+    </ClInclude>
+    <ClInclude Include="lyarr\dynarray.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
+    <ClInclude Include="unsigdefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constdefs.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lymath\gops.h">
       <Filter>Header Files\lymath</Filter>
@@ -80,14 +89,17 @@
     <ClCompile Include="lybyte\files.cpp">
       <Filter>Source Files\lybyte</Filter>
     </ClCompile>
-    <ClCompile Include="lyarr\strarr.cpp">
-      <Filter>Source Files\lyarr</Filter>
-    </ClCompile>
     <ClCompile Include="spatial\time.cpp">
       <Filter>Source Files\spatial</Filter>
     </ClCompile>
     <ClCompile Include="spatial\transform.cpp">
       <Filter>Source Files\spatial</Filter>
+    </ClCompile>
+    <ClCompile Include="lyutils\evil.cpp">
+      <Filter>Source Files\lyutils</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\dynarray.cpp">
+      <Filter>Source Files\lyarr</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

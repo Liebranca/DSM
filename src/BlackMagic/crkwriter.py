@@ -65,7 +65,7 @@ original_mesh = None
 #   ---     ---     ---     ---     --
 from mathutils import Matrix, Vector
 from math import degrees
-import bmesh, struct
+import bmesh, struct, os
 
 def ftb(num): return struct.pack('<f', num);
 
@@ -135,7 +135,7 @@ else:
 #       3.  MKDIR IF NEED BE
 #   ---     ---     ---     ---     ---
 meshname = mesh.name.split(".")[0]
-filename = path+obkls+"\\"+meshname+".crkraw"
+filename = path+obkls+"\\"+meshname+".crk"
 
 saveTex = "joj" in ob.game.properties;
 if(saveTex): saveTex = ob.game.properties["joj"];
@@ -188,10 +188,10 @@ try:
     sf = 1 if "actors" in obkls else 1
 
     gaolerSize = 96; ii = 8;
-    header = bytearray(4 + gaolerSize)
+    header = bytearray(8 + gaolerSize)
     
-    header[0:2] = numVerts.to_bytes(2, "little")
-    header[2:4] = numIndices.to_bytes(2, "little")
+    header[0:4] = numVerts.to_bytes(4, "little")
+    header[4:8] = numIndices.to_bytes(4, "little")
 
     l = []; i = 0;
     for v in ob.bound_box:
@@ -226,8 +226,18 @@ try:
     with open(filename, "wb+") as crk: crk.write(header + vertBuff + indexBuff)
     mesh_restore(mesh)
 
-    end = time.time(); execTimer = end - start
-    if debugPrint: print("\nExecution time: %fs"%execTimer)
+    end = time.time(); py_execTimer = end - start
+
+    start = time.time();
+    os.system(path+"\\BlackMagic.exe " + filename)
+    end = time.time(); cpp_execTimer = end - start;
+
+    if debugPrint:
+        print("\nExecution time: ")
+        print(">Python: %fs"%py_execTimer)
+        print(">C++: %fs"%cpp_execTimer)
+        print(">Total::%fs"%(cpp_execTimer + py_execTimer))
+
 
 finally:
 

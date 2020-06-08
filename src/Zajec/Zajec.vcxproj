@@ -73,6 +73,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>.\</OutDir>
+    <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -91,10 +92,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +109,11 @@
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
     </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)\trashcan\$(MSBuildProjectName)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -159,9 +165,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lyarr\strarr.h" />
+    <ClInclude Include="constdefs.h" />
+    <ClInclude Include="lyarr\dynarray.h" />
     <ClInclude Include="lymath\gops.h" />
     <ClInclude Include="lyutils\evil.h" />
+    <ClInclude Include="unsigdefs.h" />
     <ClInclude Include="spatial\time.h" />
     <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
@@ -170,10 +178,11 @@
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lyarr\strarr.cpp" />
+    <ClCompile Include="lyarr\dynarray.cpp" />
     <ClCompile Include="lybyte\files.cpp" />
     <ClCompile Include="lybyte\types.cpp" />
     <ClCompile Include="lymath\vops.cpp" />
+    <ClCompile Include="lyutils\evil.cpp" />
     <ClCompile Include="spatial\time.cpp" />
     <ClCompile Include="spatial\transform.cpp" />
   </ItemGroup>

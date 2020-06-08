@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -105,6 +106,9 @@
       <AdditionalLibraryDirectories>..\..\lib;..\Zajec</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glew32s.lib;Zajec.lib</AdditionalDependencies>
     </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)\trashcan\$(MSBuildProjectName)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

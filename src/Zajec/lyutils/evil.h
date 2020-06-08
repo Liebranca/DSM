@@ -3,22 +3,38 @@
 
 //  - --- - --- - --- - --- -
 
-#include <vector>
+#include "../unsigdefs.h"
+#include "../constdefs.h"
 
 //  - --- - --- - --- - --- -
 
-typedef unsigned int uint;
-typedef unsigned char uchar;
+namespace zjc {
+
+#define retchar(x) reinterpret_cast<char*>(x)
+#define retcchar(x) reinterpret_cast<const char*>(x)
 
 //  - --- - --- - --- - --- -
 
-static uint _i, _j, _k, _l;
+void terminate(int errorcode, concha* loc[]);
 
-#define vec_floop(x, y) for (x = 0; x < y.size(); x++)
-#define vec_bloop(x, y) for (x = y.size() - 1; x > -1; x--)
-#define arr_floop(x, y) for (x = 0; x < sizeof(y) / sizeof(y[0]); x++)
-#define arr_bloop(x, y) for (x = (sizeof(y) / sizeof(y[0])) -1; x > -1; x--)
+char* evil_shpath(const char* f);
 
-//  - --- - --- - --- - --- -
+void* evil_malloc(uint count, uint size, concha* loc[]);
+void evil_free(void* buff);
+
+}
+
+#define WARD_EVIL_MALLOC(x, y) if (x == nullptr) { zjc::terminate(0x00, y); }
+
+#define __HASHIT__(x) #x
+#define HASHIT(x) __HASHIT__(x)
+
+#define __LINESTRING__ HASHIT(__LINE__)
+
+#define __ERRLOC__ { zjc::evil_shpath(__FILE__), ", on func ", __func__, " @line ", __LINESTRING__ }
+#define $ERRLOC concha* ERRLOC[] = __ERRLOC__
+
+
+
 
 #endif // ZAJEC_EVIL_H

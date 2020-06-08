@@ -3,25 +3,25 @@
 
 //  - --- - --- - --- - --- -
 
-#include "glm/glm.hpp"
-#include "glm/gtx/quaternion.hpp"
+#include "../../../include/glm/glm.hpp"
+#include "../../../include/glm/gtx/quaternion.hpp"
 #include "../lymath/vops.h"
 
 #define IDENTITY glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
 //  - --- - --- - --- - --- -
-namespace threed {
+namespace zjc {
     // 3D transform class
-    class DS_TRANSFORM
+    class Trans3D
     {
     public:
-        DS_TRANSFORM(const glm::vec3& pos = glm::vec3(0, 0, 0),
+        Trans3D(const glm::vec3& pos = glm::vec3(0, 0, 0),
             const glm::quat& rot = glm::quat(1, 0, 0, 0),
             const glm::vec3& scale = glm::vec3(1, 1, 1)) {
             wPos = pos; wRot = rot; wScale = scale;
         }
 
-        virtual ~DS_TRANSFORM() {};
+        virtual ~Trans3D() {};
 
         inline glm::mat4 getModel(bool ignoreParent = false) const;
         inline glm::mat4 getNormal(bool ignoreParent = false) const;
@@ -32,7 +32,7 @@ namespace threed {
         inline glm::quat& worldOrientation() { return wRot; }
         inline glm::vec3& worldScale() { return wScale; }
 
-        void setParent(DS_TRANSFORM* parent) { this->parent = parent; }
+        void setParent(Trans3D* parent) { this->parent = parent; }
 
 //      - --- - --- - --- - --- -
 
@@ -47,7 +47,7 @@ namespace threed {
 //      - --- - --- - --- - --- -
 
     private:
-        DS_TRANSFORM* parent = nullptr;
+        Trans3D* parent = nullptr;
 
         glm::vec3 wPos;
         glm::quat wRot;
@@ -60,10 +60,6 @@ namespace threed {
         float tick = 0.0f;
 
     };
-}
-
-namespace lyspace {
-    using namespace threed;
 }
 
 #endif // TRANSFORM_H
