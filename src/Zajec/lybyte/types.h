@@ -41,6 +41,39 @@ struct frac16                          {
     explicit operator float() const    { return frac16tofloat(b1, b2);                              }
                                                                                                     };
 
+struct VertexPacked3D                  {                                                            
+    frac16 co[3] = {0, 0, 0};
+    frac16 no[3] = {0, 0, 0};
+    frac16 uv[2] = {0, 0};
+
+    VertexPacked3D(float* values)      { co[0] = *values;     co[1] = *(values+1);
+                                         co[2] = *(values+2); no[0] = *(values+3);
+                                         no[1] = *(values+4); no[2] = *(values+5);
+                                         uv[0] = *(values+6); uv[1] = *(values+7);                  }
+                                                                                                    };
+
+struct PhysVertexPacked3D              {                                                            
+    frac16 co[3] = {0, 0, 0};
+
+    PhysVertexPacked3D(float* values)  { co[0] = *values;     co[1] = *(values+1);
+                                         co[2] = *(values+2);                                       }
+                                                                                                    };
+
+struct VertexPacked2D                  {                                                            
+    frac16 co[2] = {0, 0};
+    frac16 uv[2] = {0, 0};
+
+    VertexPacked2D(float* values)      { co[0] = *values;     co[1] = *(values+1);
+                                         co[2] = *(values+2); uv[0] = *(values+3);
+                                         uv[1] = *(values+4);                                       }
+                                                                                                    };
+
+struct PhysVertexPacked2D              {                                                            
+    frac16 co[3] = {0, 0};
+
+    PhysVertexPacked2D(float* values)  { co[0] = *values;     co[1] = *(values+1);                  }
+                                                                                                    };
+
                                                                                                     }
 //  - --- - --- - --- - --- -
                                                                                                     

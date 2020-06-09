@@ -187,11 +187,11 @@ try:
 
     sf = 1 if "actors" in obkls else 1
 
-    gaolerSize = 96; ii = 8;
-    header = bytearray(8 + gaolerSize)
+    gaolerSize = 96; ii = 4;
+    header = bytearray(4 + gaolerSize)
     
-    header[0:4] = numVerts.to_bytes(4, "little")
-    header[4:8] = numIndices.to_bytes(4, "little")
+    header[0:2] = numVerts.to_bytes(2, "little")
+    header[2:4] = numIndices.to_bytes(2, "little")
 
     l = []; i = 0;
     for v in ob.bound_box:
@@ -205,12 +205,12 @@ try:
 
     for vert in mesh.vertices:
         vi = vert.index * stride;
-        vertBuff[vi:vi+stride] = ftb(vert.co[0]/sf)
-        vertBuff[vi+4:vi+stride+8] = ftb(vert.co[2]/sf)
-        vertBuff[vi+8:vi+stride+12] = ftb(-vert.co[1]/sf)
-        vertBuff[vi+12:vi+stride+16] = ftb(vert.normal[0]/sf)
-        vertBuff[vi+20:vi+stride+24] = ftb(vert.normal[2]/sf)
-        vertBuff[vi+24:vi+stride+28] = ftb(-vert.normal[1]/sf)
+        vertBuff[vi:vi+4] = ftb(vert.co[0]/sf)
+        vertBuff[vi+4:vi+8] = ftb(vert.co[2]/sf)
+        vertBuff[vi+8:vi+12] = ftb(-vert.co[1]/sf)
+        vertBuff[vi+12:vi+16] = ftb(vert.normal[0]/sf)
+        vertBuff[vi+16:vi+20] = ftb(vert.normal[2]/sf)
+        vertBuff[vi+20:vi+24] = ftb(-vert.normal[1]/sf)
     
     faces = [poly for poly in mesh.polygons]
     indexBuff = bytearray(6*numIndices); i = 0;

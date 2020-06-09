@@ -67,14 +67,14 @@ namespace zjc                       {
     public:
         vRange(size_t _mag,
                N      _step,
-               concha* loc[])
+               concha* loc)
              : step(_step),
                mag(_mag),
                values(mag, loc)
                                     { for(unsigned int i = 0; i < mag; i++)
                                     { values[i] = (i*step); }                                               }
 
-        ~vRange()                   { zjc::evil_free(values.buff);                                          }
+        ~vRange()                   { zjc::evil_free(&values.buff);                                         }
    
         T& operator [] (size_t i)   { return values[i];                                                     }
         size_t size()               { return values.size;                                                   }

@@ -1,86 +1,80 @@
 #include <iostream>
-#include <cstdint>
 
 #include "files.h"
+#include "types.h"
+
 #include "../lymath/gops.h"
+#include "../lyutils/evil.h"
+
+//  - --- - --- - --- - --- -
+
+#define EVIL_FREAD(type, count, loc, buff)        buff = (type*) zjc::evil_malloc(count, sizeof(type), loc);\
+                                                  fread(buff, sizeof(type), count, zjc::curfile);
+
+#define EVIL_FWRITE(type, count, loc, buff, info) WARD_EVIL_FWRITE(fwrite(buff, sizeof(type),\
+                                                  count, curfile), loc, info, count);
+
+//  - --- - --- - --- - --- -
 
 namespace zjc {
 
+    void openbin(concha* filename,
+                 concha* mode,
+                 concha* loc)                   { curfile = fopen(filename, mode);
+                                                  WARD_EVIL_FOPEN(curfile, loc, filename);
+                                                  std::cout << "Opened file <" << filename << "> \n";                   }
+
+    void closebin(concha* filename,
+                  concha* loc)                  { int success = fclose(curfile);
+                                                  WARD_EVIL_FCLOSE(success, loc, filename);
+                                                  std::cout << "File closed <" << filename << "> \n";                   }
+
 //  - --- - --- - --- - --- -
 
-    void openbin(const char filename[]) { ; }
-
-//  - --- - --- - --- - --- -
-
-    void writecrk(const char filename[]){
-        //openbin(filename);
-        //std::uint16_t numverts, numinds;
+    void writecrk(concha* filename,
+                  concha* loc)                  {
         
-        FILE* pfile;
-        int * b1;
+        std::uint16_t* sizes;
+        std::uint16_t* indices;
+        float* bounds;
+        float* verts;
         
-        pfile = fopen(filename, "r");
-        if(!pfile) { std::cerr << "Cannot open file " << filename << std::endl; std::exit(1); }
+        openbin(filename, "r", loc);
 
-        b1 = (int*) malloc(2 * sizeof(int));
-        if(b1 == NULL) { std::cerr << "Insufficient memory" << std::endl; std::exit(2); }
+        EVIL_FREAD(std::uint16_t, 2, loc, sizes);
+        EVIL_FREAD(float, 24, loc, bounds);
+        EVIL_FREAD(float, (*sizes) * 8, loc, verts);
+        EVIL_FREAD(std::uint16_t, (*(sizes+1)) * 3, loc, indices);
 
-        fread(b1, 2 * sizeof(int), 2, pfile);
-                
+        closebin(filename, loc);
 
-        fclose(pfile);
-        free(b1);
+        VertexPacked3D* packed_verts;
+        packed_verts = (VertexPacked3D*) evil_malloc(*sizes, sizeof(VertexPacked3D), loc);
 
-        /*curfile->read(retchar(&numverts), sizeof(std::uint16_t));
-        fv.resize(numverts*8);
-        
-        curfile->read(retchar(&numinds), sizeof(std::uint16_t));
-        iv.resize(numinds*3); gv.resize(24);
-        
-        curfile->read(retchar(gv.data()), 24 * sizeof(float));
-        curfile->read(retchar(fv.data()), numverts * (sizeof(float) * 8));
-        curfile->read(retchar(iv.data()), numinds * (sizeof(std::uint16_t) * 3));
-        
-        curfile->close();
-        
-        CrkFile crk; uint i;
-        crk.numVerts = numverts;
-        crk.numInds = numinds;
-        crk.bounds.reserve(24);
-        crk.verts.reserve(numverts*8);
-        crk.inds.reserve(numinds*3);
-        
-        for(i = 0; i < gv.size(); i++) {
-            crk.bounds.emplace_back(gv[i]);
-        }
+        for(std::uint16_t i = 0, j = 0;
+            i < (*sizes) * 8; i+= 8, j++ )      { *(packed_verts+(j)) = (verts+i);                                      }
 
-        for(i = 0; i < fv.size(); i++) {
-            crk.verts.emplace_back(fv[i]);
-        }
+        PhysVertexPacked3D* packed_bounds;
+        packed_bounds = (PhysVertexPacked3D*) evil_malloc(8, sizeof(PhysVertexPacked3D), loc);
 
-        std::cout << fv.size();
+        for(std::uint16_t i = 0, j = 0;
+            i < 24; i+= 3, j++ )                { *(packed_bounds+(j)) = (bounds+i);                                    }
 
-        for(i = 0; i < iv.size(); i++) {
-            crk.inds.emplace_back(iv[i]);
-        }
-        
-        if( remove( filename ) != 0 )
-        { std::cerr << "File " << filename << " couldn't be overwritten." << std::endl; }
-        
-        oFile out(filename, std::ios::binary);
-        if (!out) { std::cerr << "Can't create file " << filename << std::endl; }
+        openbin(filename, "w", loc);
+        EVIL_FWRITE(uint16_t, 2, loc, sizes, filename);
+        EVIL_FWRITE(PhysVertexPacked3D, 8, loc, packed_bounds, filename);
+        EVIL_FWRITE(VertexPacked3D, *sizes, loc, packed_verts, filename);
+        EVIL_FWRITE(uint16_t, *(sizes+1), loc, indices, filename);
+        closebin(filename, loc);
 
-        out.write(retcchar(&crk.magik), 16);
-        
-        out.write(retchar(&crk.numVerts), 16);
-        out.write(retchar(&crk.numInds), 16);
+        evil_free(&sizes);
+        evil_free(&bounds);
+        evil_free(&verts);
+        evil_free(&indices);
 
-        out.write(retchar(&crk.bounds[0]), crk.bounds.size() * sizeof(frac16));
-        out.write(retchar(&crk.verts[0]), crk.verts.size() * sizeof(frac16));
-        out.write(retchar(&crk.inds[0]), crk.inds.size() * sizeof(uint16_t));
+        evil_free(&packed_verts);
+        evil_free(&packed_bounds);
 
-        out.close(); std::cout << "Succes writting to " << filename << std::endl;*/
-
-    }
+                                                                                                                        }
 
 }

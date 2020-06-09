@@ -3,7 +3,7 @@
 
 //  - --- - --- - --- - --- -
 
-#include "types.h"
+#include "../constdefs.h"
 
 //  - --- - --- - --- - --- -
 
@@ -26,8 +26,11 @@ struct CrkFile {
 
 namespace zjc {
     
-    void    openbin        (const char filename[]);
-    void    writecrk   (const char filename[]);
+    static  FILE*       curfile;
+
+    void    openbin    (concha* filename, concha* mode, concha* loc);
+    void    closebin   (concha* filename, concha* loc);
+    void    writecrk   (concha* filename, concha* loc);
 
 }
 

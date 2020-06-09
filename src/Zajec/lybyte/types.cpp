@@ -6,12 +6,9 @@
 #include "../lymath/gops.h"
 #include "../lyutils/evil.h"
 
-
 namespace zjc {
-    concha* ars_errloc[] = { "\\Zajec\\lybyte\\types.cpp", " at frac16_range init;",
-                             " this should never fail?!",  " line 14", "<$ERRLOC FAIL>" };
 
-    zjc::fvRange frac16_range(128, 0.0078125f, ars_errloc);
+    zjc::fvRange frac16_range(128, 0.0078125f, "");
 
 //  - --- - --- - --- - --- -
 

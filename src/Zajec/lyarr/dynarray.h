@@ -16,10 +16,10 @@ struct dynarray                             {
     T*          buff;    
     
     dynarray    (uint s,
-                 concha* loc[])
-                :size(s), buff(0)           { buff = (T*) evil_malloc(size, sizeof(T), loc);                     }
+                 concha* loc)
+                :size(s), buff(0)           { buff = (T*) evil_malloc(size, sizeof(T), loc);                    }
 
-    ~dynarray   ()                          { evil_free(buff);                                                  }
+    ~dynarray   ()                          { evil_free(&buff);                                                 }
     dynarray    ()                          {                                                                   }
     
     T& operator [] (uint i)                 { return *(buff + i);                                               }
