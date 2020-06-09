@@ -13,21 +13,21 @@ namespace zjc                       {
     template<typename T>
     T min(T v1, T v2)               { if (v1 < v2) { return v1; } return v2;                                }
     template<typename T>
-    T submax(T v1, T v2)            { return max(v1, v2) - min(v1, v2);                                     }
+    T submin(T v1, T v2)            { return max(v1, v2) - min(v1, v2);                                     }
     template<typename T>
-    T submin(T v1, T v2)            { return min(v1, v2) - max(v1, v2);                                     }
+    T submax(T v1, T v2)            { return min(v1, v2) - max(v1, v2);                                     }
 
 //  - --- - --- - --- - --- -
     
     template<typename T>
     T abs(T v)                      { if( v<0 ) { v *= -1; } return v;                                      }
     template<typename T>
-    T pow(T v, int e)               { if (e < 0) { return root((float)v, abs(1/e)); }
-                                      else if(e == 0) { return 1; }
-                                      while(e > 0) { v *= e; e--; } return v;                               }
+    T pow(T v, int e)               { if (e < 0) { return root((float)v, abs(e)); }
+                                      else if(e == 0) { return 1; } T result = v;
+                                      while(e > 0) { result *= v; e--; } return result;                     }
     template<typename T>
-    float root(T v, int e)          { float r = v; while(r - (v/r) > 0.001f)
-                                    { r = (r + (v/r)) / 2; } return r;                                      }
+    float root(T v, int e)          { float r = v; float d = 1/e; while(r - (v/r) > 0.001f)
+                                    { r = (r + (v/r)) * d; } return r;                                      }
 
 //  - --- - --- - --- - --- -
     
@@ -35,7 +35,7 @@ namespace zjc                       {
     bool approa(T v1, T v2, T m)    { return v2 - m < v1 && v1 < v2 + m;                                    }
 
     template<typename T>
-    T approad(T v1, T v2, T m)      { if(v2 - m < v1 && v1 < v2 + m) { return submax(v1, v2); }
+    T approad(T v1, T v2, T m)      { if(v2 - m < v1 && v1 < v2 + m) { return submin(v1, v2); }
                                       return 999;                                                           }
     template<typename T>
     T clamp(T v, T min, T max)      { if (v < min) { v = min; } if (v > max) { v = max; } return v;         }
