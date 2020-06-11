@@ -1,5 +1,7 @@
 # DSM: the evil framework
 
+THUS FAR, STILL A WIP
+
 We have the following modules in development or planned so far:
 
 * `Zajec` general-purpose utility lib.

@@ -51,9 +51,6 @@
     <ClInclude Include="lybyte\types.h">
       <Filter>Header Files\lybyte</Filter>
     </ClInclude>
-    <ClInclude Include="lybyte\files.h">
-      <Filter>Header Files\lybyte</Filter>
-    </ClInclude>
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,20 +60,20 @@
     <ClInclude Include="spatial\transform.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
-    <ClInclude Include="lyutils\evil.h">
-      <Filter>Header Files\lyutils</Filter>
-    </ClInclude>
     <ClInclude Include="lyarr\dynarray.h">
       <Filter>Header Files\lyarr</Filter>
     </ClInclude>
-    <ClInclude Include="unsigdefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="constdefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lymath\gops.h">
       <Filter>Header Files\lymath</Filter>
+    </ClInclude>
+    <ClInclude Include="ZJC_CommonTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lybyte\ZJC_FileHandling.h">
+      <Filter>Header Files\lybyte</Filter>
+    </ClInclude>
+    <ClInclude Include="lyutils\ZJC_Evil.h">
+      <Filter>Header Files\lyutils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -86,20 +83,23 @@
     <ClCompile Include="lybyte\types.cpp">
       <Filter>Source Files\lybyte</Filter>
     </ClCompile>
-    <ClCompile Include="lybyte\files.cpp">
-      <Filter>Source Files\lybyte</Filter>
-    </ClCompile>
     <ClCompile Include="spatial\time.cpp">
       <Filter>Source Files\spatial</Filter>
     </ClCompile>
     <ClCompile Include="spatial\transform.cpp">
       <Filter>Source Files\spatial</Filter>
     </ClCompile>
-    <ClCompile Include="lyutils\evil.cpp">
-      <Filter>Source Files\lyutils</Filter>
-    </ClCompile>
     <ClCompile Include="lyarr\dynarray.cpp">
       <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="ZJC_CommonTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lybyte\ZJC_FileHandling.cpp">
+      <Filter>Source Files\lybyte</Filter>
+    </ClCompile>
+    <ClCompile Include="lyutils\ZJC_Evil.cpp">
+      <Filter>Source Files\lyutils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

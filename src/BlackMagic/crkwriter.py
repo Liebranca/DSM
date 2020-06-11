@@ -229,7 +229,8 @@ try:
     end = time.time(); py_execTimer = end - start
 
     start = time.time();
-    os.system(path+"\\BlackMagic.exe " + filename)
+    archive = path+"\\ArchiveTest.irf"
+    os.system(path+"\\BlackMagic.exe " + filename + " " + archive + " 1")
     end = time.time(); cpp_execTimer = end - start;
 
     if debugPrint:

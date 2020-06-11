@@ -3,7 +3,7 @@
 
 //  - --- - --- - --- - --- -
 
-#include "../unsigdefs.h"
+#include "../ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
@@ -46,6 +46,7 @@ struct VertexPacked3D                  {
     frac16 no[3] = {0, 0, 0};
     frac16 uv[2] = {0, 0};
 
+    VertexPacked3D()                   {                                                            }
     VertexPacked3D(float* values)      { co[0] = *values;     co[1] = *(values+1);
                                          co[2] = *(values+2); no[0] = *(values+3);
                                          no[1] = *(values+4); no[2] = *(values+5);
@@ -55,6 +56,7 @@ struct VertexPacked3D                  {
 struct PhysVertexPacked3D              {                                                            
     frac16 co[3] = {0, 0, 0};
 
+    PhysVertexPacked3D()               {                                                            }
     PhysVertexPacked3D(float* values)  { co[0] = *values;     co[1] = *(values+1);
                                          co[2] = *(values+2);                                       }
                                                                                                     };

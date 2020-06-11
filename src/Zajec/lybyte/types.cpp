@@ -4,7 +4,7 @@
 
 #include "types.h"
 #include "../lymath/gops.h"
-#include "../lyutils/evil.h"
+#include "../lyutils/ZJC_Evil.h"
 
 namespace zjc {
 

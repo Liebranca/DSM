@@ -165,26 +165,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="constdefs.h" />
     <ClInclude Include="lyarr\dynarray.h" />
     <ClInclude Include="lymath\gops.h" />
-    <ClInclude Include="lyutils\evil.h" />
-    <ClInclude Include="unsigdefs.h" />
+    <ClInclude Include="lyutils\ZJC_Evil.h" />
+    <ClInclude Include="ZJC_CommonTypes.h" />
     <ClInclude Include="spatial\time.h" />
     <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
-    <ClInclude Include="lybyte\files.h" />
+    <ClInclude Include="lybyte\ZJC_FileHandling.h" />
     <ClInclude Include="lybyte\types.h" />
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lyarr\dynarray.cpp" />
-    <ClCompile Include="lybyte\files.cpp" />
+    <ClCompile Include="lybyte\ZJC_FileHandling.cpp" />
     <ClCompile Include="lybyte\types.cpp" />
     <ClCompile Include="lymath\vops.cpp" />
-    <ClCompile Include="lyutils\evil.cpp" />
+    <ClCompile Include="lyutils\ZJC_Evil.cpp" />
     <ClCompile Include="spatial\time.cpp" />
     <ClCompile Include="spatial\transform.cpp" />
+    <ClCompile Include="ZJC_CommonTypes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

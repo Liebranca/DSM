@@ -4,9 +4,10 @@
 //  - --- - --- - --- - --- -
 
 #include <iostream>
+#include <string>
 
-#include "lyutils/evil.h"
-#include "lybyte/files.h"
+#include "lyutils/ZJC_Evil.h"
+#include "lybyte/ZJC_FileHandling.h"
 
 //const strvec dsm_extensions = {"crk", "joj", "ans"};
 
@@ -14,7 +15,6 @@
 
 int main(int argc, char* argv[])
 {   
-    zjc::writecrk("D:\\lieb_git\\dsm\\src\\BlackMagic\\Cube.crk", GETLOC);
-    
+    zjc::writecrk(argv[1], argv[2], argv[3], argv[4], GETLOC);
     return 0;
 }

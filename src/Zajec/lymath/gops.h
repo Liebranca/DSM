@@ -67,7 +67,7 @@ namespace zjc                       {
     public:
         vRange(size_t _mag,
                N      _step,
-               concha* loc)
+               cchar* loc)
              : step(_step),
                mag(_mag),
                values(mag, loc)

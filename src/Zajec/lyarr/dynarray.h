@@ -1,9 +1,8 @@
 #ifndef ZAJEC_DYNARRAY_H
 #define ZAJEC_DYNARRAY_H
 
-#include "../lyutils/evil.h"
-#include "../unsigdefs.h"
-#include "../constdefs.h"
+#include "../lyutils/ZJC_Evil.h"
+#include "../ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
@@ -16,7 +15,7 @@ struct dynarray                             {
     T*          buff;    
     
     dynarray    (uint s,
-                 concha* loc)
+                 cchar* loc)
                 :size(s), buff(0)           { buff = (T*) evil_malloc(size, sizeof(T), loc);                    }
 
     ~dynarray   ()                          { evil_free(&buff);                                                 }
