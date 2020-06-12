@@ -1,54 +1,64 @@
-#include <iostream>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdint>
 
 #include "ZJC_FileHandling.h"
-#include "types.h"
+#include "ZJC_BinTypes.h"
 
 #include "../lyutils/ZJC_Evil.h"
 
 //  - --- - --- - --- - --- -
 
-#define EVIL_FREAD(type, count, loc, buff)        buff = (type*) zjc::evil_malloc(count, sizeof(type), loc);\
+#define EVIL_FREAD(type, count, buff)             buff = (type*) zjc::evil_malloc(count, sizeof(type));\
                                                   fread(buff, sizeof(type), count, zjc::curfile);
 
-#define EVIL_FWRITE(type, count, loc, buff, info) WARD_EVIL_FWRITE(fwrite(buff, sizeof(type),\
-                                                  count, curfile), loc, info, count);
+#define EVIL_FWRITE(type, count, buff, info)      WARD_EVIL_FWRITE(fwrite(buff, sizeof(type),\
+                                                  count, curfile), info, count);
 
 //  - --- - --- - --- - --- -
 
 extern "C" namespace zjc {
 
+    static    FILE*  curfile;
+    static    FILE*  tempfile;
 
-    constexpr uint16_t maxstride    =             0xFFFF;
-
+    constexpr ushort maxstride    =               0xFFFF;
 
     cchar crk_sign[16]              =           { 0x46, 0x43, 0x4b, 0x42, 0x21, 0x54, 0x43, 0x48,
                                                   0x45, 0x53, 0x47, 0x45, 0x54, 0x24, 0x24, 0x24                        };
 
 //  - --- - --- - --- - --- -
 
-    class CrkFile                               {
-
-    public:
+    struct CrkFile                              {
 
         CrkFile()                               {                                                                       }
         ~CrkFile()                              { WARD_EVIL_MFREE(bounds); WARD_EVIL_MFREE(verts);
                                                   WARD_EVIL_MFREE(indices);                                             }
 
-        uint16_t vertCount;
-        uint16_t indexCount;
+        ushort vertCount;
+        ushort indexCount;
 
         PhysVertexPacked3D* bounds;
         VertexPacked3D* verts;
-        uint16_t* indices;
+        ushort* indices;
 
                                                                                                                         };
 
 //  - --- - --- - --- - --- -
 
+    struct IrfArchive                           {
+
+        ushort fileCount;
+        uint size;
+        ushort offsets[512];
+
+        ushort_pair operator [] (ushort i)      { if( i > 255 ) { return {0, 0}; }
+                                                  return { offsets[i*2], offsets[(i*2)+1] }; }
+};
+
+//  - --- - --- - --- - --- -
+
     int openbin(cchar* filename,
                 cchar* mode,
-                cchar* loc,
                 bool shutit)                    {
 
         int isnew = 0;
@@ -56,22 +66,30 @@ extern "C" namespace zjc {
 
         if( (mode == "rb+")
          && (curfile == NULL) )                 { curfile = fopen(filename, "wb"); isnew = -1;                          }
-                                                  WARD_EVIL_FOPEN(curfile, loc, filename);
+                                                  WARD_EVIL_FOPEN(curfile,  filename);
 
-        if (!shutit)                            { std::cout << "Opened file <" << filename << "> \n";                   }
+        if (!shutit)                            { printf("Opened file <%s>\n", filename);                               }
 
         return isnew;                                                                                                   }
 
 //  - --- - --- - --- - --- -
 
+    int readarch(IrfArchive irf,
+                 uint start,
+                 uint end)                      {
+
+        ;
+    }
+
+//  - --- - --- - --- - --- -
+
     int closebin(cchar* filename,
-                  cchar* loc,
                   bool shutit)                  {
 
         int success = fclose(curfile);
-        WARD_EVIL_FCLOSE(success, loc, filename);
+        WARD_EVIL_FCLOSE(success, filename);
 
-        if (!shutit)                            { std::cout << "File closed <" << filename << "> \n";                   }
+        if (!shutit)                            { printf("File closed <%s>\n", filename);                               }
 
         return 0;                                                                                                       }
 
@@ -79,57 +97,53 @@ extern "C" namespace zjc {
 
     int IN_writecrk(cchar* filename,
                     cchar* archive,
-                    uint8_t offset,
-                    uint8_t mode,
+                    ushort offset,
+                    ushort mode,
                     CrkFile* crk,
                     ushort* sizes,
                     float* bounds,
-                    float* verts,
-                    cchar* loc)                 {
+                    float* verts)               {
 
         int errorstate = 0;
 
-        errorstate = openbin(filename, "rb", loc);
-        WARD_EVIL_WRAP(errorstate);
+        WARD_EVIL_WRAP(errorstate, openbin(filename, "rb", false));
 
-        fread(sizes, sizeof(uint16_t), 2, zjc::curfile);
+        fread(sizes, sizeof(ushort), 2, zjc::curfile);
 
         crk->vertCount = sizes[0];
         crk->indexCount = sizes[1];
 
-        EVIL_FREAD(float, 24, loc, bounds);
-        EVIL_FREAD(float, crk->vertCount * 8, loc, verts);
-        EVIL_FREAD(std::uint16_t, crk->indexCount * 3, loc, crk->indices);
+        EVIL_FREAD(float, 24, bounds);
+        EVIL_FREAD(float, crk->vertCount * 8, verts);
+        EVIL_FREAD(ushort, crk->indexCount * 3, crk->indices);
 
-        errorstate = closebin(filename, loc);
-        WARD_EVIL_WRAP(errorstate);
+        WARD_EVIL_WRAP(errorstate, closebin(filename, false));
 
 //  - --- - --- - --- - --- -
 
-        crk->bounds = (PhysVertexPacked3D*) evil_malloc(8, sizeof(PhysVertexPacked3D), loc);
-        crk->verts = (VertexPacked3D*) evil_malloc(*sizes, sizeof(VertexPacked3D), loc);
+        crk->bounds = (PhysVertexPacked3D*) evil_malloc(8, sizeof(PhysVertexPacked3D));
+        crk->verts = (VertexPacked3D*) evil_malloc(*sizes, sizeof(VertexPacked3D));
 
-        for(std::uint16_t i = 0, j = 0;
+        for(ushort i = 0, j = 0;
             i < crk->vertCount * 8;
             i+= 8, j++ )                        { *(crk->verts+(j)) = (verts+i);                                        }
 
-        for(std::uint16_t i = 0, j = 0;
+        for(ushort i = 0, j = 0;
             i < 24; i+= 3, j++ )                { *(crk->bounds+(j)) = (bounds+i);                                      }
 
         uint filesize = 4 + (8*6) + (crk->vertCount * 16) + (crk->indexCount * 2);
 
 //  - --- - --- - --- - --- -
 
-        {   int isnew = openbin(archive, "rb+", loc);
-            errorstate = (isnew > -1) ? isnew : errorstate;
-            WARD_EVIL_WRAP(errorstate);
+        {   int isnew = openbin(archive, "rb+", false);
+            WARD_EVIL_WRAP(errorstate, (isnew > -1) ? isnew : errorstate);
 
-            uint8_t totalfiles = 1;
-            uint stride = 0;
+            ushort totalfiles = 1;
+            ushort stride = 0;
             char sign[16];
 
-            if(isnew)                           { EVIL_FWRITE(cchar, 16, loc, &crk_sign, archive);
-                                                  EVIL_FWRITE(uint8_t, 1, loc, &totalfiles, archive);                  }
+            if(isnew)                           { EVIL_FWRITE(cchar, 16, &crk_sign, archive);
+                                                  EVIL_FWRITE(ushort, 1, &totalfiles, archive);                  }
 
 
             else 
@@ -140,11 +154,11 @@ extern "C" namespace zjc {
                       curfile);
 
                 for(uint i = 0; i < 16; i++)    { if(sign[i] != crk_sign[i])
-                                                { terminator(0x67, loc, archive); return ERROR; }                      }
+                                                { terminator(0x67, archive); return ERROR; }                      }
                                                   
 
                 fread(&totalfiles,
-                      sizeof(uint8_t),
+                      sizeof(ushort),
                       1, curfile);
 
 //  - --- - --- - --- - --- -
@@ -153,39 +167,33 @@ extern "C" namespace zjc {
                 else if( offset == totalfiles ) { fseek(curfile, -2, SEEK_CUR);
                                                   uint newtotalfiles = totalfiles + 1;
                                                   fseek(curfile, 0, SEEK_CUR);
-                                                  EVIL_FWRITE(uint8_t, 1, loc,
-                                                              &newtotalfiles, archive);
+                                                  EVIL_FWRITE(ushort, 1, &newtotalfiles, archive);
 
                                                   fseek(curfile, 0, SEEK_CUR);
                                                   totalfiles = newtotalfiles;                                           }
 
                 for(uint i = 0;
-                    i < offset; i++)            { fread(&stride, sizeof(uint), 1, curfile);
+                    i < offset; i++)            { fread(&stride, sizeof(ushort), 1, curfile);
                                                   fseek(curfile, stride, SEEK_CUR);
 
                                                   if(stride > maxstride)
-                                                { std::cout << "Bad stride: " << stride << std::endl;
-                                                  terminator(0x68, loc, archive); return 0x02; }
+                                                { terminator(0x68, archive); return 0x02; }
 
-                                                  std::cout << "STRIDE! " << stride
-                                                            << ", " << i << std::endl;                                  }
+                                                  printf("Stride by %u at pos %u\n", stride, i);                        }
             }
 
         }
 
 //  - --- - --- - --- - --- -
 
-        EVIL_FWRITE(uint, 1, loc, &filesize, archive);
-        EVIL_FWRITE(uint16_t, 2, loc, sizes, archive);
-        EVIL_FWRITE(PhysVertexPacked3D, 8, loc, crk->bounds, archive);
-        EVIL_FWRITE(VertexPacked3D, crk->vertCount, loc, crk->verts, archive);
-        EVIL_FWRITE(uint16_t, crk->indexCount, loc, crk->indices, archive);
+        EVIL_FWRITE(ushort, 2, sizes, archive);
+        EVIL_FWRITE(PhysVertexPacked3D, 8, crk->bounds, archive);
+        EVIL_FWRITE(VertexPacked3D, crk->vertCount, crk->verts, archive);
+        EVIL_FWRITE(ushort, crk->indexCount, crk->indices, archive);
         
-        errorstate = closebin(archive, loc);
-        WARD_EVIL_WRAP(errorstate);
-
-        std::remove(filename);
-        std::cout << "Deleted file " << filename << std::endl;
+        WARD_EVIL_WRAP(errorstate, closebin(archive, false));
+        WARD_EVIL_WRAP(errorstate, remove(filename));
+        printf("Deleted file <%s>\n", filename);
 
         return 0;
                                                                                                                         }
@@ -195,8 +203,7 @@ extern "C" namespace zjc {
     int writecrk(cchar* filename,
                  cchar* archive,
                  char* offset,
-                 char* mode,
-                 cchar* loc)                 {
+                 char* mode)                 {
 
         CrkFile* crk = new CrkFile;
 
@@ -208,7 +215,7 @@ extern "C" namespace zjc {
         uint8_t nummode   = HEXLIT(mode,   uint8_t);
 
         int evilstate = IN_writecrk(filename, archive, numoffset, nummode,
-                                    crk, sizes, bounds, verts, loc);
+                                    crk, sizes, bounds, verts);
 
         delete crk;
 

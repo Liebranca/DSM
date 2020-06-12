@@ -14,9 +14,8 @@ struct dynarray                             {
     uint        size;
     T*          buff;    
     
-    dynarray    (uint s,
-                 cchar* loc)
-                :size(s), buff(0)           { buff = (T*) evil_malloc(size, sizeof(T), loc);                    }
+    dynarray    (uint s)
+                :size(s), buff(0)           { buff = (T*) evil_malloc(size, sizeof(T));                    }
 
     ~dynarray   ()                          { evil_free(&buff);                                                 }
     dynarray    ()                          {                                                                   }

@@ -173,13 +173,13 @@
     <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\ZJC_FileHandling.h" />
-    <ClInclude Include="lybyte\types.h" />
+    <ClInclude Include="lybyte\ZJC_BinTypes.h" />
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lyarr\dynarray.cpp" />
     <ClCompile Include="lybyte\ZJC_FileHandling.cpp" />
-    <ClCompile Include="lybyte\types.cpp" />
+    <ClCompile Include="lybyte\ZJC_BinTypes.cpp" />
     <ClCompile Include="lymath\vops.cpp" />
     <ClCompile Include="lyutils\ZJC_Evil.cpp" />
     <ClCompile Include="spatial\time.cpp" />

@@ -1,7 +1,6 @@
 #ifndef ZAJEC_GOPS_H
 #define ZAJEC_GOPS_H
 
-#include <iostream>
 #include "../lyarr/dynarray.h"
 
 //  - --- - --- - --- - --- -
@@ -66,11 +65,10 @@ namespace zjc                       {
     
     public:
         vRange(size_t _mag,
-               N      _step,
-               cchar* loc)
+               N      _step)
              : step(_step),
                mag(_mag),
-               values(mag, loc)
+               values(mag)
                                     { for(unsigned int i = 0; i < mag; i++)
                                     { values[i] = (i*step); }                                               }
 

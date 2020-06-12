@@ -1,14 +1,12 @@
-#include <iostream>
 #include <string>
-#include <memory>
 
-#include "types.h"
+#include "ZJC_BinTypes.h"
 #include "../lymath/gops.h"
 #include "../lyutils/ZJC_Evil.h"
 
-namespace zjc {
+extern "C" namespace zjc {
 
-    zjc::fvRange frac16_range(128, 0.0078125f, "");
+    zjc::fvRange frac16_range(128, 0.0078125f);
 
 //  - --- - --- - --- - --- -
 
@@ -47,33 +45,36 @@ namespace zjc {
 
     frac16::frac16(float v) : b1(0b0), b2(0b0) {
         if (abs(v) >= 64)
-        { std::cerr << v << " is out of FRAC16 range (63.992188)" << std::endl; std::exit(1); }
+        { printf("%f is out of FRAC16 range (63.992188)", v); }
 
-        bool sign = 0; if (v < 0) { sign = 1; } v = abs(v);
-        std::string s = std::to_string(v); size_t fromdot = s.rfind(".");
+        else
+        {
 
-        std::string decimals =  s.substr(fromdot+1, s.npos);
-        std::string integer =   s.substr(0, fromdot);
+            bool sign = 0; if (v < 0) { sign = 1; } v = abs(v);
+            std::string s = std::to_string(v); size_t fromdot = s.rfind(".");
+
+            std::string decimals =  s.substr(fromdot+1, s.npos);
+            std::string integer =   s.substr(0, fromdot);
     
-        size_t closest = 0; int rounding = 0b00;
+            size_t closest = 0; int rounding = 0b00;
 
-        if (decimals.at(0) == '0') {
-            if (decimals.at(1) != '0') { 
-                closest = frac16_range.take_closest(
-                    std::stof("0."+decimals) * 10);
+            if (decimals.at(0) == '0') {
+                if (decimals.at(1) != '0') { 
+                    closest = frac16_range.take_closest(
+                        std::stof("0."+decimals) * 10);
 
-                rounding = 0b11;}
-                                                                                    }
+                    rounding = 0b11;}
+                                                                                        }
 
-        else {  float w = std::stof("0."+decimals);
-                closest = frac16_range.take_closest(w);
+            else {  float w = std::stof("0."+decimals);
+                    closest = frac16_range.take_closest(w);
         
-                if ( frac16_range[closest] > w )        { rounding = 0b01; }
-                else if ( frac16_range[closest] < w )   { rounding = 0b10; }
-                                                                                    }
+                    if ( frac16_range[closest] > w )        { rounding = 0b01; }
+                    else if ( frac16_range[closest] < w )   { rounding = 0b10; }
+                                                                                        }
     
-        this->b1 = (closest << 1) + sign;
-        this->b2 = (std::stoi(integer) << 2) + rounding;
-
+            this->b1 = (closest << 1) + sign;
+            this->b2 = (std::stoi(integer) << 2) + rounding;
+        }
     }
 }

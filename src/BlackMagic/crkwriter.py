@@ -230,7 +230,7 @@ try:
 
     start = time.time();
     archive = path+"\\ArchiveTest.irf"
-    os.system(path+"\\BlackMagic.exe " + filename + " " + archive + " 1")
+    os.system(path+"\\BlackMagic.exe " + filename + " " + archive + " 0x01" + " 0x00")
     end = time.time(); cpp_execTimer = end - start;
 
     if debugPrint:

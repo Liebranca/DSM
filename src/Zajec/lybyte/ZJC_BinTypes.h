@@ -1,5 +1,5 @@
-#ifndef LYBYTE_TYPES_H
-#define LYBYTE_TYPES_H
+#ifndef __ZJC_BinTypes_H__
+#define __ZJC_BinTypes_H__
 
 //  - --- - --- - --- - --- -
 
@@ -7,7 +7,7 @@
 
 //  - --- - --- - --- - --- -
 
-namespace zjc {
+extern "C" namespace zjc {
 
 struct byte                            {
     uchar bits = 0b0;
@@ -22,6 +22,12 @@ struct byte                            {
     explicit operator int()            { return this->bits;                                         }
     operator bool()                    { return bits;                                               }
                                                                                                     };
+
+struct bytechunk                       {
+    ushort size;
+    ushort position;
+    cuchar* values;
+};
 
 //  - --- - --- - --- - --- -
     
@@ -78,12 +84,5 @@ struct PhysVertexPacked2D              {
 
                                                                                                     }
 //  - --- - --- - --- - --- -
-                                                                                                    
-static  std::ostream& operator << (
-        std::ostream& stream,
-        zjc::byte& b)                  { stream << b.bits; return stream;                           }
-static  std::ostream& operator << (
-        std::ostream& stream,
-        zjc::frac16& f)                { stream << (float)f; return stream;                         }
 
-#endif //LYBYTE_TYPES_H
+#endif //__ZJC_BinTypes_H__

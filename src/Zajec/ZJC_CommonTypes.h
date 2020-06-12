@@ -22,6 +22,8 @@ extern "C" {
         long hexstr_tolong(char* v);
     }
 
+    struct                          ushort_pair                 { ushort a, b;                                      };
+
 }
 
 #define HEXLIT(value, type) (type) zjc::hexstr_tolong(value);

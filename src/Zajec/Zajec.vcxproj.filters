@@ -48,9 +48,6 @@
     <ClInclude Include="lymath\vops.h">
       <Filter>Header Files\lymath</Filter>
     </ClInclude>
-    <ClInclude Include="lybyte\types.h">
-      <Filter>Header Files\lybyte</Filter>
-    </ClInclude>
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,13 +72,13 @@
     <ClInclude Include="lyutils\ZJC_Evil.h">
       <Filter>Header Files\lyutils</Filter>
     </ClInclude>
+    <ClInclude Include="lybyte\ZJC_BinTypes.h">
+      <Filter>Header Files\lybyte</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lymath\vops.cpp">
       <Filter>Source Files\lymath</Filter>
-    </ClCompile>
-    <ClCompile Include="lybyte\types.cpp">
-      <Filter>Source Files\lybyte</Filter>
     </ClCompile>
     <ClCompile Include="spatial\time.cpp">
       <Filter>Source Files\spatial</Filter>
@@ -100,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="lyutils\ZJC_Evil.cpp">
       <Filter>Source Files\lyutils</Filter>
+    </ClCompile>
+    <ClCompile Include="lybyte\ZJC_BinTypes.cpp">
+      <Filter>Source Files\lybyte</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
