@@ -5,9 +5,12 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <conio.h>
 
 #include "lyutils/ZJC_Evil.h"
 #include "lybyte/ZJC_FileHandling.h"
+
+#include "lybyte/ZJC_BinTypes.h"
 
 //const strvec dsm_extensions = {"crk", "joj", "ans"};
 
@@ -20,7 +23,7 @@ int main(int argc, char* argv[])
         "usage: %s <filename> <archive> offset mode ", argv[0]); exit(EXIT_FAILURE); }
 
     int errorcode = 0;
-    WARD_EVIL_WRAP(errorcode, zjc::writecrk(argv[1], argv[2], argv[3], argv[4]));
+    WARD_EVIL_WRAP(errorcode, writecrk(argv[1], argv[2], argv[3], argv[4]));
 
     return 0;
 }

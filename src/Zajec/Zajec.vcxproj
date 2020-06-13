@@ -177,14 +177,15 @@
     <ClInclude Include="lymath\vops.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lyarr\dynarray.cpp" />
-    <ClCompile Include="lybyte\ZJC_FileHandling.cpp" />
-    <ClCompile Include="lybyte\ZJC_BinTypes.cpp" />
+    <ClCompile Include="lyarr\dynarray.c" />
+    <ClCompile Include="lybyte\ZJC_FileHandling.c" />
+    <ClCompile Include="lybyte\ZJC_BinTypes.c" />
+    <ClCompile Include="lymath\gops.c" />
     <ClCompile Include="lymath\vops.cpp" />
-    <ClCompile Include="lyutils\ZJC_Evil.cpp" />
+    <ClCompile Include="lyutils\ZJC_Evil.c" />
     <ClCompile Include="spatial\time.cpp" />
     <ClCompile Include="spatial\transform.cpp" />
-    <ClCompile Include="ZJC_CommonTypes.cpp" />
+    <ClCompile Include="ZJC_CommonTypes.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

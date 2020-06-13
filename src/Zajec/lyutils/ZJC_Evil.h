@@ -3,70 +3,74 @@
 
 //  - --- - --- - --- - --- -
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "../ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
-extern "C" namespace zjc {
+static uint gEvilState = 0x00;
 
-    static uint gEvilState = 0x00;
+static char LOCREG[64][256];
+static uint LOCREG_I = 0;
 
-    static char LOCREG[64][256];
-    static uint LOCREG_I = 0;
+void    terminator(uint errorcode, cchar* info);
 
-    void    terminator(uint errorcode, cchar* info);
+static cchar* evil_shpath(cchar* path) {
+    cchar* file = path;
+    cchar* curchar = '\0';
+    int src[3] = { 0, 0, 0 };
 
-    constexpr cchar* evil_shpath(cchar* path) {
-        cchar* file = path;
-        cchar* curchar = '\0';
-        bool src[3] = { false, false, false };
+    while (*path++) {
 
-        while (*path++) {
-
-            curchar = path;
-            if ((*curchar == '\\') || (*curchar == '/')) {
-                src[0] = *(path+1) == 's';
-                src[1] = *(path+2) == 'r';
-                src[2] = *(path+3) == 'c';
+        curchar = path;
+        if ((*curchar == '\\') || (*curchar == '/')) {
+            src[0] = *(path+1) == 's';
+            src[1] = *(path+2) == 'r';
+            src[2] = *(path+3) == 'c';
             
-                if(src[0]*src[1]*src[2]) { file = path+5; break; }
+            if(src[0]*src[1]*src[2]) { file = path+5; break; }
 
-            }
         }
-        return file;
     }
-
-    void*   evil_malloc(size_t count, size_t size);
-    void    evil_free(void* buff);
-
-    void  evil_geterrloc(cchar* path, cchar* func, uint line);
-    void  evil_printlocreg(bool flush);
-    void  evil_poplocreg();
-
+    return file;
 }
 
-//  - --- - --- - --- - --- -
+void*   evil_malloc(uint count, uint size);
+void    evil_free(void* buff);
 
-constexpr uint FATAL = 0x01;
-constexpr uint ERROR = 0x02;
-
-//  - --- - --- - --- - --- -
-
-#define __ERRLOC__ zjc::evil_shpath(__FILE__), __func__, __LINE__
-#define GETLOC zjc::evil_geterrloc(__ERRLOC__)
+void  evil_geterrloc(cchar* path, cchar* func, uint line);
+void  evil_printlocreg(int flush);
+void  evil_poplocreg();
 
 //  - --- - --- - --- - --- -
 
-#define WARD_EVIL_MALLOC(x)             if(x == nullptr)    { zjc::terminator(0x00, "");                            }
-#define WARD_EVIL_MFREE(x)              if(x != NULL)       { zjc::evil_free((void*)x);                             }
-#define WARD_EVIL_FOPEN(x, y)           if(x == NULL)       { zjc::terminator(0x40, y);  return ERROR;              }
-#define WARD_EVIL_FCLOSE(x, y)          if(x != NULL)       { zjc::terminator(0x41, y);  return ERROR;              }
-#define WARD_EVIL_FWRITE(x, y, z)       if(x != z)          { zjc::terminator(0x42, y);  return ERROR;              }
+static cuint FATAL = 0x01;
+static cuint ERROR = 0x02;
+
+//  - --- - --- - --- - --- -
+
+#define __ERRLOC__ evil_shpath(__FILE__), __func__, __LINE__
+#define GETLOC evil_geterrloc(__ERRLOC__)
+
+//  - --- - --- - --- - --- -
+
+#define WARD_EVIL_MALLOC(x)             if(!x)              { terminator(0x00, "");                            }
+#define WARD_EVIL_MFREE(x)              if(x)               { evil_free((void*)x);                             }
+#define WARD_EVIL_FOPEN(x, y)           if(!x)              { terminator(0x40, y);  return ERROR;              }
+#define WARD_EVIL_FCLOSE(x, y)          if(x)               { terminator(0x41, y);  return ERROR;              }
+#define WARD_EVIL_FWRITE(x, y, z)       if(x != z)          { terminator(0x42, y);  return ERROR;              }
 
 #define WARD_EVIL_WRAP(x, func)         GETLOC;\
                                         x = func;\
                                         if(x == 1)          { return FATAL;                                         }\
-                                        if(x == 2)          { return ERROR;                                         }\
-                                        else                { zjc::evil_poplocreg();                                }
+                                        else if(x == 2)     { return ERROR;                                         }\
+                                        else                { evil_poplocreg();                                     }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ZAJEC_EVIL_H

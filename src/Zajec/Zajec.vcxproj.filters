@@ -86,20 +86,23 @@
     <ClCompile Include="spatial\transform.cpp">
       <Filter>Source Files\spatial</Filter>
     </ClCompile>
-    <ClCompile Include="lyarr\dynarray.cpp">
-      <Filter>Source Files\lyarr</Filter>
-    </ClCompile>
-    <ClCompile Include="ZJC_CommonTypes.cpp">
+    <ClCompile Include="ZJC_CommonTypes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lybyte\ZJC_FileHandling.cpp">
+    <ClCompile Include="lybyte\ZJC_FileHandling.c">
       <Filter>Source Files\lybyte</Filter>
     </ClCompile>
-    <ClCompile Include="lyutils\ZJC_Evil.cpp">
+    <ClCompile Include="lybyte\ZJC_BinTypes.c">
+      <Filter>Source Files\lybyte</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\dynarray.c">
+      <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="lymath\gops.c">
+      <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="lyutils\ZJC_Evil.c">
       <Filter>Source Files\lyutils</Filter>
-    </ClCompile>
-    <ClCompile Include="lybyte\ZJC_BinTypes.cpp">
-      <Filter>Source Files\lybyte</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
