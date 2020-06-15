@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <io.h>
 
 #include "ZJC_FileHandling.h"
 #include "ZJC_BinTypes.h"
 
+#include "../lymath/ZJC_GOPS.h"
 #include "../lyutils/ZJC_Evil.h"
 
 //  - --- - --- - --- - --- -
@@ -139,15 +141,15 @@ int openarch(cchar*        filename,
         fread(&irf->fileCount, sizeof(ushort), 1, curfile);
 
         fread(&irf->size,   sizeof(uint32_t), 1,   curfile);
-        fread(irf->offsets, sizeof(uint32_t), 512, curfile);
+        fread(irf->offsets, sizeof(uint32_t), 256, curfile);
 
         uint32_t datasize = irf->size - IRF_HSIZE;
 
         if((mode == IRF_UPDATE)
-        || (mode == IRF_DELETE))                { EVIL_FREAD(uchar, datasize, irf->data);                               }
+        || (mode == IRF_DELETE))                { EVIL_FREAD(uchar, datasize, irf->data);
+                                                  fseek(curfile, 0, SEEK_CUR); rewind(curfile);                         }
 
     }
-
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
@@ -274,6 +276,67 @@ int writeirf(CrkFile* crk,
         fseek (curfile, offset_stride, SEEK_CUR);
 
         EVIL_FWRITE(uint32_t, 1, &newoffset,       filename);
+    }
+
+    else if (mode == IRF_UPDATE && offset < 256)
+    {
+
+        int isLastChunk = offset == 255 || offset == (irf->fileCount - 1);
+
+        uint32_t chunk_start = irf->offsets[offset];
+        uint32_t newsize, byteshift, old_end;
+
+        if(isLastChunk)
+        {
+            newsize   = chunk_start + crk->size;
+            old_end   = irf->size;
+            byteshift = newsize - old_end;
+
+            fseek (curfile, 0,           SEEK_CUR);
+            fseek (curfile, chunk_start, SEEK_CUR);
+            WARD_EVIL_WRAP(evilstate, crk_to_irf(crk, filename));
+            fseek (curfile, 0,           SEEK_CUR);
+
+            rewind(curfile);
+            fseek(curfile, 10, SEEK_CUR);
+            fseek(curfile, 0, SEEK_CUR);
+            EVIL_FWRITE(uint32_t, 1, &newsize, filename);
+            fseek(curfile, 0, SEEK_CUR);
+        }
+
+        else
+        {
+            uint32_t chunk_end;
+
+            chunk_end = chunk_start + crk->size;
+            old_end   = irf->offsets[offset+1];
+            byteshift = chunk_end - old_end;
+            newsize   = (irf->size - (old_end - chunk_start)) + crk->size;
+
+            fseek(curfile, 0,           SEEK_CUR);
+            fseek(curfile, chunk_start, SEEK_CUR);
+            WARD_EVIL_WRAP(evilstate, crk_to_irf(crk, filename));
+
+            irf->data += (old_end - IRF_HSIZE);
+            fseek(curfile, 0,         SEEK_CUR);
+            fseek(curfile, chunk_end, SEEK_CUR);
+            fseek(curfile, 0,         SEEK_CUR);
+            EVIL_FWRITE(uchar, irf->size - old_end, irf->data, filename);
+            fseek(curfile, 0,         SEEK_CUR);
+
+            for(uint i = offset+1;
+                i < irf->fileCount; i++)        { irf->offsets[i] += byteshift;                                         }
+
+            rewind(curfile);
+            fseek(curfile, 10, SEEK_CUR);
+            fseek(curfile, 0, SEEK_CUR);
+            EVIL_FWRITE(uint32_t, 1,   &newsize,     filename);
+            EVIL_FWRITE(uint32_t, 256, irf->offsets, filename);
+            fseek(curfile, 0, SEEK_CUR);
+        }
+
+        _chsize_s(_fileno(curfile), irf->size + byteshift);
+
     }
 
     closebin(filename, 0);
