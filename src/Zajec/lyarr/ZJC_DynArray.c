@@ -1,4 +1,4 @@
-#include "dynarray.h"
+#include "ZJC_DynArray.h"
 
 fArray build_fArray(uint32_t size) {
 

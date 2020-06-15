@@ -10,7 +10,7 @@
 #include "lyutils/ZJC_Evil.h"
 #include "lybyte/ZJC_FileHandling.h"
 
-#include "lybyte/ZJC_BinTypes.h"
+//#include "lybyte/ZJC_BinTypes.h"
 
 //const strvec dsm_extensions = {"crk", "joj", "ans"};
 

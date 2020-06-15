@@ -1,11 +1,11 @@
-#ifndef ZAJEC_GOPS_H
-#define ZAJEC_GOPS_H
+#ifndef __ZJC_GOPS_H__
+#define __ZJC_GOPS_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "../lyarr/dynarray.h"
+#include "../lyarr/ZJC_DynArray.h"
 
 //  - --- - --- - --- - --- -
 
@@ -53,4 +53,4 @@ uint32_t fvRange_take_closest(fvRange* fvr, float v);
 }
 #endif
 
-#endif // ZAJEC_GOPS_H
+#endif // __ZJC_GOPS_H__

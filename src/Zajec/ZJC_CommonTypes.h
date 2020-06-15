@@ -18,7 +18,4 @@ typedef const unsigned  long    culong;
 
 long hexstr_tolong(char* v);
 
-typedef struct                  ushort_pair                 { ushort a, b;                                      }
-                                ushort_pair;
-
 #endif // __ZJC_COMMONTYPES_H__

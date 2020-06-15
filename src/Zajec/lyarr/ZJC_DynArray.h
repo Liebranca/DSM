@@ -1,5 +1,5 @@
-#ifndef ZAJEC_DYNARRAY_H
-#define ZAJEC_DYNARRAY_H
+#ifndef __ZJC_DYNARRAY_H__
+#define __ZJC_DYNARRAY_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,4 +28,4 @@ void   del_fArray(fArray* farr);
 }
 #endif
 
-#endif // ZAJEC_DYNARRAY_H
+#endif // __ZJC_DYNARRAY_H__

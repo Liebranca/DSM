@@ -15,14 +15,14 @@ typedef struct frac16 {
     uchar b1;
     uchar b2;
 
-} frac16;
+} f16;
 
 //  - --- - --- - --- - --- -
 
 int nthbit(uchar b, int n);
 int takebits(uchar b, uint iStart, uint iEnd);
-float frac16_tofloat(frac16* frac);
-frac16 float_tofrac16(float v);
+float frac16_tofloat(f16* frac);
+f16 float_tofrac16(float v);
 
 int zjc_convertor_init();
 int zjc_convertor_end();
@@ -30,20 +30,20 @@ int zjc_convertor_end();
 //  - --- - --- - --- - --- -
 
 typedef struct VertexPacked3D {
-    frac16 co[3];
-    frac16 no[3];
-    frac16 uv[2];
+    f16 co[3];
+    f16 no[3];
+    f16 uv[2];
 
-} VertexPacked3D;
+} VP3D;
 
-VertexPacked3D build_vertpacked_3d(float* values);
+VP3D build_vertpacked_3d(float* values);
 
 typedef struct PhysVertexPacked3D {
-    frac16 co[3];
+    f16 co[3];
 
-} PhysVertexPacked3D;
+} pVP3D;
 
-PhysVertexPacked3D build_physvert_3d (float* values);
+pVP3D build_physvert_3d (float* values);
 
 //  - --- - --- - --- - --- -
 

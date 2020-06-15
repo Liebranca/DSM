@@ -1,4 +1,4 @@
-#include "gops.h"
+#include "ZJC_GOPS.h"
 #include <stdio.h>
 
 //  - --- - --- - --- - --- -
@@ -47,28 +47,30 @@ float approadf(float v1,
 
 //  - --- - --- - --- - --- -
 
-fvRange build_fvRange(uint mag, float step) { 
+fvRange build_fvRange(uint mag,
+                      float step)       { 
+
     fvRange fvr; fvr.mag = mag; fvr.step = step;
     fvr.values = build_fArray(mag);
 
-    for(uint i = 0; i < mag; i++) { *(fvr.values.buff+i) = (i*step); }
+    for(uint i = 0; i < mag; i++)       { *(fvr.values.buff+i) = (i*step);                                  }
 
     return fvr;
 }
 
-void del_fvRange(fvRange* fvr) { evil_free(&fvr->values.buff); }
+void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->values.buff);                                }
 
-uint32_t fvRange_take_closest(fvRange* fvr, float v) {
+uint32_t fvRange_take_closest(
+                          fvRange* fvr,
+                          float v)      {
 
     float s = fvr->step * 0.5f;
     float dist = 999.0f;
     float newdist;
     uint closest = 0;
 
-    for (uint i = 0; i < fvr->mag; i++) {
-        newdist = approadf(v, *(fvr->values.buff+i), s);
-        if ( newdist < dist ) { dist = newdist; closest = i; }
-    }
+    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, *(fvr->values.buff+i), s);
+                                          if ( newdist < dist ) { dist = newdist; closest = i; }            }
 
     return closest;
 }

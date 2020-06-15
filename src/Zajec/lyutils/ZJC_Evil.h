@@ -57,9 +57,9 @@ static cuint ERROR = 0x02;
 
 //  - --- - --- - --- - --- -
 
-#define WARD_EVIL_MALLOC(x)             if(!x)              { terminator(0x00, "");                            }
-#define WARD_EVIL_MFREE(x)              if(x)               { evil_free((void*)x);                             }
-#define WARD_EVIL_FOPEN(x, y)           if(!x)              { terminator(0x40, y);  return ERROR;              }
+#define WARD_EVIL_MALLOC(x)             if(x == NULL)       { terminator(0x00, "");                            }
+#define WARD_EVIL_MFREE(x)              if(x != NULL)       { evil_free((void*)x);                             }
+#define WARD_EVIL_FOPEN(x, y)           if(x == NULL)       { terminator(0x40, y);  return ERROR;              }
 #define WARD_EVIL_FCLOSE(x, y)          if(x)               { terminator(0x41, y);  return ERROR;              }
 #define WARD_EVIL_FWRITE(x, y, z)       if(x != z)          { terminator(0x42, y);  return ERROR;              }
 

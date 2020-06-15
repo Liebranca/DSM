@@ -3,20 +3,20 @@
 #include <math.h>
 #include <string.h>
 
-#include "../lymath/gops.h"
+#include "../lymath/ZJC_GOPS.h"
 #include "../lyutils/ZJC_Evil.h"
 #include "ZJC_BinTypes.h"
 
 fvRange frac16_range;
 
-int zjc_convertor_init() { frac16_range = build_fvRange(128, 0.0078125f); return 0; }
-int zjc_convertor_end()  { del_fvRange(&frac16_range); return 0; }
+int zjc_convertor_init()                        { frac16_range = build_fvRange(128, 0.0078125f); return 0;          }
+int zjc_convertor_end()                         { del_fvRange(&frac16_range); return 0;                             }
 
 //  - --- - --- - --- - --- -
 
-VertexPacked3D build_vertpacked_3d(float* values)           {
+VP3D build_vertpacked_3d(float* values)         {
 
-    VertexPacked3D vert;
+    VP3D vert;
 
     vert.co[0] = float_tofrac16(*values);
     vert.co[1] = float_tofrac16(*(values+1));
@@ -27,16 +27,16 @@ VertexPacked3D build_vertpacked_3d(float* values)           {
     vert.uv[0] = float_tofrac16(*(values+6));
     vert.uv[1] = float_tofrac16(*(values+7));
 
-}
+    return vert;                                                                                                    }
 
-PhysVertexPacked3D build_physvert_3d (float* values){ 
+pVP3D build_physvert_3d (float* values)         { 
 
-    PhysVertexPacked3D vert;
+    pVP3D vert;
     vert.co[0] = float_tofrac16(*values);
     vert.co[1] = float_tofrac16(*(values+1));
     vert.co[2] = float_tofrac16(*(values+2));
 
-}
+    return vert;                                                                                                    }
 
 //  - --- - --- - --- - --- -
 
@@ -50,7 +50,7 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 
 //  - --- - --- - --- - --- -
 
-float frac16_tofloat(frac16* frac)               {
+float frac16_tofloat(f16* frac)                 {
 
     int sign      = nthbit(frac->b1, 0);
     int floatbits = takebits(frac->b1, 1, 8);
@@ -62,27 +62,25 @@ float frac16_tofloat(frac16* frac)               {
 //      - --- - --- - --- - --- -
 
     if (zerobits)                               {
-        if      (zerobits == 1)                 { fvalue -= 0.001f; }
-        else if (zerobits == 2)                 { fvalue += 0.001f; }
-        else if (zerobits == 3)                 { fvalue *= 0.1f;   }
-                                                                    }
+        if      (zerobits == 1)                 { fvalue -= 0.001f;                                                 }
+        else if (zerobits == 2)                 { fvalue += 0.001f;                                                 }
+        else if (zerobits == 3)                 { fvalue *= 0.1f;                                                   }
+                                                                                                                    }
 
 //      - --- - --- - --- - --- -
 
     float result = intbits + fvalue;
-    if (sign)                                   { result *= -1;     }
+    if (sign)                                   { result *= -1;                                                     }
 
-    return result;
-}
+    return result;                                                                                                  }
 
 //      - --- - --- - --- - --- -
 
-frac16 float_tofrac16(float v) {
+f16 float_tofrac16(float v) {
 
-    frac16 frac = {0, 0};
+    f16 frac = {0, 0};
 
-    if (fabs(v) >= 64.0)
-    { printf("%f is out of FRAC16 range (63.992188)", v); }
+    if (fabs(v) >= 64.0)                        { printf("%f is out of FRAC16 range (63.992188)", v);               }
     else
     {
 
@@ -91,7 +89,7 @@ frac16 float_tofrac16(float v) {
         char s[10]; snprintf(s, 9, "%f", v);
 
         int fromdot = 0;
-        for(uint i = 0; i < 10; i++)            { if(s[i] == '.') { break; } fromdot++; }
+        for(uint i = 0; i < 10; i++)            { if(s[i] == '.') { break; } fromdot++;                             }
 
         char decimals[7] = "000000";
         memcpy(decimals, &s[fromdot + 1], 6);
@@ -99,25 +97,27 @@ frac16 float_tofrac16(float v) {
         char integer[3] = "00";
         int singledigit = fromdot == 1;
         memcpy(integer, &s, fromdot);
-        if(singledigit) { integer[1] = '\0'; }
+        if(singledigit)                         { integer[1] = '\0';                                                }
 
         uint closest = 0; int rounding = 0b00;
         char ws[9] = "0."; ws[8] = '\0';
 
         float w = (float) atof(strcat(ws, decimals));
 
-        if (*decimals == '0') {
-            if (*decimals != '0') { 
-                closest = fvRange_take_closest(
-                    &frac16_range, w * 10);
-
-                rounding = 0b11;}
+        if (*decimals == '0')
+        {
+            if (*decimals != '0')               { closest = fvRange_take_closest(&frac16_range, w * 10);
+                                                  rounding = 0b11;                                                  }
         }
 
-        else {  closest = fvRange_take_closest(&frac16_range, w);
-                if (*(frac16_range.values.buff + closest) > w) { rounding = 0b01; }
-                else if ( *(frac16_range.values.buff + closest) < w )   { rounding = 0b10;  }
-                                                                                            }
+        else
+        { 
+            closest = fvRange_take_closest(&frac16_range, w);
+            float decimals_packed = *(frac16_range.values.buff + closest);
+
+            if      (decimals_packed > w)       { rounding = 0b01;                                                  }
+            else if (decimals_packed < w )      { rounding = 0b10;                                                  }
+        }
 
         frac.b1 = (closest << 1) + sign;
         frac.b2 = (atoi(integer) << 2) + rounding;
