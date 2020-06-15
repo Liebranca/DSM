@@ -28,11 +28,11 @@ const uint8_t   IRF_UPDATE      =                 0x02;
 const uint8_t   IRF_READ        =                 0x03;
 const uint8_t   IRF_DELETE      =                 0x04;
 
-cushort MAXSTRIDE               =                 0xFFFF;
+cushort         MAXSTRIDE       =                 0xFFFF;
 
-cchar CRKSIGN[8]                =               { 0x4c, 0x59, 0x45, 0x42, 0x24, 0x43, 0x52, 0x4b                        };
+cchar           CRKSIGN[8]      =               { 0x4c, 0x59, 0x45, 0x42, 0x24, 0x43, 0x52, 0x4b                        };
 
-cchar FBGM[16]                  =               { 0x46, 0x43, 0x4b, 0x42, 0x21, 0x54, 0x43, 0x48,
+cchar           FBGM[16]        =               { 0x46, 0x43, 0x4b, 0x42, 0x21, 0x54, 0x43, 0x48,
                                                   0x45, 0x53, 0x47, 0x45, 0x54, 0x24, 0x24, 0x24                        };
 
 //  - --- - --- - --- - --- -
@@ -220,11 +220,11 @@ int crk_to_irf(CrkFile*    crk,
 
 //  - --- - --- - --- - --- -
 
-int writeirf(CrkFile* crk,
-             IrfArchive* irf,
-             uint8_t mode,
-             uint8_t offset,
-             cchar* filename)                   {
+int writecrk_irf(CrkFile*    crk,
+                 IrfArchive* irf,
+                 uint8_t     mode,
+                 uint8_t     offset,
+                 cchar*     filename)           {
 
     int evilstate = 0;
 
@@ -237,6 +237,10 @@ int writeirf(CrkFile* crk,
                                            irf,
                                            0        ));
     }
+
+    if      (irf->fileCount == 256
+            && mode != IRF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
+                                                  return 0;                                                             }
 
     if      (mode == IRF_WRITE)
     {
@@ -345,6 +349,84 @@ int writeirf(CrkFile* crk,
 
 //  - --- - --- - --- - --- -
 
+int popirf(IrfArchive* irf,
+           uint8_t     offset,
+           cchar*      filename)                {
+
+    int evilstate = 0;
+
+    {
+        WARD_EVIL_WRAP(evilstate, openarch(filename,
+                                           "rb+",
+                                           CRKSIGN,
+                                           4,
+                                           irf,
+                                           0        ));
+    }
+
+    if      (!irf->fileCount)                   { printf("Archive <%s> is empty; deletion aborted.\n", filename);
+                                                  return 0;                                                             }
+
+    else if (offset < 256)
+    {
+
+        int isLastChunk = offset == 255 || offset == (irf->fileCount - 1);
+
+        uint32_t chunk_start = irf->offsets[offset];
+        uint32_t byteshift, newsize;
+
+        if(isLastChunk)
+        {
+            byteshift = irf->size - chunk_start;
+            newsize   = irf->size - byteshift;
+
+            irf->offsets[offset] = 0;
+            irf->fileCount--;
+
+            fseek(curfile, 8, SEEK_CUR);
+            fseek(curfile, 0, SEEK_CUR);
+            EVIL_FWRITE(uint32_t, 1,   &irf->fileCount, filename);
+            EVIL_FWRITE(uint32_t, 1,   &newsize,        filename);
+            EVIL_FWRITE(uint32_t, 256, irf->offsets,    filename);
+            fseek(curfile, 0, SEEK_CUR);
+        }
+
+        else
+        {
+            uint32_t old_end = irf->offsets[offset+1];
+
+            byteshift = old_end - chunk_start;
+            newsize   = irf->size - byteshift;
+            irf->fileCount--;
+
+            irf->data += (old_end - IRF_HSIZE);
+            fseek(curfile, 0,           SEEK_CUR);
+            fseek(curfile, chunk_start, SEEK_CUR);
+            fseek(curfile, 0,           SEEK_CUR);
+            EVIL_FWRITE(uchar, irf->size - old_end, irf->data, filename);
+            fseek(curfile, 0,           SEEK_CUR);
+
+            for(uint i = offset;
+                i < irf->fileCount; i++)        { irf->offsets[i] = irf->offsets[i+1];                                  }
+
+            irf->offsets[irf->fileCount] = 0;
+
+            rewind(curfile);
+            fseek(curfile, 8, SEEK_CUR);
+            fseek(curfile, 0, SEEK_CUR);
+            EVIL_FWRITE(uint32_t, 1,   &irf->fileCount, filename);
+            EVIL_FWRITE(uint32_t, 1,   &newsize,        filename);
+            EVIL_FWRITE(uint32_t, 256, irf->offsets,    filename);
+            fseek(curfile, 0, SEEK_CUR);
+        }
+
+        _chsize_s(_fileno(curfile), irf->size + byteshift);
+    }
+
+    return 0;
+                                                                                                                        }
+//  - --- - --- - --- - --- -
+
 int writecrk(cchar* filename,
              cchar* archive,
              char*  mode,
@@ -369,7 +451,7 @@ int writecrk(cchar* filename,
     WARD_EVIL_MFREE(bounds);
     WARD_EVIL_MFREE(verts);
 
-    if(!evilstate)                              { evilstate = writeirf(&crk, &irf, nummode, numoffset, archive);        }
+    if(!evilstate)                              { evilstate = writecrk_irf(&crk, &irf, nummode, numoffset, archive);   }
     if(nummode == IRF_UPDATE || IRF_DELETE)     { WARD_EVIL_MFREE(irf.data);                                            }
 
     del_CrkFile(&crk);
