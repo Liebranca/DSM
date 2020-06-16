@@ -169,7 +169,7 @@
     <ClInclude Include="lymath\ZJC_GOPS.h" />
     <ClInclude Include="lyutils\ZJC_Evil.h" />
     <ClInclude Include="ZJC_CommonTypes.h" />
-    <ClInclude Include="spatial\time.h" />
+    <ClInclude Include="spatial\ZJC_Time.h" />
     <ClInclude Include="spatial\transform.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\ZJC_FileHandling.h" />
@@ -183,7 +183,7 @@
     <ClCompile Include="lymath\ZJC_GOPS.c" />
     <ClCompile Include="lymath\vops.cpp" />
     <ClCompile Include="lyutils\ZJC_Evil.c" />
-    <ClCompile Include="spatial\time.cpp" />
+    <ClCompile Include="spatial\ZJC_Time.c" />
     <ClCompile Include="spatial\transform.cpp" />
     <ClCompile Include="ZJC_CommonTypes.c" />
   </ItemGroup>

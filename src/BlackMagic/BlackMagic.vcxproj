@@ -72,6 +72,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\</OutDir>
     <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86; </LibraryPath>
+    <ReferencePath>$(VC_ReferencesPath_x86);</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -81,14 +83,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Zajec;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Zajec;..\Chasm;..\..\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\Zajec;..\..\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Zajec.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Zajec;..\Chasm;..\..\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Zajec.lib;Chasm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)\trashcan\$(MSBuildProjectName)\$(MSBuildProjectName).log</Path>
@@ -132,7 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

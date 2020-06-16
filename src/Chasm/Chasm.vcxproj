@@ -162,14 +162,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Chasm.h" />
-    <ClInclude Include="wind\chCONT.h" />
     <ClInclude Include="wind\chMANG.h" />
     <ClInclude Include="wind\chWIN.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="wind\chCONT.cpp" />
-    <ClCompile Include="wind\chMANG.cpp" />
-    <ClCompile Include="wind\chWIN.cpp" />
+    <ClCompile Include="wind\chMANG.c" />
+    <ClCompile Include="wind\chWIN.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

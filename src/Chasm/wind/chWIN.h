@@ -1,52 +1,50 @@
-#ifndef CH_WIN_H
-#define CH_WIN_H
+#ifndef __CH_WIN_H__
+#define __CH_WIN_H__
 
-//  - --- - --- - --- - --- -
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "SDL/SDL.h"
 
 //  - --- - --- - --- - --- -
 
-// Baseline SDL window wrap
-class chWIN
-{
-    public:
+typedef struct CHASM_WINDOW_HANDLE              { 
 
-    chWIN(const char title[], int height, int width);
-    virtual ~chWIN();
+    int           isClosed;
+    int           width;
+    int           height;
+    int           pkeys;
+    int           helkeys;
 
-    void swapBuffers() { SDL_GL_SwapWindow(window); }
-    SDL_Window* getWin() { return window; }
+    int           mouseIgnore;
+    int           mousePos_x;
+    int           mousePos_y;
 
-    void hideCursor() { SDL_ShowCursor(SDL_DISABLE); }
-    void showCursor() { SDL_ShowCursor(SDL_ENABLE); }
+    float         mouseRel_x;
+    float         mouseRel_y;
+    float         mouseSens;
 
-    bool getIsClosed() { return isClosed; }
-
-//  - --- - --- - --- - --- -
-
-    void pollEvents();
-    void mouseWrap();
-
-//  - --- - --- - --- - --- -
-
-    bool pkeys[7] = { 0,0,0,0,0,0,0 };
-    bool helkeys[1] = { 0 };
-    float mouseRel[2] = { 0,0 };
-    int mousePos[2] = { 0,0 };
-
-//  - --- - --- - --- - --- -
-    float mouseSens = 2.0f;
-    bool mouseIgnore = false;
-    
-//  - --- - --- - --- - --- -
-
-    private:
-
-    SDL_Window* window;
+    SDL_Window*   window;
     SDL_GLContext context;
-    bool isClosed; int ww, wh;
 
-};
+} chWH;
 
-#endif // CH_WIN_H
+//  - --- - --- - --- - --- -
+
+chWH        build_whandle   (const char title[], int height, int width);
+int         del_whandle     (chWH* whandle);
+void        swapBuffers     (chWH* whandle);
+void        hideCursor      ();
+void        showCursor      ();
+int         getIsClosed     (chWH* whandle);
+void        pollEvents      (chWH* whandle);
+void        mouseWrap       (chWH* whandle);
+
+//  - --- - --- - --- - --- -
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __CH_WIN_H__

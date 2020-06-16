@@ -1,35 +1,48 @@
-#ifndef CH_MANG_H
-#define CH_MANG_H
+#ifndef __CH_MANG_H__
+#define __CH_MANG_H__
 
-//  - --- - --- - --- - --- -
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <vector>
 #include "chWIN.h"
-#include "Zajec.h"
-
-typedef std::vector<chWIN*> chWinVec;
-
-//  - --- - --- - --- - --- -
-
-// SDL window manager
-class chMANG {
-    
-    public:
-        chMANG();
-        ~chMANG();
-
-        void createWin(const char title[], int width, int height);
-        chWIN* getCurWin() { return getWin(curwin); }
-        chWIN* getWin(uint i) { if (i < this->wins.size()) { return this->wins[i]; } return nullptr; }
+#include "GL/glew.h"
+#include "ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
-    private:
-        chWinVec wins; // Collection of opened windows
-        uint curwin = 0;
+typedef struct CHASM_WINDOW_MANAGER             {
 
-};
+    chWH*         wins;
+    Uint8         curwin;
+    Uint8         openwins;
 
-extern chMANG* chmang;
+    SDL_GLContext context;
 
-#endif // CH_MANG_H
+} chMG;
+
+//  - --- - --- - --- - --- -
+
+int   chmang_init           (cchar* title, uint width, uint height);
+int   chmang_end            ();
+
+int   chmang_winOpen        ();
+void  chmang_frameStart     ();
+void  chmang_frameEnd       ();
+
+void  chmang_wait           ();
+
+int   chmang_buildwin       (cchar* title, uint width, uint height);
+
+chWH* chmang_curwin         ();
+chWH* chmang_getwin         (Uint8 i);
+
+//  - --- - --- - --- - --- -
+
+extern chMG chmang;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __CH_MANG_H__

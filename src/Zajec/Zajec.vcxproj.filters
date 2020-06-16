@@ -51,9 +51,6 @@
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="spatial\time.h">
-      <Filter>Header Files\spatial</Filter>
-    </ClInclude>
     <ClInclude Include="spatial\transform.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
@@ -75,13 +72,13 @@
     <ClInclude Include="lymath\ZJC_GOPS.h">
       <Filter>Header Files\lymath</Filter>
     </ClInclude>
+    <ClInclude Include="spatial\ZJC_Time.h">
+      <Filter>Header Files\spatial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lymath\vops.cpp">
       <Filter>Source Files\lymath</Filter>
-    </ClCompile>
-    <ClCompile Include="spatial\time.cpp">
-      <Filter>Source Files\spatial</Filter>
     </ClCompile>
     <ClCompile Include="spatial\transform.cpp">
       <Filter>Source Files\spatial</Filter>
@@ -103,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="lymath\ZJC_GOPS.c">
       <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="spatial\ZJC_Time.c">
+      <Filter>Source Files\spatial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

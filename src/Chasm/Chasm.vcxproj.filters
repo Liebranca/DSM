@@ -30,18 +30,12 @@
     <ClInclude Include="wind\chMANG.h">
       <Filter>Header Files\wind</Filter>
     </ClInclude>
-    <ClInclude Include="wind\chCONT.h">
-      <Filter>Header Files\wind</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="wind\chWIN.cpp">
+    <ClCompile Include="wind\chMANG.c">
       <Filter>Source Files\wind</Filter>
     </ClCompile>
-    <ClCompile Include="wind\chMANG.cpp">
-      <Filter>Source Files\wind</Filter>
-    </ClCompile>
-    <ClCompile Include="wind\chCONT.cpp">
+    <ClCompile Include="wind\chWIN.c">
       <Filter>Source Files\wind</Filter>
     </ClCompile>
   </ItemGroup>
