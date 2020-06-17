@@ -3,8 +3,7 @@
 
 //  - --- - --- - --- - --- -
 
-#include "..\SIN.h"
-#include "vertex.h"
+/*#include "..\SIN.h"
 
 namespace SIN {
 
@@ -33,5 +32,5 @@ namespace SIN {
         uint buffs[NUM_BUFFERS];
 
 };
-
+*/
 #endif // SIN_VBO_H

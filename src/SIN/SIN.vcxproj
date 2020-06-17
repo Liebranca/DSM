@@ -73,6 +73,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -161,17 +162,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h" />
-    <ClInclude Include="types\material.h" />
-    <ClInclude Include="types\mesh.h" />
+    <ClInclude Include="types\SIN_Material.h" />
+    <ClInclude Include="types\SIN_Mesh.h" />
     <ClInclude Include="types\batch.h" />
-    <ClInclude Include="types\vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SIN.cpp" />
-    <ClCompile Include="types\material.cpp" />
-    <ClCompile Include="types\mesh.cpp" />
+    <ClCompile Include="SIN.c" />
+    <ClCompile Include="types\SIN_Material.c" />
+    <ClCompile Include="types\SIN_Mesh.c" />
     <ClCompile Include="types\batch.cpp" />
-    <ClCompile Include="types\vertex.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

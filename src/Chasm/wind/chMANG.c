@@ -40,9 +40,9 @@ int chmang_init         (cchar* title,
     chmang.curwin   = 0;
     chmang.openwins = 1;
 
-    chmang.wins     = (chWH*) evil_malloc(8, sizeof(chWH));
-    *chmang.wins    = build_whandle(title, width, height);
+    WARD_EVIL_WRAP(chmang.wins, (chWH*) evil_malloc(8, sizeof(chWH)));
 
+    *chmang.wins    = build_whandle(title, width, height);
     chmang.context  = SDL_GL_CreateContext(chmang_curwin()->window);
 
     GLenum status = glewInit();

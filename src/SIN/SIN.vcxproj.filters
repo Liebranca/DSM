@@ -27,36 +27,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SIN.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="types\mesh.cpp">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
-    <ClCompile Include="types\vertex.cpp">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
-    <ClCompile Include="types\material.cpp">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
     <ClCompile Include="types\batch.cpp">
       <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Mesh.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Material.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="SIN.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="types\mesh.h">
-      <Filter>Header Files\types</Filter>
-    </ClInclude>
-    <ClInclude Include="types\vertex.h">
-      <Filter>Header Files\types</Filter>
-    </ClInclude>
-    <ClInclude Include="types\material.h">
-      <Filter>Header Files\types</Filter>
-    </ClInclude>
     <ClInclude Include="types\batch.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="types\SIN_Mesh.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="types\SIN_Material.h">
       <Filter>Header Files\types</Filter>
     </ClInclude>
   </ItemGroup>

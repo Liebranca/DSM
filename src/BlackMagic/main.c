@@ -1,7 +1,9 @@
 #include "lyutils/ZJC_Evil.h"
 #include "lybyte/ZJC_FileHandling.h"
 
-#include "wind\chMANG.h"
+#include "../SIN/SIN.h"
+
+#include "wind/chMANG.h"
 
 //  - --- - --- - --- - --- -
 
@@ -15,6 +17,7 @@ int main(int argc, char* argv[])
     WARD_EVIL_WRAP(errorcode, writecrk(argv[1], argv[2], argv[3], argv[4]));*/
 
     chmang_init("BlackMagic", 640, 480);
+    SIN_INIT(SIN_INIT_3D);
 
     while(chmang_winOpen())
     {
@@ -24,6 +27,7 @@ int main(int argc, char* argv[])
         chmang_frameEnd();
     }
 
+    SIN_END();
     chmang_end();
     return 0;
 }

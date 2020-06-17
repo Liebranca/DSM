@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
 #include "../ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -

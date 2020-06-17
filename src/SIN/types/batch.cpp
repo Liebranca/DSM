@@ -1,6 +1,6 @@
 #include "batch.h"
 
-const int drawflags[3] = { GL_STATIC_DRAW, GL_STREAM_DRAW, GL_DYNAMIC_DRAW };
+/*const int drawflags[3] = { GL_STATIC_DRAW, GL_STREAM_DRAW, GL_DYNAMIC_DRAW };
 
 //  - --- - --- - --- - --- -
 
@@ -26,9 +26,9 @@ BatchBuffer::BatchBuffer(uint usageflag, bool genUbo) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffs[IBO]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, SIN::batch_iboSize, NULL, drawflags[usageflag]);
 
-    /*if (genUbo) {
+    if (genUbo) {
         glBindBuffer(GL_UNIFORM_BUFFER, buffs[UBO]);
-    }*/
+    }
 
     glBindVertexArray(0);
 
@@ -42,4 +42,4 @@ BatchBuffer::~BatchBuffer() {
     }
 
     glDeleteVertexArrays(1, &vao_location);
-}
+}*/

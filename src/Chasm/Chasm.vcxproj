@@ -162,10 +162,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Chasm.h" />
+    <ClInclude Include="ui\ch_WidgetTools.h" />
     <ClInclude Include="wind\chMANG.h" />
     <ClInclude Include="wind\chWIN.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ui\ch_WidgetTools.c" />
     <ClCompile Include="wind\chMANG.c" />
     <ClCompile Include="wind\chWIN.c" />
   </ItemGroup>

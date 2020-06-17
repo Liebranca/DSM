@@ -19,6 +19,12 @@
     <Filter Include="Source Files\wind">
       <UniqueIdentifier>{ef6b6943-c559-47ca-9f0b-f1c93f72d464}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{7c5cd6c4-d105-4e15-990c-cce10f0644b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{668923bb-3528-4426-9219-bd5aef18678b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chasm.h">
@@ -30,6 +36,9 @@
     <ClInclude Include="wind\chMANG.h">
       <Filter>Header Files\wind</Filter>
     </ClInclude>
+    <ClInclude Include="ui\ch_WidgetTools.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wind\chMANG.c">
@@ -37,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="wind\chWIN.c">
       <Filter>Source Files\wind</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ch_WidgetTools.c">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

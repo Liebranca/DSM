@@ -1,10 +1,20 @@
-#ifndef SIN_H
-#define SIN_H
+#ifndef __SIN_H__
+#define __SIN_H__
 
-//	- --- - --- - --- - --- -
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "Zajec.h"
 #include "GL/glew.h"
-#include "glm/glm.hpp"
 
-#endif // SIN_H
+#define SIN_INIT_3D 0x01
+#define SIN_INIT_2D 0x02
+
+void SIN_INIT(unsigned char flags);
+void SIN_END ();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __SIN_H__

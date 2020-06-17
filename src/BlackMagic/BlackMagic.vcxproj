@@ -83,14 +83,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Zajec;..\Chasm;..\..\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Zajec;..\Chasm; ..\SIN;..\..\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\Zajec;..\Chasm;..\..\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Zajec.lib;Chasm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Zajec;..\Chasm;..\SIN;..\..\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Zajec.lib;Chasm.lib;SIN.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)\trashcan\$(MSBuildProjectName)\$(MSBuildProjectName).log</Path>
