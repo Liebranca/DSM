@@ -166,6 +166,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="lyarr\ZJC_DynArray.h" />
+    <ClInclude Include="lyarr\ZJC_Hash.h" />
+    <ClInclude Include="lyarr\ZJC_Stack.h" />
     <ClInclude Include="lymath\ZJC_GOPS.h" />
     <ClInclude Include="lyutils\ZJC_Evil.h" />
     <ClInclude Include="ZJC_CommonTypes.h" />
@@ -178,6 +180,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lyarr\ZJC_DynArray.c" />
+    <ClCompile Include="lyarr\ZJC_Hash.c" />
+    <ClCompile Include="lyarr\ZJC_Stack.c" />
     <ClCompile Include="lybyte\ZJC_FileHandling.c" />
     <ClCompile Include="lybyte\ZJC_BinTypes.c" />
     <ClCompile Include="lymath\ZJC_GOPS.c" />

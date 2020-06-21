@@ -28,15 +28,15 @@ void terminator(uint errorcode,
 
 
     switch(errorcode)                     { 
-        case 0:                             errout("Insuficcient memory."); break;
-        case 1:                             errout("Access violation."); break;
-        case 2:                             errout("Pray to god this one never happens."); break;
+        case 0:                             errout("Insuficcient memory.");                      break;
+        case 1:                             errout("Access violation.");                         break;
+        case 2:                             errout("The end times have come.");                  break;
+        case 3:                             errout("You just did something illegal.");           break;
 
-
-        case 64:                            errout("Couln't open file <%s>", info); break;
-        case 65:                            errout("File couldn't be closed <%s>", info); break;
-        case 66:                            errout("File couldn't be writen <%s>", info); break;
-        case 67:                            errout("Wrong file type for archive <%s>", info); break;
+        case 64:                            errout("Couln't open file <%s>",              info); break;
+        case 65:                            errout("File couldn't be closed <%s>",        info); break;
+        case 66:                            errout("File couldn't be writen <%s>",        info); break;
+        case 67:                            errout("Wrong file type for archive <%s>",    info); break;
         case 68:                            errout("Error reading file <%s> overstride.", info); break;
 
 

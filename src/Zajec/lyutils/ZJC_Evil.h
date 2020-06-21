@@ -70,6 +70,10 @@ static cuint ERROR = 0x02;
                                         else if(x == 2)     { return ERROR;                                         }\
                                         else                { evil_poplocreg();                                     }
 
+#define WARD_EVIL_UNSIG(x, tresh)       GETLOC;\
+                                        if(x < tresh)       { terminator(0x03, "");                                 }\
+                                        else                { evil_poplocreg(); x -= tresh;                         }
+
 #ifdef __cplusplus
 }
 #endif

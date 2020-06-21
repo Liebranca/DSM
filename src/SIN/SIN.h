@@ -8,7 +8,6 @@ extern "C" {
 #include "GL/glew.h"
 
 #define SIN_INIT_3D 0x01
-#define SIN_INIT_2D 0x02
 
 void SIN_INIT(unsigned char flags);
 void SIN_END ();

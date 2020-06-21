@@ -28,30 +28,12 @@ VP3D build_vertpacked_3d(float* values)         {
 
     return vert;                                                                                                    }
 
-VP2D build_vertpacked_2d(float* values)         {
-
-    VP2D vert;
-    vert.co[0] = float_tofrac16(*values);
-    vert.co[1] = float_tofrac16(*(values+1));
-    vert.uv[0] = float_tofrac16(*(values+2));
-    vert.uv[1] = float_tofrac16(*(values+3));
-
-    return vert;                                                                                                    }
-
 pVP3D build_physvert_3d (float* values)         { 
 
     pVP3D vert;
     vert.co[0] = float_tofrac16(*values);
     vert.co[1] = float_tofrac16(*(values+1));
     vert.co[2] = float_tofrac16(*(values+2));
-
-    return vert;                                                                                                    }
-
-pVP2D build_physvert_2d (float* values)         {
-
-    pVP2D vert;
-    vert.co[0] = float_tofrac16(*values);
-    vert.co[1] = float_tofrac16(*(values+1));
 
     return vert;                                                                                                    }
 

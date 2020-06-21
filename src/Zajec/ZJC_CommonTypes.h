@@ -16,6 +16,7 @@ typedef const unsigned  short   cushort;
 typedef const unsigned  int     cuint;
 typedef const unsigned  long    culong;
 
-long hexstr_tolong(char* v);
+long hexstr_tolong (char* v);
+long chexstr_tolong(cchar* v);
 
 #endif // __ZJC_COMMONTYPES_H__

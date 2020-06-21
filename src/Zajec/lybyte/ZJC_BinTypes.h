@@ -38,27 +38,12 @@ typedef struct VertexPacked3D {
 
 VP3D build_vertpacked_3d(float* values);
 
-typedef struct VertexPacked2D {
-    f16 co[2];
-    f16 uv[2];
-
-} VP2D;
-
-VP2D build_vertpacked_2d(float* values);
-
 typedef struct PhysVertexPacked3D {
     f16 co[3];
 
 } pVP3D;
 
 pVP3D build_physvert_3d (float* values);
-
-typedef struct PhysVertexPacked2D {
-    f16 co[2];
-
-} pVP2D;
-
-pVP2D build_physvert_2d (float* values);
 
 //  - --- - --- - --- - --- -
 

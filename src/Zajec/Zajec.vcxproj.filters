@@ -75,6 +75,12 @@
     <ClInclude Include="spatial\ZJC_Time.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
+    <ClInclude Include="lyarr\ZJC_Hash.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
+    <ClInclude Include="lyarr\ZJC_Stack.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lymath\vops.cpp">
@@ -103,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="spatial\ZJC_Time.c">
       <Filter>Source Files\spatial</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\ZJC_Hash.c">
+      <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\ZJC_Stack.c">
+      <Filter>Source Files\lyarr</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

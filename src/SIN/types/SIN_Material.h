@@ -11,7 +11,7 @@ extern "C" {
 
 typedef struct SIN_MATERIAL {
 
-    cchar* id;
+    ushort id;
 
     ushort shader;
     ushort texture;
@@ -21,15 +21,14 @@ typedef struct SIN_MATERIAL {
 
 //  - --- - --- - --- - --- -
 
-int       SIN_matbucket_init  ();
-int       SIN_matbucket_end   ();
-ushort    unsub_material      (ushort loc);
+int       SIN_matbucket_init     ();
+int       SIN_matbucket_end      ();
+void      unsub_material         (ushort matid);
 
-Material* build_material      (cchar* matid, ushort texture, ushort shader);
-Material* SIN_matbucket_find  (cchar* matid);
-Material* SIN_matbucket_get   (ushort loc);
-
-ushort    SIN_matbucket_getloc(cchar* matid);
+Material* build_material         (ushort matid, ushort texture, ushort shader);
+Material* SIN_matbucket_find     (ushort matid);
+Material* SIN_matbucket_get      (ushort loc);
+ushort    SIN_matbucket_findloc  (ushort matid);
 
 #ifdef __cplusplus
 }

@@ -107,24 +107,6 @@ void del_CrkFile(CrkFile* crk)                  {
     WARD_EVIL_MFREE(crk->verts);
     WARD_EVIL_MFREE(crk->indices);                                                                                      }
 
-typedef struct MESH_FILE_2D                     {
-
-    ushort  size;
-    ushort  vertCount;
-    ushort  indexCount;
-
-    pVP2D*  bounds;
-    VP2D*   verts;
-    ushort* indices;
-
-} HrnFile;
-
-void del_HrnFile(HrnFile* hrn)                  {
-
-    WARD_EVIL_MFREE(hrn->bounds);
-    WARD_EVIL_MFREE(hrn->verts);
-    WARD_EVIL_MFREE(hrn->indices);                                                                                      }
-
 //  - --- - --- - --- - --- -
 
 int openarch(cchar*        filename,

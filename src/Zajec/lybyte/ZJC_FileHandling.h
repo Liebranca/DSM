@@ -12,7 +12,6 @@ extern "C" {
 typedef struct DSM_ARCHIVE_FORMAT DAF;
 
 typedef struct MESH_FILE_3D CrkFile;
-typedef struct MESH_FILE_2D HrnFile;
 
 int    writecrk         (cchar* filename, cchar* archive, char* offset, char* mode);
 

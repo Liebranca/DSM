@@ -11,7 +11,7 @@ extern "C" {
 
 typedef struct SIN_MESH_3D                      {
 
-    cchar*  id;
+    ushort  id;
 
     ushort  vertCount;
     ushort  indexCount;
@@ -24,43 +24,19 @@ typedef struct SIN_MESH_3D                      {
     ushort  users;
 
 } M3D;
-typedef struct SIN_MESH_2D                      {
-
-    cchar*  id;
-
-    ushort  vertCount;
-    ushort  indexCount;
-
-    pVP2D*  bounds;
-    VP2D*   verts;
-    ushort* indices;
-
-    uint    matloc;
-    uint    users;
-
-} M2D;
 
 //  - --- - --- - --- - --- -
 
-int     SIN_meshbucket_init3d  ();
-int     SIN_meshbucket_end3d    ();
+int     SIN_meshbucket_init ();
+int     SIN_meshbucket_end  ();
 
-ushort  unsub_mesh_3d          (ushort loc);
+void    unsub_mesh          (ushort loc);
 
-M3D*    SIN_meshbucket_find3d  (cchar* id);
-M3D*    SIN_meshbucket_get3d   (ushort loc);
-
-M3D*    build_mesh_3d          (cchar* id, cchar* matid, cchar* archive, uint offset);
+M3D*    SIN_meshbucket_find (ushort id);
+M3D*    SIN_meshbucket_get  (ushort loc);
+M3D*    build_mesh          (ushort id, ushort matid, cchar* archive, uint offset);
 
 //  - --- - --- - --- - --- -
-
-int     SIN_meshbucket_end2d    ();
-int     SIN_meshbucket_init2d  ();
-
-M2D*    SIN_meshbucket_find2d  (cchar* id);
-M2D*    SIN_meshbucket_get2d   (ushort loc);
-
-M2D*    build_mesh_2d          (cchar* id, cchar* matid, cchar* archive, uint offset);
 
 #ifdef __cplusplus
 }
