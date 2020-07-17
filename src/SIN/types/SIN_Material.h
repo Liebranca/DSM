@@ -13,8 +13,8 @@ typedef struct SIN_MATERIAL {
 
     ushort id;
 
-    ushort shader;
-    ushort texture;
+    ushort shdloc;
+    ushort texloc;
     ushort users;
 
 } Material;
@@ -23,9 +23,9 @@ typedef struct SIN_MATERIAL {
 
 int       SIN_matbucket_init     ();
 int       SIN_matbucket_end      ();
-void      unsub_material         (ushort matid);
+void      unsub_material         (ushort loc);
 
-Material* build_material         (ushort matid, ushort texture, ushort shader);
+Material* build_material         (ushort matid, ushort texid, ushort shdid);
 Material* SIN_matbucket_find     (ushort matid);
 Material* SIN_matbucket_get      (ushort loc);
 ushort    SIN_matbucket_findloc  (ushort matid);

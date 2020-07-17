@@ -123,8 +123,7 @@ void     del_mesh            (M3D*   mesh,
     WARD_EVIL_MFREE(mesh->verts);
     WARD_EVIL_MFREE(mesh->indices);
 
-    Material* material = SIN_matbucket_get(mesh->matloc);
-    unsub_material(material->id);
+    unsub_material(mesh->matloc);
 
     SIN_meshbucket[loc] = SIN_emptymesh;
     int memward = sStack_push(&SIN_MESH_SLOTSTACK, loc);

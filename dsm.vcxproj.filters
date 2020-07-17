@@ -19,9 +19,6 @@
     <Filter Include="Source Files\rend">
       <UniqueIdentifier>{383f5497-c411-4b8e-94c5-fb397798a134}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\lymath">
-      <UniqueIdentifier>{898cb358-3f11-426f-b6fb-792289b445dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\game">
       <UniqueIdentifier>{aa49f870-6c41-4ce3-8099-9db219134363}</UniqueIdentifier>
     </Filter>
@@ -47,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="src\game\node.cpp">
       <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lymath\Gaoler.cpp">
-      <Filter>Source Files\lymath</Filter>
     </ClCompile>
     <ClCompile Include="src\backbone\reyn.cpp">
       <Filter>Source Files\backbone</Filter>
@@ -88,9 +82,6 @@
     </ClInclude>
     <ClInclude Include="src\game\node.h">
       <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="src\lymath\Gaoler.h">
-      <Filter>Source Files\lymath</Filter>
     </ClInclude>
     <ClInclude Include="src\backbone\reyn.h">
       <Filter>Source Files\backbone</Filter>

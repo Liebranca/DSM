@@ -12,8 +12,10 @@ extern "C" {
 typedef struct DSM_ARCHIVE_FORMAT DAF;
 
 typedef struct MESH_FILE_3D CrkFile;
+typedef struct IMAGE_FILE_8BIT_RGB JojFile;
 
-int    writecrk         (cchar* filename, cchar* archive, char* offset, char* mode);
+int    writecrk         (cchar* filename, cchar* archive, char* mode, char* offset);
+int    writejoj         (cchar* filename, cchar* archive, char* mode, char* offset);
 
 int    extraction_start (cchar* filename, uchar archtype, DAF* daf);
 int    extraction_end   (cchar* filename);
@@ -21,6 +23,8 @@ int    extraction_end   (cchar* filename);
 int    extractcrk       (DAF* daf, uchar offset, ushort* vertCount,
                          ushort* indexCount, pVP3D* bounds,
                          VP3D* verts, ushort* indices);
+
+int    extractjoj       (DAF* daf, uchar offset, ushort* size, uchar* width, uchar* height, ushort* pixels);
 
 #ifdef __cplusplus
 }

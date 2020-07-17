@@ -19,6 +19,9 @@ typedef struct frac16 {
 
 //  - --- - --- - --- - --- -
 
+uchar color_to_joj8(float r, float g, float b);
+
+
 int nthbit(uchar b, int n);
 int takebits(uchar b, uint iStart, uint iEnd);
 float frac16_tofloat(f16* frac);

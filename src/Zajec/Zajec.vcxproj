@@ -72,8 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>.\</OutDir>
-    <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)</OutDir>
+    <IntDir>$(ProjectDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -172,11 +172,11 @@
     <ClInclude Include="lyutils\ZJC_Evil.h" />
     <ClInclude Include="ZJC_CommonTypes.h" />
     <ClInclude Include="spatial\ZJC_Time.h" />
-    <ClInclude Include="spatial\transform.h" />
+    <ClInclude Include="spatial\ZJC_Transform.h" />
     <ClInclude Include="Zajec.h" />
     <ClInclude Include="lybyte\ZJC_FileHandling.h" />
     <ClInclude Include="lybyte\ZJC_BinTypes.h" />
-    <ClInclude Include="lymath\vops.h" />
+    <ClInclude Include="lymath\ZJC_VOPS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lyarr\ZJC_DynArray.c" />
@@ -185,10 +185,10 @@
     <ClCompile Include="lybyte\ZJC_FileHandling.c" />
     <ClCompile Include="lybyte\ZJC_BinTypes.c" />
     <ClCompile Include="lymath\ZJC_GOPS.c" />
-    <ClCompile Include="lymath\vops.cpp" />
+    <ClCompile Include="lymath\ZJC_VOPS.cpp" />
     <ClCompile Include="lyutils\ZJC_Evil.c" />
     <ClCompile Include="spatial\ZJC_Time.c" />
-    <ClCompile Include="spatial\transform.cpp" />
+    <ClCompile Include="spatial\ZJC_Transform.cpp" />
     <ClCompile Include="ZJC_CommonTypes.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

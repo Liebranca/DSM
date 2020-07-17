@@ -75,3 +75,21 @@ uint32_t fvRange_take_closest(
     return closest;
 }
 
+uchar fvRange_take_closest_1b(fvRange* fvr,
+                              float v)          {
+
+    if (fvr->mag >= 256)                        { fprintf(stderr,
+                                                  "fvRange_take_closest_1b rejects float scales outside the range(0, 256)\n");
+
+                                                  return 0;                                                             }
+
+    float s = fvr->step * 0.5f;
+    float dist = 999.0f;
+    float newdist;
+    uint closest = 0;
+
+    for (uint i = 0; i < fvr->mag; i++)         { newdist = approadf(v, *(fvr->values.buff+i), s);
+                                                  if ( newdist < dist ) { dist = newdist; closest = i; }                }
+
+    return closest;                                                                                                     }
+

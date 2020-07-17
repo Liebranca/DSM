@@ -8,9 +8,18 @@
 #include "ZJC_BinTypes.h"
 
 fvRange frac16_range;
+fvRange joj8_rg_range;
+fvRange joj8_b_range;
 
-int zjc_convertor_init()                        { frac16_range = build_fvRange(128, 0.0078125f); return 0;          }
-int zjc_convertor_end()                         { del_fvRange(&frac16_range); return 0;                             }
+int zjc_convertor_init()                        { frac16_range  = build_fvRange(128, 0.0078125f);
+                                                  joj8_rg_range = build_fvRange(8, (float)1/8);
+                                                  joj8_b_range  = build_fvRange(4, (float)1/4);
+                                                  return 0;                                                         }
+
+int zjc_convertor_end()                         { del_fvRange(&frac16_range);
+                                                  del_fvRange(&joj8_rg_range);
+                                                  del_fvRange(&joj8_b_range);
+                                                  return 0;                                                         }
 
 //  - --- - --- - --- - --- -
 
@@ -125,3 +134,18 @@ f16 float_tofrac16(float v) {
 
     return frac;
 }
+
+//      - --- - --- - --- - --- -
+
+uchar color_to_joj8(float r,
+                    float g,
+                    float b)                    {
+
+    uchar color =   (fvRange_take_closest_1b(&joj8_rg_range, r)      )
+                  + (fvRange_take_closest_1b(&joj8_rg_range, g) << 3 )
+                  + (fvRange_take_closest_1b(&joj8_b_range,  b) << 6 );
+
+    return color;                                                                                                   }
+
+//      - --- - --- - --- - --- -
+

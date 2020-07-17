@@ -7,10 +7,14 @@ extern "C" {
 
 #include "GL/glew.h"
 
-#define SIN_INIT_3D 0x01
+//  - --- - --- - --- - --- -
 
 void SIN_INIT(unsigned char flags);
 void SIN_END ();
+
+//  - --- - --- - --- - --- -
+
+void SIN_SWIPESCREEN(float color[4], float mult);
 
 #ifdef __cplusplus
 }

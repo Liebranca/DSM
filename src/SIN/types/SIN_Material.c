@@ -1,4 +1,5 @@
 #include "SIN_Material.h"
+#include "SIN_Shader.h"
 
 #include "lyarr/ZJC_Hash.h"
 #include "lyarr/ZJC_Stack.h"
@@ -68,8 +69,8 @@ Material* SIN_matbucket_get      (ushort loc)   {
 //  - --- - --- - --- - --- -
 
 Material* build_material      (ushort matid,
-                               ushort texture,
-                               ushort shader)   {
+                               ushort texid,
+                               ushort shdid)    {
 
     Material* material = SIN_matbucket_find(matid);
 
@@ -79,10 +80,10 @@ Material* build_material      (ushort matid,
         == SIN_MAX_MATERIALS)                   { fprintf(stderr, "Cannot create more than %u materials\n",
                                                   SIN_MAX_MATERIALS); return NULL;                                      }
 
-        material = 0;
-        material->id       = matid;
-        material->texture  = texture;
-        material->shader   = shader;
+        material         = 0;
+        material->id     = matid;
+        material->texloc = texid; // replace by findloc
+        material->shdloc = SIN_shdbucket_findloc(shdid);
 
         uint loc = sStack_pop(&SIN_MAT_SLOTSTACK);
         WARD_EVIL_UNSIG(loc, 1);
@@ -91,6 +92,12 @@ Material* build_material      (ushort matid,
 
         SIN_matbucket[loc] = *material;
         SIN_ACTIVE_MATERIALS++;
+
+        Program* program  = SIN_shdbucket_get(material->shdloc);
+        program->users++;
+
+        // TODO: add increase of usercount for texture.
+
     }
 
     return material;                                                                                                    }
@@ -99,6 +106,9 @@ Material* build_material      (ushort matid,
 
 void    del_material        (Material* material,
                              ushort loc)        {
+
+    unsub_shader(material->shdloc);
+    //TODO: unsub texture
 
     SIN_matbucket[loc] = SIN_emptymat;
     int memward = sStack_push(&SIN_MAT_SLOTSTACK, loc);

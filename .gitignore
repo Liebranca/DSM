@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.irf
+*.daf
 *.crk
 *.ans
 *.joj
@@ -38,6 +38,8 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Tt]rashcan/
+OrangeBox/
+*.tlog/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

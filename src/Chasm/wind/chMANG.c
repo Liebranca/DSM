@@ -14,7 +14,8 @@ int  chmang_winOpen     ()                      { return !chmang_curwin()->isClo
 void chmang_frameStart  ()                      { clock_frameStart();
                                                   pollEvents(chmang_curwin());                                          }
 
-void  chmang_frameEnd   ()                      { clock_frameEnd();                                                     }
+void  chmang_frameEnd   ()                      { swapBuffers(chmang_curwin());
+                                                  clock_frameEnd();                                                     }
 
 void  chmang_wait       ()                      {
 
@@ -40,7 +41,7 @@ int chmang_init         (cchar* title,
     chmang.curwin   = 0;
     chmang.openwins = 1;
 
-    WARD_EVIL_WRAP(chmang.wins, (chWH*) evil_malloc(8, sizeof(chWH)));
+    chmang.wins = (chWH*) evil_malloc(8, sizeof(chWH));
 
     *chmang.wins    = build_whandle(title, width, height);
     chmang.context  = SDL_GL_CreateContext(chmang_curwin()->window);

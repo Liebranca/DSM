@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)\trashcan\$(MSBuildProjectName)\</IntDir>
+    <IntDir>.\</IntDir>
     <OutDir>$(ProjectDir)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -162,15 +162,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h" />
+    <ClInclude Include="SIN_DefaultShader.h" />
     <ClInclude Include="types\SIN_Material.h" />
     <ClInclude Include="types\SIN_Mesh.h" />
     <ClInclude Include="types\batch.h" />
+    <ClInclude Include="types\SIN_Shader.h" />
+    <ClInclude Include="types\SIN_Shader_EX.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SIN.c" />
     <ClCompile Include="types\SIN_Material.c" />
     <ClCompile Include="types\SIN_Mesh.c" />
     <ClCompile Include="types\batch.cpp" />
+    <ClCompile Include="types\SIN_Shader.c" />
+    <ClCompile Include="types\SIN_Shader_EX.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

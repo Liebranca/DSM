@@ -51,8 +51,8 @@ int         del_whandle  (chWH* whandle)        { SDL_DestroyWindow(whandle->win
 void mouseWrap           (chWH* whandle)        {
 
     SDL_WarpMouseInWindow(whandle->window,
-                          whandle->height * 0.5,
-                          whandle->width  * 0.5);
+                          whandle->height/2,
+                          whandle->width/2);
 
     whandle->mouseIgnore = 1;
     whandle->mouseRel_x  = 0.0f;

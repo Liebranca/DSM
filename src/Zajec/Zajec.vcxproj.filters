@@ -45,14 +45,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lymath\vops.h">
-      <Filter>Header Files\lymath</Filter>
-    </ClInclude>
     <ClInclude Include="Zajec.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="spatial\transform.h">
-      <Filter>Header Files\spatial</Filter>
     </ClInclude>
     <ClInclude Include="ZJC_CommonTypes.h">
       <Filter>Header Files</Filter>
@@ -81,14 +75,14 @@
     <ClInclude Include="lyarr\ZJC_Stack.h">
       <Filter>Header Files\lyarr</Filter>
     </ClInclude>
+    <ClInclude Include="spatial\ZJC_Transform.h">
+      <Filter>Header Files\spatial</Filter>
+    </ClInclude>
+    <ClInclude Include="lymath\ZJC_VOPS.h">
+      <Filter>Header Files\lymath</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lymath\vops.cpp">
-      <Filter>Source Files\lymath</Filter>
-    </ClCompile>
-    <ClCompile Include="spatial\transform.cpp">
-      <Filter>Source Files\spatial</Filter>
-    </ClCompile>
     <ClCompile Include="ZJC_CommonTypes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -115,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="lyarr\ZJC_Stack.c">
       <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="spatial\ZJC_Transform.cpp">
+      <Filter>Source Files\spatial</Filter>
+    </ClCompile>
+    <ClCompile Include="lymath\ZJC_VOPS.cpp">
+      <Filter>Source Files\lymath</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

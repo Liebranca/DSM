@@ -14,9 +14,6 @@ typedef struct CHASM_UI_WIDGET                  {
     float  position_x;
     float  position_y;
 
-    VP2D*  mesh;
-    pVP2D* bounds;
-
 } chUW;
 
 //  - --- - --- - --- - --- -

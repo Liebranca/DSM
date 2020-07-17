@@ -25,6 +25,9 @@
     <Filter Include="Header Files\rend">
       <UniqueIdentifier>{8469cad0-c216-4afb-b4c2-79189afd3438}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\shaders">
+      <UniqueIdentifier>{f1bcf597-4ff8-48da-b57f-d9112b038462}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="types\batch.cpp">
@@ -39,6 +42,12 @@
     <ClCompile Include="SIN.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="types\SIN_Shader.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Shader_EX.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h">
@@ -52,6 +61,15 @@
     </ClInclude>
     <ClInclude Include="types\SIN_Material.h">
       <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="types\SIN_Shader.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="types\SIN_Shader_EX.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="SIN_DefaultShader.h">
+      <Filter>Header Files\shaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

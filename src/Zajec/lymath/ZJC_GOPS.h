@@ -46,6 +46,7 @@ fvRange build_fvRange(uint mag, float step);
 void del_fvRange(fvRange* fvr);
 
 uint32_t fvRange_take_closest(fvRange* fvr, float v);
+uchar    fvRange_take_closest_1b(fvRange* fvr, float v);
 
 //  - --- - --- - --- - --- -
 

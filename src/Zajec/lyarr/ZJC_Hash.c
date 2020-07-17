@@ -25,7 +25,7 @@ void  del_sHash  (sHash* hash)                  { del_usArray     (&hash->locs);
 
 ulong hashhex  (ushort key, ulong maxloc)       {
 
-    if(key >= maxloc)                           { fprintf(stderr, "Key %s is over limit of %u locations for this table\n",
+    if(key >= maxloc)                           { fprintf(stderr, "Key %u is over limit of %u locations for this table\n",
                                                   key, maxloc); return ERROR;                                           }
 
     return key + 3;                                                                                                     }
