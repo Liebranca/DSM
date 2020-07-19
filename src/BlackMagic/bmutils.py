@@ -1,4 +1,5 @@
 import bpy, sys, os, struct
+from .frac8_converter import meshfrac
 
 #   ---     ---     ---     ---     ---
 #   classy trick for silent exceptions

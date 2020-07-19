@@ -7,25 +7,39 @@
 #include "../lyutils/ZJC_Evil.h"
 #include "ZJC_BinTypes.h"
 
+fvRange frac8_range;
+fvRange frac4_range;
 fvRange frac16_range;
 fvRange joj8_rg_range;
 fvRange joj8_b_range;
 
-int zjc_convertor_init()                        { frac16_range  = build_fvRange(128, 0.0078125f);
-                                                  joj8_rg_range = build_fvRange(8, (float)1/8);
-                                                  joj8_b_range  = build_fvRange(4, (float)1/4);
-                                                  return 0;                                                         }
+uchar zjc_convertor_flags = 0;
 
-int zjc_convertor_end()                         { del_fvRange(&frac16_range);
-                                                  del_fvRange(&joj8_rg_range);
-                                                  del_fvRange(&joj8_b_range);
-                                                  return 0;                                                         }
+int zjc_convertor_init(uchar flags)             {
+
+    if (flags & BUILD_FRAC8)                    { frac8_range   = build_fvRange(128, 0.03125f);
+                                                  frac4_range   = build_fvRange(16,  0.0625f);                      }
+    if (flags & BUILD_FRAC16)                   { frac16_range  = build_fvRange(128, 0.0078125f);                   }
+    if (flags & BUILD_JOJ8)                     { joj8_rg_range = build_fvRange(8, (float)1/8);
+                                                  joj8_b_range  = build_fvRange(4, (float)1/4);                     }
+
+    zjc_convertor_flags = flags;
+
+    return 0;                                                                                                       }
+
+int zjc_convertor_end()                         {
+
+    if (zjc_convertor_flags & BUILD_FRAC8)      { del_fvRange(&frac8_range); del_fvRange(&frac4_range);             }
+    if (zjc_convertor_flags & BUILD_FRAC16)     { del_fvRange(&frac16_range);                                       }
+    if (zjc_convertor_flags & BUILD_JOJ8)       { del_fvRange(&joj8_rg_range); del_fvRange(&joj8_b_range);          }
+
+    return 0;                                                                                                       }
 
 //  - --- - --- - --- - --- -
 
-VP3D build_vertpacked_3d(float* values)         {
+VP3D_16 build_vertpacked_3d_16bit(float* values)     {
 
-    VP3D vert;
+    VP3D_16 vert;
     vert.co[0] = float_tofrac16(*values);
     vert.co[1] = float_tofrac16(*(values+1));
     vert.co[2] = float_tofrac16(*(values+2));
@@ -37,12 +51,31 @@ VP3D build_vertpacked_3d(float* values)         {
 
     return vert;                                                                                                    }
 
-pVP3D build_physvert_3d (float* values)         { 
+VP3D_8 build_vertpacked_3d_8bit(float* values)      {
 
-    pVP3D vert;
+    VP3D_8 vert;
+    vert.co[0] = float_tofrac8(*values);
+    vert.co[1] = float_tofrac8(*(values+1));
+    vert.co[2] = float_tofrac8(*(values+2));
+    vert.uv    = float_tofrac4(*(values+3), *(values+4));
+
+    return vert;                                                                                                    }
+
+pVP3D_16 build_physvert_3d_16bit (float* values)     { 
+
+    pVP3D_16 vert;
     vert.co[0] = float_tofrac16(*values);
     vert.co[1] = float_tofrac16(*(values+1));
     vert.co[2] = float_tofrac16(*(values+2));
+
+    return vert;                                                                                                    }
+
+pVP3D_8 build_physvert_3d_8bit (float* values)     { 
+
+    pVP3D_8 vert;
+    vert.co[0] = float_tofrac8(*values);
+    vert.co[1] = float_tofrac8(*(values+1));
+    vert.co[2] = float_tofrac8(*(values+2));
 
     return vert;                                                                                                    }
 
@@ -58,12 +91,14 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 
 //  - --- - --- - --- - --- -
 
-float frac16_tofloat(f16* frac)                 {
+const int i = 3 & 0b000001;
 
-    int sign      = nthbit(frac->b1, 0);
-    int floatbits = takebits(frac->b1, 1, 8);
-    int zerobits  = takebits(frac->b2, 0, 2);
-    int intbits   = takebits(frac->b2, 2, 8);
+float frac16_tofloat(f16 frac)                 {
+
+    int sign      = nthbit(frac.b1, 0);
+    int floatbits = takebits(frac.b1, 1, 8);
+    int zerobits  = takebits(frac.b2, 0, 2);
+    int intbits   = takebits(frac.b2, 2, 8);
 
     float fvalue = (float)floatbits * 0.0078125f;
 
@@ -81,6 +116,21 @@ float frac16_tofloat(f16* frac)                 {
     if (sign)                                   { result *= -1;                                                     }
 
     return result;                                                                                                  }
+
+float frac8_tofloat(f8 frac)                   {
+
+    float v = takebits(frac, 1, 8) * 0.003125f;
+    return v * (1 - (2 * (frac & 1)));                                                                              }
+
+float* frac4_tofloat(f8 frac)                  {
+
+    int   indices[2] = { takebits(frac, 0, 4), takebits(frac, 4, 8) };
+    float v[2]       = { 0.0f,                 0.0f                 };
+
+    for (uint i = 0; i < 2; i++)                { if (indices[i] == 15) { v[i] = 1.0f; }
+                                                  else { v[i] = indices[i] * 0.0625f; }                             }
+
+    return v;                                                                                                       }
 
 //      - --- - --- - --- - --- -
 
@@ -134,6 +184,26 @@ f16 float_tofrac16(float v) {
 
     return frac;
 }
+
+f8 float_tofrac8(float v)                       {
+
+    f8    frac;
+    uchar index = fvRange_take_closest_1b(&frac8_range, (float)fabs(v));
+
+    frac = (index << 1) + (v < 0);
+
+    return frac;                                                                                                    }
+
+f8 float_tofrac4(float v1, float v2)            {
+
+    f8 frac;
+
+    uchar index1 = fvRange_take_closest_1b(&frac4_range, v1);
+    uchar index2 = fvRange_take_closest_1b(&frac4_range, v2);
+
+    frac = index1 + (index2 << 4);
+
+    return frac;                                                                                                    }
 
 //      - --- - --- - --- - --- -
 

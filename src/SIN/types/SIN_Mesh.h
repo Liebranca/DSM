@@ -16,8 +16,8 @@ typedef struct SIN_MESH_3D                      {
     ushort  vertCount;
     ushort  indexCount;
 
-    pVP3D*  bounds;
-    VP3D*   verts;
+    pVP3D_8*  bounds;
+    VP3D_8*   verts;
     ushort* indices;
 
     ushort  matloc;

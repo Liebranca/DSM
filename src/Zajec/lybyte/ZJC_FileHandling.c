@@ -89,13 +89,13 @@ struct DSM_ARCHIVE_FORMAT {
 
 typedef struct MESH_FILE_3D                     {
 
-    ushort  size;
-    ushort  vertCount;
-    ushort  indexCount;
+    ushort   size;
+    ushort   vertCount;
+    ushort   indexCount;
 
-    pVP3D*  bounds;
-    VP3D*   verts;
-    ushort* indices;
+    pVP3D_8* bounds;
+    VP3D_8*  verts;
+    ushort*  indices;
 
 } CrkFile;
 
@@ -188,23 +188,23 @@ int read_crkdump(cchar*     filename,
     crk->indexCount = sizes[1];
 
     EVIL_FREAD(float,  24,                  bounds);
-    EVIL_FREAD(float,  crk->vertCount * 8,  verts);
+    EVIL_FREAD(float,  crk->vertCount * 5,  verts);
     EVIL_FREAD(ushort, crk->indexCount * 3, crk->indices);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
 //  - --- - --- - --- - --- -
 
-    crk->size   = 4 + (8*6) + (crk->vertCount * 16) + (crk->indexCount * 2);
-    crk->bounds = (pVP3D*) evil_malloc(8,      sizeof(pVP3D));
-    crk->verts  = (VP3D*)  evil_malloc(*sizes, sizeof(VP3D) );
+    crk->size   = 4 + (8 * 3) + (crk->vertCount * 4) + (crk->indexCount * 2);
+    crk->bounds = (pVP3D_8*) evil_malloc(8,      sizeof(pVP3D_8));
+    crk->verts  = (VP3D_8*)  evil_malloc(*sizes, sizeof(VP3D_8) );
 
     for(uint i = 0, j = 0;
-        i < (uint) crk->vertCount * 8;
-        i+= 8, j++ )                            { *(crk->verts+j) =  build_vertpacked_3d(verts+i);                      }
+        i < (uint) crk->vertCount * 5;
+        i+= 5, j++ )                            { *(crk->verts+j) =  build_vertpacked_3d_8bit(verts+i);                 }
 
     for(uint i = 0, j = 0;
-        i < 24; i+= 3, j++ )                    { *(crk->bounds+j) = build_physvert_3d(bounds+i);                       }
+        i < 24; i+= 3, j++ )                    { *(crk->bounds+j) = build_physvert_3d_8bit(bounds+i);                  }
 
     WARD_EVIL_WRAP(errorstate, remove(filename));
     printf("Deleted file <%s>\n", filename);
@@ -274,10 +274,10 @@ int crk_to_daf(CrkFile*    crk,
     ushort sizes[2] = { crk->vertCount, crk->indexCount};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(ushort, 2,               sizes,        filename);
-    EVIL_FWRITE(pVP3D,  8,               crk->bounds,  filename);
-    EVIL_FWRITE(VP3D,   crk->vertCount,  crk->verts,   filename);
-    EVIL_FWRITE(ushort, crk->indexCount, crk->indices, filename);
+    EVIL_FWRITE(ushort,  2,               sizes,        filename);
+    EVIL_FWRITE(pVP3D_8, 8,               crk->bounds,  filename);
+    EVIL_FWRITE(VP3D_8,  crk->vertCount,  crk->verts,   filename);
+    EVIL_FWRITE(ushort,  crk->indexCount, crk->indices, filename);
     fseek(curfile, 0, SEEK_CUR);
 
     return 0;                                                                                                           }
@@ -649,7 +649,7 @@ int writecrk(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
     uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
 
-    zjc_convertor_init();
+    zjc_convertor_init(BUILD_FRAC8);
     evilstate = read_crkdump(filename, &crk, bounds, verts);
 
     zjc_convertor_end();
@@ -682,7 +682,7 @@ int writejoj(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
     uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
 
-    zjc_convertor_init();
+    zjc_convertor_init(BUILD_JOJ8);
     evilstate = read_jojdump(filename, &joj, colbuff, pixels);
 
     zjc_convertor_end();
@@ -732,8 +732,8 @@ int extractcrk (DAF*    daf,
                 uchar   offset,
                 ushort* vertCount,
                 ushort* indexCount,
-                pVP3D*  bounds,
-                VP3D*   verts,
+                pVP3D_8*  bounds,
+                VP3D_8*   verts,
                 ushort* indices)                {
 
     rewind(curfile);
@@ -744,8 +744,8 @@ int extractcrk (DAF*    daf,
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
     
-    EVIL_FREAD(pVP3D,  8,           bounds);
-    EVIL_FREAD(VP3D,   *vertCount,  verts);
+    EVIL_FREAD(pVP3D_8,  8,           bounds);
+    EVIL_FREAD(VP3D_8, *vertCount,  verts);
     EVIL_FREAD(ushort, *indexCount, indices);
 
     return 0;                                                                                                           }

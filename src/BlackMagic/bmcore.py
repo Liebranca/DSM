@@ -1,4 +1,5 @@
 from . import bmpath, set_bm_ars
+from .bmutils   import meshfrac
 from .crkwriter import writecrk
 from .jojwriter import writejoj
 
@@ -6,7 +7,7 @@ from .jojwriter import writejoj
 
 isrunning   = False;
 
-writerlist  = ["writecrk", "writejoj"];
+writerlist  = ["writecrk", "writejoj", "meshfrac"];
 setterlist  = ["setpath", "setname", "setarch", "setmode", "setoffs"];
 systemlist  = ["quit", "help"];
 

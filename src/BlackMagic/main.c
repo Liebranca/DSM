@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "lyutils/ZJC_Evil.h"
 #include "lybyte/ZJC_FileHandling.h"
@@ -21,8 +22,8 @@ int main(int argc, char* argv[])
         char* writemode    = argv[4];
         char* writeoffset  = argv[5];
 
-        if     (converter == "crk")             { writecrk(filename, archive, writemode, writeoffset);                  }
-        else if(converter == "joj")             { writejoj(filename, archive, writemode, writeoffset);                  }
+        if     (!strcmp(converter, "crk"))      { writecrk(filename, archive, writemode, writeoffset);                  }
+        else if(!strcmp(converter, "joj"))      { writejoj(filename, archive, writemode, writeoffset);                  }
 
     }
 

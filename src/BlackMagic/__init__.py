@@ -3,9 +3,9 @@ version     = "0.1 BETA";
 
 #   ---     ---     ---     ---     ---
 
-filepath    = "D:\\lieb_git\\dsm\\src\\BlackMagic";
+filepath    = "D:\\lieb_git\\dsm\\src\\OrangeBox";
 filename    = "dsm_hexdump";
-archive     = "BMUI";
+archive     = "Meshes";
 writemode   = "0x00";
 writeoffset = "0x00";
 

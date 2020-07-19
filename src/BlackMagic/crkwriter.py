@@ -52,6 +52,10 @@ def writecrk(ob_name):
 
     else: ob = bpy.data.objects[ob_name];
 
+    context = bpy.context
+    original_object = ob = context.object
+    mesh = ob.data    
+
     if not ob:
         raise STAHP ("No object selected -- export failed.")
 
@@ -59,10 +63,6 @@ def writecrk(ob_name):
         raise STAHP ("Selected object has no mesh data -- export failed.")
 
     #   ---     ---     ---     ---     ---
-
-    context = bpy.context
-    original_object = ob = context.object
-    mesh = ob.data
 
     obstrs = ob.name.split(":")
     if len(obstrs) > 1:
@@ -73,7 +73,6 @@ def writecrk(ob_name):
     #   ---     ---     ---     ---     ---
 
     meshname = mesh.name
-    filename = path+obkls+"\\"+meshname+".crk"
 
     if ob.parent:
 
@@ -104,6 +103,8 @@ def writecrk(ob_name):
     else: hasProps, merge = [], [];
     mesh_triangulate(ob, mesh)
 
+    header, vertBuff, indexBuff = None, None, None;
+
     try:
         start = time.time()
 
@@ -113,9 +114,6 @@ def writecrk(ob_name):
         numIndices = len(mesh.polygons)
 
         uv = mesh.uv_layers.active.data
-
-        hasShader = mesh.materials[0]
-        hasTextures = {}
 
         sf = 1 if "actors" in obkls else 1
 
@@ -132,24 +130,21 @@ def writecrk(ob_name):
             header[ii+8:ii+12] = ftb(-v[1]/sf)
             ii += 12;
         
-        stride = 32;
-        vertBuff = bytearray(numVerts*32);
+        stride = 20;
+        vertBuff = bytearray(numVerts*20);
 
         for vert in mesh.vertices:
             vi = vert.index * stride;
             vertBuff[vi:vi+4] = ftb(vert.co[0]/sf)
             vertBuff[vi+4:vi+8] = ftb(vert.co[2]/sf)
             vertBuff[vi+8:vi+12] = ftb(-vert.co[1]/sf)
-            vertBuff[vi+12:vi+16] = ftb(vert.normal[0]/sf)
-            vertBuff[vi+16:vi+20] = ftb(vert.normal[2]/sf)
-            vertBuff[vi+20:vi+24] = ftb(-vert.normal[1]/sf)
         
         faces = [poly for poly in mesh.polygons]
         indexBuff = bytearray(6*numIndices); i = 0;
 
         for face in faces:
             for vi, loop_index in zip(face.vertices, face.loop_indices):
-                svi = (vi * stride) + 24
+                svi = (vi * stride) + 12
                 vertBuff[svi:svi+4] = ftb(uv[loop_index].uv[0])
                 vertBuff[svi+4:svi+8] = ftb(uv[loop_index].uv[1])
 
@@ -180,6 +175,8 @@ def writecrk(ob_name):
 
 
     finally:
+
+        global original_mesh;
 
         if original_mesh:
 
