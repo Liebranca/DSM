@@ -148,13 +148,14 @@ Program* build_shader(ushort id,
         glValidateProgram(program->location);
         checkShaderError (program->location, GL_VALIDATE_STATUS, 1, "Shader validation failed");
 
-        program->uniforms[SIN_TRANSFORM_U]  = glGetUniformLocation(program->location, "MODEL");
-        program->uniforms[SIN_NORMAL_U]     = glGetUniformLocation(program->location, "INVERSE_TRANSPOSE");
-        program->uniforms[SIN_PROJECTION_U] = glGetUniformLocation(program->location, "VIEWPROJECTION");
-        program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CAMFWD");
-        program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "AMBIENT");
+        program->uniforms[SIN_TRANSFORM_U]  = glGetUniformLocation(program->location, "Model");
+        program->uniforms[SIN_NORMAL_U]     = glGetUniformLocation(program->location, "ModelInverseTranspose");
+        program->uniforms[SIN_PROJECTION_U] = glGetUniformLocation(program->location, "ViewProjection");
+        program->uniforms[SIN_SUNFWD_U]     = glGetUniformLocation(program->location, "SunEye");
+        program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CamEye");
+        program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "AmbientColor");
         program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
-        program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "LIGHTS");
+        program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
 
         uint loc = sStack_pop(&SIN_SHD_SLOTSTACK);
         WARD_EVIL_UNSIG(loc, 1);

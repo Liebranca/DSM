@@ -28,11 +28,11 @@
     <Filter Include="Header Files\shaders">
       <UniqueIdentifier>{f1bcf597-4ff8-48da-b57f-d9112b038462}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{5d8e16b3-22b6-427a-ae2d-e751a8ec77c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="types\batch.cpp">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
     <ClCompile Include="types\SIN_Mesh.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
@@ -48,13 +48,19 @@
     <ClCompile Include="types\SIN_Shader_EX.cpp">
       <Filter>Source Files\types</Filter>
     </ClCompile>
+    <ClCompile Include="types\SIN_MeshBatch.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_DefaultShader.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Texture.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="types\batch.h">
-      <Filter>Header Files\types</Filter>
     </ClInclude>
     <ClInclude Include="types\SIN_Mesh.h">
       <Filter>Header Files\types</Filter>
@@ -68,8 +74,14 @@
     <ClInclude Include="types\SIN_Shader_EX.h">
       <Filter>Header Files\types</Filter>
     </ClInclude>
-    <ClInclude Include="SIN_DefaultShader.h">
+    <ClInclude Include="types\SIN_MeshBatch.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_DefaultShader.h">
       <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="types\SIN_Texture.h">
+      <Filter>Header Files\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

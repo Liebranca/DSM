@@ -119,7 +119,7 @@ float frac16_tofloat(f16 frac)                 {
 
 float frac8_tofloat(f8 frac)                   {
 
-    float v = takebits(frac, 1, 8) * 0.003125f;
+    float v = (frac >> 1) * 0.003125f;
     return v * (1 - (2 * (frac & 1)));                                                                              }
 
 float* frac4_tofloat(f8 frac)                  {
@@ -193,6 +193,28 @@ f8 float_tofrac8(float v)                       {
     frac = (index << 1) + (v < 0);
 
     return frac;                                                                                                    }
+
+float* trinormal_8bit(f8 p1[3],
+                      f8 p2[3],
+                      f8 p3[3])                 {
+
+    float p1_unpack[3]   = { frac8_tofloat(p1[0]), frac8_tofloat(p1[1]), frac8_tofloat(p1[2])                       };
+    float p2_unpack[3]   = { frac8_tofloat(p2[0]), frac8_tofloat(p2[1]), frac8_tofloat(p2[2])                       };
+    float p3_unpack[3]   = { frac8_tofloat(p3[0]), frac8_tofloat(p3[1]), frac8_tofloat(p3[2])                       };
+
+    return fv3_normalize(fv3_cross(fv3_sub(p2_unpack, p1_unpack), fv3_sub(p3_unpack, p1_unpack)));                  }
+
+f8*    sumtrinormals_8bit(float face_normals[3],
+                          uint len)             {
+
+    f8 vertex_normal[3] = { 0, 0, 0 };
+
+    float dlen          = (float)1/len;
+    vertex_normal[0]    = float_tofrac8(face_normals[0] * dlen);
+    vertex_normal[1]    = float_tofrac8(face_normals[1] * dlen);
+    vertex_normal[2]    = float_tofrac8(face_normals[2] * dlen);
+
+    return vertex_normal;                                                                                           }
 
 f8 float_tofrac4(float v1, float v2)            {
 

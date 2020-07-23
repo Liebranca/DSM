@@ -17,14 +17,14 @@ typedef struct IMAGE_FILE_8BIT_RGB JojFile;
 int    writecrk         (cchar* filename, cchar* archive, char* mode, char* offset);
 int    writejoj         (cchar* filename, cchar* archive, char* mode, char* offset);
 
-int    extraction_start (cchar* filename, uchar archtype, DAF* daf);
-int    extraction_end   (cchar* filename);
+int    extraction_start (cchar* filename, uchar archtype, DAF** daf);
+int    extraction_end   (cchar* filename, DAF** daf);
 
 int    extractcrk       (DAF* daf, uchar offset, ushort* vertCount,
                          ushort* indexCount, pVP3D_8* bounds,
                          VP3D_8* verts, ushort* indices);
 
-int    extractjoj       (DAF* daf, uchar offset, ushort* size, uchar* width, uchar* height, ushort* pixels);
+int    extractjoj       (DAF* daf, uchar offset, uchar* size, uchar* width, uchar* height, ushort* pixels);
 
 #ifdef __cplusplus
 }

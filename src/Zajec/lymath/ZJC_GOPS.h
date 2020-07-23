@@ -9,6 +9,14 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
+float* fv3_sub(float a[3], float b[3]);
+float* fv3_add(float a[3], float b[3]);
+float* fv3_cross(float a[3], float b[3]);
+float  fv3_length(float vec[3]);
+float* fv3_normalize(float vec[3]);
+
+//  - --- - --- - --- - --- -
+
 int   maxi(int v1, int v2);
 float maxf(float v1, float v2);
 

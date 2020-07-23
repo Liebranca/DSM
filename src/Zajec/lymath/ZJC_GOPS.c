@@ -1,5 +1,33 @@
 #include "ZJC_GOPS.h"
 #include <stdio.h>
+#include <math.h>
+
+//  - --- - --- - --- - --- -
+
+float* fv3_sub(float a[3], float b[3])  { float c[3] = { a[0] + b[0], a[1] + b[1], a[2] + b[2] }; return c; }
+float* fv3_add(float a[3], float b[3])  { float c[3] = { a[0] - b[0], a[1] - b[1], a[2] - b[2] }; return c; }
+
+float* fv3_cross(float a[3],
+                 float b[3])            {
+
+    float vec[3] = { 0.0f, 0.0f, 0.0f };
+
+    vec[0]       = (a[1] * b[2]) - (a[2] * b[1]);
+    vec[1]       = (a[2] * b[0]) - (a[0] * b[2]);
+    vec[2]       = (a[0] * b[1]) - (a[1] * b[0]);
+
+    return vec;                                                                                             }
+
+float  fv3_length(float vec[3])         { return sqrt( (vec[0] * vec[0])
+                                                     + (vec[1] * vec[1])
+                                                     + (vec[2] * vec[2]) );                                 }
+
+float* fv3_normalize(float vec[3])      {
+
+    float length        = fv3_length(vec);
+    float normalized[3] = { vec[0] / length, vec[1] / length, vec[2] / length };
+
+    return normalized;                                                                                      }
 
 //  - --- - --- - --- - --- -
 

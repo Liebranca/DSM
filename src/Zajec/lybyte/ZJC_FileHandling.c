@@ -17,7 +17,7 @@
 
 //  - --- - --- - --- - --- -
 
-FILE*  curfile;
+FILE*           curfile;
 
 cushort         DAF_HSIZE       =                 0x40e;
 
@@ -86,6 +86,8 @@ struct DSM_ARCHIVE_FORMAT {
     uchar*   data;
 
 };
+
+DAF emptyarch = {0};
 
 typedef struct MESH_FILE_3D                     {
 
@@ -708,7 +710,7 @@ cchar* get_archtype(uint8_t archtype)           {
 
 int    extraction_start (cchar*  filename,
                          uchar   archtype,
-                         DAF*    daf)            {
+                         DAF**    daf)           {
 
     int evilstate = 0;
     cchar* sign     = get_archtype(archtype);
@@ -723,18 +725,21 @@ int    extraction_start (cchar*  filename,
 
     return 0;                                                                                                           }
 
-int    extraction_end   (cchar* filename)       {
+int    extraction_end   (cchar* filename,
+                         DAF**  daf)            {
 
     closebin(filename, 0);
+    **daf = emptyarch;
+
     return 0;                                                                                                           }
 
-int extractcrk (DAF*    daf,
-                uchar   offset,
-                ushort* vertCount,
-                ushort* indexCount,
-                pVP3D_8*  bounds,
-                VP3D_8*   verts,
-                ushort* indices)                {
+int extractcrk (DAF*     daf,
+                uchar    offset,
+                ushort*  vertCount,
+                ushort*  indexCount,
+                pVP3D_8* bounds,
+                VP3D_8*  verts,
+                ushort*  indices)               {
 
     rewind(curfile);
     fseek(curfile, 0, SEEK_CUR);
@@ -744,15 +749,15 @@ int extractcrk (DAF*    daf,
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
     
-    EVIL_FREAD(pVP3D_8,  8,           bounds);
-    EVIL_FREAD(VP3D_8, *vertCount,  verts);
-    EVIL_FREAD(ushort, *indexCount, indices);
+    EVIL_FREAD(pVP3D_8, 8,           bounds);
+    EVIL_FREAD(VP3D_8,  *vertCount,  verts);
+    EVIL_FREAD(ushort,  *indexCount, indices);
 
     return 0;                                                                                                           }
 
 int    extractjoj (DAF*    daf,
+                   uchar*  size,
                    uchar   offset,
-                   ushort* size,
                    uchar*  width,
                    uchar*  height,
                    ushort* pixels)              {

@@ -1,4 +1,5 @@
 #include "SIN_Material.h"
+#include "SIN_Texture.h"
 #include "SIN_Shader.h"
 
 #include "lyarr/ZJC_Hash.h"
@@ -82,7 +83,7 @@ Material* build_material      (ushort matid,
 
         material         = 0;
         material->id     = matid;
-        material->texloc = texid; // replace by findloc
+        material->texloc = SIN_texbucket_findloc(texid);
         material->shdloc = SIN_shdbucket_findloc(shdid);
 
         uint loc = sStack_pop(&SIN_MAT_SLOTSTACK);
@@ -96,7 +97,8 @@ Material* build_material      (ushort matid,
         Program* program  = SIN_shdbucket_get(material->shdloc);
         program->users++;
 
-        // TODO: add increase of usercount for texture.
+        Texture* tex      = SIN_texbucket_get(material->texloc);
+        tex->users++;
 
     }
 

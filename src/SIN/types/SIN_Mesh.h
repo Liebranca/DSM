@@ -11,21 +11,25 @@ extern "C" {
 
 typedef struct SIN_MESH_3D                      {
 
-    ushort  id;
+    ushort   id;
 
-    ushort  vertCount;
-    ushort  indexCount;
+    ushort   vertCount;
+    ushort   indexCount;
 
-    pVP3D_8*  bounds;
-    VP3D_8*   verts;
-    ushort* indices;
+    uint     drawLoc;
+    uint     drawOffset;
 
-    ushort  matloc;
-    ushort  users;
+    pVP3D_8* bounds;
+
+    ushort   matloc;
+    ushort   users;
 
 } M3D;
 
 //  - --- - --- - --- - --- -
+
+int     SIN_mesh_extract_from(cchar* filename);
+int     SIN_mesh_extract_end (cchar* filename);
 
 int     SIN_meshbucket_init ();
 int     SIN_meshbucket_end  ();
@@ -34,7 +38,7 @@ void    unsub_mesh          (ushort loc);
 
 M3D*    SIN_meshbucket_find (ushort id);
 M3D*    SIN_meshbucket_get  (ushort loc);
-M3D*    build_mesh          (ushort id, ushort matid, cchar* archive, uint offset);
+M3D*    build_mesh          (ushort id, ushort matid, ushort imatid, uchar offset);
 
 //  - --- - --- - --- - --- -
 
