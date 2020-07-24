@@ -1,8 +1,11 @@
 #include "SIN.H"
 
+#include "types/SIN_Texture.h"
+#include "types/SIN_Shader.h"
+#include "types/SIN_Material.h"
+
 #include "types/SIN_Mesh.h"
 #include "types/SIN_MeshBatch.h"
-#include "types/SIN_Material.h"
 
 unsigned char INITFLAGS = 0;
 
@@ -11,6 +14,9 @@ unsigned char INITFLAGS = 0;
 void SIN_INIT(unsigned char flags)              { 
 
     SIN_GVAO_init();
+
+    SIN_texbucket_init();
+    SIN_shdbucket_init();
     SIN_matbucket_init();
     SIN_meshbucket_init();
 
@@ -20,6 +26,8 @@ void SIN_INIT(unsigned char flags)              {
 
 void SIN_END()                                  { 
 
+    SIN_texbucket_end();
+    SIN_shdbucket_end();
     SIN_matbucket_end();
     SIN_meshbucket_end();
     SIN_GVAO_end();

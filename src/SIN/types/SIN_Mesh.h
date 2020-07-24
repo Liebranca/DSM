@@ -38,7 +38,7 @@ void    unsub_mesh          (ushort loc);
 
 M3D*    SIN_meshbucket_find (ushort id);
 M3D*    SIN_meshbucket_get  (ushort loc);
-M3D*    build_mesh          (ushort id, ushort matid, ushort imatid, uchar offset);
+M3D*    build_mesh          (ushort id, ushort matid, uchar offset);
 
 //  - --- - --- - --- - --- -
 

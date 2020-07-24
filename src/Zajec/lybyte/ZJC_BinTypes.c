@@ -119,7 +119,7 @@ float frac16_tofloat(f16 frac)                 {
 
 float frac8_tofloat(f8 frac)                   {
 
-    float v = (frac >> 1) * 0.003125f;
+    float  v = (frac >> 1) * 0.003125f;
     return v * (1 - (2 * (frac & 1)));                                                                              }
 
 float* frac4_tofloat(f8 frac)                  {
@@ -204,15 +204,15 @@ float* trinormal_8bit(f8 p1[3],
 
     return fv3_normalize(fv3_cross(fv3_sub(p2_unpack, p1_unpack), fv3_sub(p3_unpack, p1_unpack)));                  }
 
-f8*    sumtrinormals_8bit(float face_normals[3],
+float* sumtrinormals_8bit(float face_normals[3],
                           uint len)             {
 
-    f8 vertex_normal[3] = { 0, 0, 0 };
+    float vertex_normal[3] = { 0, 0, 0 };
 
     float dlen          = (float)1/len;
-    vertex_normal[0]    = float_tofrac8(face_normals[0] * dlen);
-    vertex_normal[1]    = float_tofrac8(face_normals[1] * dlen);
-    vertex_normal[2]    = float_tofrac8(face_normals[2] * dlen);
+    vertex_normal[0]    = face_normals[0] * dlen;
+    vertex_normal[1]    = face_normals[1] * dlen;
+    vertex_normal[2]    = face_normals[2] * dlen;
 
     return vertex_normal;                                                                                           }
 

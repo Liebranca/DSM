@@ -88,7 +88,6 @@ M3D* SIN_meshbucket_get  (ushort loc)           {
 
 M3D*    build_mesh          (ushort id,
                              ushort matid,
-                             ushort imatid,
                              uchar  offset)     {
 
     M3D* mesh = SIN_meshbucket_find(id);
@@ -98,6 +97,9 @@ M3D*    build_mesh          (ushort id,
         if(SIN_ACTIVE_MESHES
         == SIN_MAX_MESHES)                      { fprintf(stderr, "Cannot create more than %u 3D meshes",
                                                   SIN_MAX_MESHES); return NULL;                                         }
+
+        M3D new_mesh = {0};
+        mesh         = &new_mesh;
 
         mesh         = 0;
         mesh->id     = id;
@@ -116,11 +118,10 @@ M3D*    build_mesh          (ushort id,
 
 //  - --- - --- - --- - --- -
 
-        uint* vertex_data = (uint*) evil_malloc(mesh->vertCount * 2, sizeof(uint));
+        float* vertex_data = (float*) evil_malloc(mesh->vertCount * 8, sizeof(float));
 
         {
             TNG* vert_normal_data = (TNG*) evil_malloc(mesh->vertCount, sizeof(TNG));
-            float* face_normal    = (float*) evil_malloc(3, sizeof(float));
 
             f8 p1[3] = { 0, 0, 0 };
             f8 p2[3] = { 0, 0, 0 };
@@ -140,7 +141,7 @@ M3D*    build_mesh          (ushort id,
                 p3[1] = (verts + indices[i+2])->co[1];
                 p3[2] = (verts + indices[i+2])->co[2];
 
-                face_normal = trinormal_8bit(p1, p2, p3);
+                float* face_normal = trinormal_8bit(p1, p2, p3);
                 for(uint j = 0; j < 3; j++) { vert_normal_data[indices[i+0]].face_normals[j] += face_normal[j]; }
 
                 vert_normal_data[indices[i+0]].len++;
@@ -151,33 +152,27 @@ M3D*    build_mesh          (ushort id,
 
 //  - --- - --- - --- - --- -
 
-            f8* n = (f8*) evil_malloc(3, sizeof(f8));
-
-            for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 2)
+            for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 8)
             {
 
                 vertex_data[j]  = 0;
 
-                vertex_data[j] += (verts + i)->co[0];
-                vertex_data[j] += (verts + i)->co[1] << 8;
-                vertex_data[j] += (verts + i)->co[2] << 16;
+                vertex_data[j+1] = frac8_tofloat((verts + i)->co[0]);
+                vertex_data[j+2] = frac8_tofloat((verts + i)->co[1]);
+                vertex_data[j+3] = frac8_tofloat((verts + i)->co[2]);
 
-                vertex_data[j] += (verts + i)->uv    << 24;
+                float* n = sumtrinormals_8bit(vert_normal_data[i].face_normals, vert_normal_data[i].len);
 
-                n = sumtrinormals_8bit(vert_normal_data[i].face_normals, vert_normal_data[i].len);
+                vertex_data[j+4] += n[0];
+                vertex_data[j+5] += n[1];
+                vertex_data[j+6] += n[2];
 
-                vertex_data[j+1]  = 0;
-
-                vertex_data[j+1] += n[0];
-                vertex_data[j+1] += n[1]   << 8;
-                vertex_data[j+1] += n[2]   << 16;
-
-                vertex_data[j+1] += imatid << 24;
+                float* uvs = frac4_tofloat((verts + i)->uv);
+                vertex_data[j+7] += uvs[0];
+                vertex_data[j+8] += uvs[1];
 
             }
 
-            WARD_EVIL_MFREE(n);
-            WARD_EVIL_MFREE(face_normal);
             WARD_EVIL_MFREE(vert_normal_data);
 
         }

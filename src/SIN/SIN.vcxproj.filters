@@ -51,11 +51,11 @@
     <ClCompile Include="types\SIN_MeshBatch.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="shaders\SIN_DefaultShader.cpp">
-      <Filter>Source Files\shaders</Filter>
-    </ClCompile>
     <ClCompile Include="types\SIN_Texture.c">
       <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_DefaultShader.c">
+      <Filter>Source Files\shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

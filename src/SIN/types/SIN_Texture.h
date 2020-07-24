@@ -14,8 +14,8 @@ typedef struct SIN_TEXTURE {
     ushort id;
     ushort users;
 
-    uchar  width;
-    uchar  height;
+    ushort width;
+    ushort height;
 
     uint   location;
 
@@ -36,6 +36,7 @@ Texture* SIN_texbucket_find    (ushort id);
 ushort   SIN_texbucket_findloc (ushort id);
 
 void     unsub_tex             (ushort loc);
+void     bind_tex_to_slot      (ushort loc, uint slot);
 
 //  - --- - --- - --- - --- -
 

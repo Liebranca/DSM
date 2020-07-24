@@ -5,7 +5,7 @@ version     = "0.1 BETA";
 
 filepath    = "D:\\lieb_git\\dsm\\src\\OrangeBox";
 filename    = "dsm_hexdump";
-archive     = "Meshes";
+archive     = "Textures";
 writemode   = "0x00";
 writeoffset = "0x00";
 

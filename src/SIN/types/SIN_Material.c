@@ -81,6 +81,9 @@ Material* build_material      (ushort matid,
         == SIN_MAX_MATERIALS)                   { fprintf(stderr, "Cannot create more than %u materials\n",
                                                   SIN_MAX_MATERIALS); return NULL;                                      }
 
+        Material new_material = {0};
+        material              = &new_material;
+
         material         = 0;
         material->id     = matid;
         material->texloc = SIN_texbucket_findloc(texid);

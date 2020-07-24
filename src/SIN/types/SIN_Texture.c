@@ -40,6 +40,12 @@ int SIN_texbucket_end  ()                       {
     del_sHash(&SIN_TEXHASH);
     del_sStack(&SIN_TEX_SLOTSTACK);
 
+    for(uint i = 0;
+        i < SIN_MAX_TEXTURES; i++)              { Texture* tex = SIN_texbucket + i;
+
+                                                  if(tex != NULL) 
+                                                { glDeleteTextures(1, &tex->location); }                                }
+
     WARD_EVIL_MFREE(SIN_texbucket);
     return 0;                                                                                                           }
 
@@ -91,7 +97,8 @@ Texture* build_texture(ushort id, uchar offset) {
            == SIN_MAX_TEXTURES)                 { fprintf(stderr, "Cannot create more than %u textures",
                                                   SIN_MAX_TEXTURES); return NULL;                                       }
 
-        tex = 0;
+        Texture new_texture = {0};
+        tex                 = &new_texture;
 
         tex->id = id;
 
@@ -127,7 +134,7 @@ Texture* build_texture(ushort id, uchar offset) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE_3_3_2, pixel_data);
+                     GL_RGB, GL_UNSIGNED_BYTE_2_3_3_REV, pixel_data);
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -147,6 +154,17 @@ Texture* build_texture(ushort id, uchar offset) {
     }
 
     return tex;                                                                                                         }
+
+//  - --- - --- - --- - --- -
+
+void bind_tex_to_slot(ushort loc, uint slot)    {
+
+    Texture* tex = SIN_texbucket_get(loc);
+
+    if(slot <= 31)                              { slot = 31;                                                            }
+
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, tex->location);                                                                        }
 
 //  - --- - --- - --- - --- -
 

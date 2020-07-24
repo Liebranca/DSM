@@ -17,7 +17,7 @@ sStack SIN_BATCH_SLOTSTACK  = {0};
 
 uint   SIN_GVAO             = 0;
 
-#define SIN_BATCH_VERTSIZE    8
+#define SIN_BATCH_VERTSIZE    32
 
 #define SIN_BATCH_MAXOBJECTS  256
 #define SIN_BATCH_MAXVERTS    65536
@@ -32,9 +32,17 @@ void  SIN_GVAO_init()                           { SIN_BATCH_SLOTSTACK = build_sS
                                                   glGenVertexArrays(1, &SIN_GVAO);
                                                   glBindVertexArray(SIN_GVAO);
 
-                                                  glVertexAttribFormat(0, 2, GL_UNSIGNED_INT, 0, 0);
+                                                  glVertexAttribFormat(0, 3, GL_FLOAT, 0, 0);
                                                   glVertexAttribBinding(0, 0);
-                                                  glEnableVertexAttribArray(0);                                         }
+                                                  glEnableVertexAttribArray(0);
+
+                                                  glVertexAttribFormat(1, 3, GL_FLOAT, 0, 3 * sizeof(float));
+                                                  glVertexAttribBinding(1, 0);
+                                                  glEnableVertexAttribArray(1);
+
+                                                  glVertexAttribFormat(2, 2, GL_FLOAT, 0, 6 * sizeof(float));
+                                                  glVertexAttribBinding(2, 0);
+                                                  glEnableVertexAttribArray(2);                                         }
 
 void  SIN_GVAO_end()                            {
 
@@ -104,7 +112,7 @@ void SIN_delMeshBatch(M3DB* batch)              {
 
 uint  SIN_meshbatch_upload(ushort  numVerts,
                            ushort  numIndices,
-                           uint*   vertex_data,
+                           float*   vertex_data,
                            ushort* indices)     {
 
     M3DB* batch = SIN_active_meshbatch;

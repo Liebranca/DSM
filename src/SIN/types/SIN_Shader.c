@@ -133,14 +133,18 @@ Program* build_shader(ushort id,
         == SIN_MAX_SHADERS)                     { fprintf(stderr, "Cannot create more than %u shader programs\n",
                                                   SIN_MAX_SHADERS); return NULL;                                        }
 
-        program->location   = glCreateProgram();
+        Program new_program = {0};
+        program             = &new_program;
+
+        program->location = glCreateProgram();
+
         program->shaders[0] = createShader(source_v, GL_VERTEX_SHADER);
         program->shaders[1] = createShader(source_p, GL_FRAGMENT_SHADER);
 
         for (uint i = 0; i < 2; i++)            { glAttachShader(program->location, program->shaders[i]);               }
     
-        glBindAttribLocation(program->location, 0, "POSITION");
-        glBindAttribLocation(program->location, 1, "NORMAL");
+        glBindAttribLocation(program->location, 0, "Position");
+        glBindAttribLocation(program->location, 1, "Normal");
         glBindAttribLocation(program->location, 2, "UV");
 
         glLinkProgram    (program->location);

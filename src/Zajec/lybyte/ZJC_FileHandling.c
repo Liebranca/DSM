@@ -104,8 +104,8 @@ typedef struct MESH_FILE_3D                     {
 typedef struct IMAGE_FILE_8BIT_RGB              {
 
     ushort  size;
-    uchar   height;
-    uchar   width;
+    ushort  height;
+    ushort  width;
 
     ushort* pixels;
 
@@ -223,10 +223,10 @@ int read_jojdump(cchar*   filename,
     int errorstate = 0;
     WARD_EVIL_WRAP(errorstate, openbin(filename, "rb", 0));
 
-    fread(&joj->width,  sizeof(uchar), 1, curfile);
-    fread(&joj->height, sizeof(uchar), 1, curfile);
+    fread(&joj->width,  sizeof(ushort), 1, curfile);
+    fread(&joj->height, sizeof(ushort), 1, curfile);
 
-    EVIL_FREAD(float, joj->height * joj->width * 3, pixels);
+    EVIL_FREAD(float, joj->height * joj->width * 4, pixels);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
@@ -241,7 +241,7 @@ int read_jojdump(cchar*   filename,
 
     colbuff = (ushort*) evil_malloc(dim, sizeof(ushort));
 
-    for(uint i = 0; i < dim * 3; i+=3)
+    for(uint i = 0; i < dim * 4; i+=4)
     {
 
         curcol = color_to_joj8(pixels[i+0],
@@ -287,10 +287,10 @@ int crk_to_daf(CrkFile*    crk,
 int joj_to_daf(JojFile*    joj,
                cchar* filename)                 {
 
-    uchar sizes[2] = { joj->width, joj->height};
+    ushort sizes[2] = { joj->width, joj->height};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(uchar,  2,         sizes,       filename);
+    EVIL_FWRITE(ushort, 2,         sizes,       filename);
     EVIL_FWRITE(ushort, 1,         &joj->size,  filename);
     EVIL_FWRITE(ushort, joj->size, joj->pixels, filename);
     fseek(curfile, 0, SEEK_CUR);
@@ -720,7 +720,7 @@ int    extraction_start (cchar*  filename,
                                         readmode,
                                         sign,
                                         DAF_READ,
-                                        daf,
+                                        *daf,
                                         0        ));
 
     return 0;                                                                                                           }
@@ -756,8 +756,8 @@ int extractcrk (DAF*     daf,
     return 0;                                                                                                           }
 
 int    extractjoj (DAF*    daf,
-                   uchar*  size,
                    uchar   offset,
+                   uchar*  size,
                    uchar*  width,
                    uchar*  height,
                    ushort* pixels)              {

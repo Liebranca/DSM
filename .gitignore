@@ -13,6 +13,9 @@
 *.crk
 *.ans
 *.joj
+*.exe
+*.lib
+*.dll
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

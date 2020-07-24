@@ -40,7 +40,7 @@ f8     float_tofrac8(float v);
 f8     float_tofrac4(float v1, float v2);
 
 float* trinormal_8bit(f8 p1[3], f8 p2[3], f8 p3[3]);
-f8*    sumtrinormals_8bit(float face_normals[3], uint len);
+float* sumtrinormals_8bit(float face_normals[3], uint len);
 
 int    zjc_convertor_init(uchar flags);
 int    zjc_convertor_end();
