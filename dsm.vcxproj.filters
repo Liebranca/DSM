@@ -36,9 +36,6 @@
     <ClCompile Include="src\rend\texture.cpp">
       <Filter>Source Files\rend</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\camera.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
     <ClCompile Include="src\rend\importcrk.cpp">
       <Filter>Source Files\rend</Filter>
     </ClCompile>
@@ -70,9 +67,6 @@
     </ClInclude>
     <ClInclude Include="src\rend\texture.h">
       <Filter>Source Files\rend</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\camera.h">
-      <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="src\rend\importcrk.h">
       <Filter>Source Files\rend</Filter>

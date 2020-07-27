@@ -24,7 +24,7 @@ int    extractcrk       (DAF* daf, uchar offset, ushort* vertCount,
                          ushort* indexCount, pVP3D_8* bounds,
                          VP3D_8* verts, ushort* indices);
 
-int    extractjoj       (DAF* daf, uchar offset, uchar* size, uchar* width, uchar* height, ushort* pixels);
+int    extractjoj       (DAF* daf, uchar offset, uint* size, ushort* width, ushort* height, ushort* pixels);
 
 #ifdef __cplusplus
 }

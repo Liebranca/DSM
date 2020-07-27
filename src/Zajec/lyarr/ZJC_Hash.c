@@ -6,20 +6,22 @@ const uchar MAX_HASH_LENGTH = 16;
 
 //  - --- - --- - --- - --- -
 
-sHash build_sHash(size_t size)                  {
+sHash* build_sHash(size_t size)                 {
 
-    sHash hash = {0};
-    ulong locsize = size*size;
+    sHash* hash    = (sHash*) evil_malloc(1, sizeof(sHash));
+    ulong locsize  = size*size;
 
-    hash.size   = size;
-    hash.maxloc = locsize;
-    hash.locs   = build_usArray(locsize);
+    hash->size     = size;
+    hash->maxloc   = locsize;
 
-    for(uint i  = 0; i < locsize; i++)          { hash.locs.buff[i]  = 0;                                               }
+    hash->locs     = NULL;
+    hash->locs     = build_usArray(locsize);
+
+    for(uint i  = 0; i < locsize; i++)          { hash->locs->buff[i]  = 0;                                             }
 
     return hash;                                                                                                        }
 
-void  del_sHash  (sHash* hash)                  { del_usArray     (&hash->locs);                                        }
+void  del_sHash  (sHash* hash)                  { del_usArray(hash->locs); WARD_EVIL_MFREE(hash);                       }
 
 //  - --- - --- - --- - --- -
 
@@ -46,14 +48,14 @@ int    sh_insert  (sHash* hash,
                    ushort rloc)                 {
 
     ulong loc = sh_hashit(hash, key);
-    hash->locs.buff[loc] = rloc+1;
+    hash->locs->buff[loc] = rloc+1;
 
     return 0;                                                                                                           }
 
 int   sh_pop     (sHash* hash, ushort key)      {
 
     ulong loc = sh_hashit(hash, key);
-    hash->locs.buff[loc] = 0;
+    hash->locs->buff[loc] = 0;
 
     return 0;                                                                                                           }
 
@@ -62,6 +64,6 @@ int   sh_pop     (sHash* hash, ushort key)      {
 ushort sh_hashloc (sHash* hash, ushort key)      {
 
     ulong loc   = sh_hashit(hash, key);
-    if(hash->locs.buff[loc] == 0)                { return 0;                                                            }
-    return hash->locs.buff[loc];                                                                                        }
+    if(hash->locs->buff[loc] == 0)                { return 0;                                                           }
+    return hash->locs->buff[loc];                                                                                       }
 

@@ -70,8 +70,8 @@ int  chmang_end         ()                      {
         i < chmang.openwins; i ++)              { del_whandle(chmang.wins + i);                                         }
 
     WARD_EVIL_MFREE(chmang.wins);
-
     SDL_Quit();
+
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -

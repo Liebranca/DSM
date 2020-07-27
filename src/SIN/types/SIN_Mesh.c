@@ -10,17 +10,18 @@
 
 #include <stdio.h>
 
-#define SIN_MAX_MESHES      512
+#define SIN_MAX_MESHES              512
 
-M3D*   SIN_meshbucket     = NULL;
-M3D    SIN_emptymesh      = {0};
+static M3D     SIN_emptymesh      = {0};
 
-ushort SIN_ACTIVE_MESHES  = 0;
+static ushort  SIN_ACTIVE_MESHES  = 0;
 
-DAF*   MESH_ARCHIVE       = {0};
+static DAF*    MESH_ARCHIVE       = {0};
 
-sStack SIN_MESH_SLOTSTACK = {0};
-sHash  SIN_MEHASH         = {0};
+static sStack* SIN_MESH_SLOTSTACK = NULL;
+static sHash*  SIN_MEHASH         = NULL;
+
+static M3D     SIN_meshbucket[SIN_MAX_MESHES];
 
 typedef struct TRI_NORMAL_GROUP {
 
@@ -33,19 +34,17 @@ typedef struct TRI_NORMAL_GROUP {
 
 int SIN_meshbucket_init ()                      {
 
-    SIN_MEHASH     = build_sHash(SIN_MAX_MESHES);
-
+    SIN_MEHASH         = build_sHash (SIN_MAX_MESHES);
     SIN_MESH_SLOTSTACK = build_sStack(SIN_MAX_MESHES);
-    for(int i = SIN_MAX_MESHES-1; i > -1; i--)  { sStack_push(&SIN_MESH_SLOTSTACK, i);                                  }
 
-    SIN_meshbucket = (M3D*) evil_malloc(SIN_MAX_MESHES, sizeof(M3D));
+    for(int i = SIN_MAX_MESHES-1; i > -1; i--)  { sStack_push(SIN_MESH_SLOTSTACK, i);                                   }
 
     return 0;                                                                                                           }
 
 int SIN_meshbucket_end  ()                      {
 
-    del_sHash(&SIN_MEHASH);
-    del_sStack(&SIN_MESH_SLOTSTACK);
+    del_sStack(SIN_MESH_SLOTSTACK);
+    del_sHash (SIN_MEHASH);
 
     for(uint i = 0;
         i < SIN_MAX_MESHES; i++)                { M3D* mesh = SIN_meshbucket + i;
@@ -53,7 +52,6 @@ int SIN_meshbucket_end  ()                      {
                                                   if(mesh != NULL) 
                                                 { WARD_EVIL_MFREE(mesh->bounds); }                                      }
 
-    WARD_EVIL_MFREE(SIN_meshbucket);
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
@@ -66,7 +64,7 @@ int     SIN_mesh_extract_end (cchar* filename)  { return extraction_end(filename
 
 M3D* SIN_meshbucket_find (ushort id)            {
 
-    ushort loc = sh_hashloc(&SIN_MEHASH, id);
+    ushort loc = sh_hashloc(SIN_MEHASH, id);
     if(loc == 0)                                { return NULL;                                                          }
 
     return SIN_meshbucket+(loc-1);                                                                                      }
@@ -98,15 +96,19 @@ M3D*    build_mesh          (ushort id,
         == SIN_MAX_MESHES)                      { fprintf(stderr, "Cannot create more than %u 3D meshes",
                                                   SIN_MAX_MESHES); return NULL;                                         }
 
-        M3D new_mesh = {0};
-        mesh         = &new_mesh;
+        uint loc = sStack_pop(SIN_MESH_SLOTSTACK);
+        WARD_EVIL_UNSIG(loc, 1);
 
-        mesh         = 0;
-        mesh->id     = id;
-        mesh->matloc = SIN_matbucket_findloc(matid);
+        sh_insert(SIN_MEHASH, id, loc);
 
-        VP3D_8* verts;
-        ushort* indices;
+        mesh            = SIN_meshbucket+loc;
+
+        mesh            = 0;
+        mesh->id        = id;
+        mesh->matloc    = SIN_matbucket_findloc(matid);
+
+        VP3D_8* verts   = NULL;
+        ushort* indices = NULL;
 
         extractcrk(MESH_ARCHIVE,
                    offset,
@@ -186,12 +188,6 @@ M3D*    build_mesh          (ushort id,
         WARD_EVIL_MFREE(verts);
         WARD_EVIL_MFREE(indices);
 
-        uint loc = sStack_pop(&SIN_MESH_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
-
-        sh_insert(&SIN_MEHASH, id, loc);
-
-        SIN_meshbucket[loc] = *mesh;
         SIN_ACTIVE_MESHES++;
 
         Material* material = SIN_matbucket_get(mesh->matloc);
@@ -210,7 +206,7 @@ void     del_mesh            (M3D*   mesh,
     unsub_material(mesh->matloc);
 
     SIN_meshbucket[loc] = SIN_emptymesh;
-    int memward = sStack_push(&SIN_MESH_SLOTSTACK, loc);
+    int memward = sStack_push(SIN_MESH_SLOTSTACK, loc);
     WARD_EVIL_UNSIG(memward, 1);
 
     SIN_ACTIVE_MESHES--;                                                                                                }
@@ -222,7 +218,7 @@ void  unsub_mesh       (ushort loc)             {
     if(mesh)
     {
         mesh->users--;
-        if(mesh->users == 0)                    { sh_pop(&SIN_MEHASH, mesh->id); del_mesh(mesh, loc);                   }
+        if(mesh->users == 0)                    { sh_pop(SIN_MEHASH, mesh->id); del_mesh(mesh, loc);                    }
     }
 
                                                                                                                         }

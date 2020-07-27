@@ -34,7 +34,7 @@ def writejoj(ob_name):
     j    = 0;
 
     buff[0:dim] = ftbarr(tex.image.pixels)[0:dim]
-
+    
     sizes = bytearray(4);
     sizes[0:2] = tex.image.size[0].to_bytes(2, "little");
     sizes[2:4] = tex.image.size[1].to_bytes(2, "little");

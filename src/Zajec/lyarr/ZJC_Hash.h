@@ -13,12 +13,12 @@ typedef struct SHORT_HASH_TABLE {
 
     size_t    size;
     ulong     maxloc;
-    usArray   locs;
+    usArray*  locs;
 
 } sHash;
 
-sHash build_sHash(size_t size);
-void  del_sHash  (sHash* hash);
+sHash* build_sHash(size_t size);
+void   del_sHash  (sHash* hash);
 
 ushort sh_hashloc (sHash* hash, ushort key);
 ulong  sh_hashit  (sHash* hash, ushort key);

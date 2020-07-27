@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#include "types/SIN_Texture.h"
+#include "types/SIN_Shader.h"
+#include "types/SIN_Material.h"
+#include "types/SIN_Mesh.h"
+#include "types/SIN_MeshBatch.h"
+
 #include "GL/glew.h"
 
 //  - --- - --- - --- - --- -

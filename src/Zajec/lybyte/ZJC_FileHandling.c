@@ -103,7 +103,7 @@ typedef struct MESH_FILE_3D                     {
 
 typedef struct IMAGE_FILE_8BIT_RGB              {
 
-    ushort  size;
+    uint    size;
     ushort  height;
     ushort  width;
 
@@ -158,10 +158,11 @@ int openarch(cchar*        filename,
         for(uint i = 0; i < 8; i++)             { if(sign[i] != archtype[i])
                                                 { terminator(0x67, filename); return ERROR; }                           }
 
-        fread(&daf->fileCount, sizeof(ushort), 1, curfile);
+        printf("Good enough\n");
 
-        fread(&daf->size,   sizeof(uint32_t), 1,   curfile);
-        fread(daf->offsets, sizeof(uint32_t), 256, curfile);
+        fread(&daf->fileCount, sizeof(ushort), 1, curfile);
+        fread(&daf->size,      sizeof(uint32_t), 1,   curfile);
+        fread(daf->offsets,    sizeof(uint32_t), 256, curfile);
 
         uint32_t datasize = daf->size - DAF_HSIZE;
 
@@ -239,7 +240,7 @@ int read_jojdump(cchar*   filename,
     uint    dim         = joj->width * joj->height;
     uint j              = 0;
 
-    colbuff = (ushort*) evil_malloc(dim, sizeof(ushort));
+    colbuff             = (ushort*) evil_malloc(dim, sizeof(ushort));
 
     for(uint i = 0; i < dim * 4; i+=4)
     {
@@ -291,7 +292,7 @@ int joj_to_daf(JojFile*    joj,
 
     fseek(curfile, 0, SEEK_CUR);
     EVIL_FWRITE(ushort, 2,         sizes,       filename);
-    EVIL_FWRITE(ushort, 1,         &joj->size,  filename);
+    EVIL_FWRITE(uint,   1,         &joj->size,  filename);
     EVIL_FWRITE(ushort, joj->size, joj->pixels, filename);
     fseek(curfile, 0, SEEK_CUR);
 
@@ -712,16 +713,15 @@ int    extraction_start (cchar*  filename,
                          uchar   archtype,
                          DAF**    daf)           {
 
-    int evilstate = 0;
+    int evilstate   = 0;
     cchar* sign     = get_archtype(archtype);
     cchar* readmode = get_fmode(DAF_READ);
-
     WARD_EVIL_WRAP(evilstate, openarch(filename,
-                                        readmode,
-                                        sign,
-                                        DAF_READ,
-                                        *daf,
-                                        0        ));
+                                       readmode,
+                                       sign,
+                                       DAF_READ,
+                                       *daf,
+                                       0        ));
 
     return 0;                                                                                                           }
 
@@ -757,9 +757,9 @@ int extractcrk (DAF*     daf,
 
 int    extractjoj (DAF*    daf,
                    uchar   offset,
-                   uchar*  size,
-                   uchar*  width,
-                   uchar*  height,
+                   uint*   size,
+                   ushort* width,
+                   ushort* height,
                    ushort* pixels)              {
 
     rewind(curfile);
@@ -767,9 +767,9 @@ int    extractjoj (DAF*    daf,
     fseek(curfile, daf->offsets[offset], SEEK_CUR);
     fseek(curfile, 0, SEEK_CUR);
 
-    fread(width,   sizeof(uchar),  1, curfile);
-    fread(height,  sizeof(uchar),  1, curfile);
-    fread(size,    sizeof(ushort), 1, curfile);
+    fread(width,   sizeof(ushort),  1, curfile);
+    fread(height,  sizeof(ushort),  1, curfile);
+    fread(size,    sizeof(uint),    1, curfile);
 
     EVIL_FREAD(ushort, *size, pixels);
 

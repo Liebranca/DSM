@@ -167,7 +167,6 @@
     <ClCompile Include="src\backbone\fbo.cpp" />
     <ClCompile Include="src\backbone\reyn.cpp" />
     <ClCompile Include="src\backbone\space.cpp" />
-    <ClCompile Include="src\game\camera.cpp" />
     <ClCompile Include="src\game\node.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rend\importcrk.cpp" />
@@ -182,7 +181,6 @@
     <ClInclude Include="src\backbone\fbo.h" />
     <ClInclude Include="src\backbone\reyn.h" />
     <ClInclude Include="src\backbone\space.h" />
-    <ClInclude Include="src\game\camera.h" />
     <ClInclude Include="src\game\node.h" />
     <ClInclude Include="src\game\obdynamic.h" />
     <ClInclude Include="src\game\obstatic.h" />

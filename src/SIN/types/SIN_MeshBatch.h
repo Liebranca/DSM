@@ -21,7 +21,7 @@ typedef struct SIN_MESH_3D_BATCH {
 } M3DB;
 
 void  SIN_GVAO_init();
-void  SIN_GVAO_end();
+int   SIN_GVAO_end();
 
 M3DB* SIN_meshbatches_get(ushort loc);
 M3DB* SIN_genMeshBatch();

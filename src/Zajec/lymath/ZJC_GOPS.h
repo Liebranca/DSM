@@ -9,11 +9,11 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-float* fv3_sub(float a[3], float b[3]);
-float* fv3_add(float a[3], float b[3]);
-float* fv3_cross(float a[3], float b[3]);
-float  fv3_length(float vec[3]);
-float* fv3_normalize(float vec[3]);
+float* fv3_sub(float* a, float* b);
+float* fv3_add(float* a, float* b);
+float* fv3_cross(float* a, float* b);
+float  fv3_length(float* vec);
+float* fv3_normalize(float* vec);
 
 //  - --- - --- - --- - --- -
 
@@ -45,13 +45,13 @@ float approadf(float v1, float v2, float m);
 typedef struct fvRange {
 
     uint32_t mag;
-    float step;
-    fArray values;
+    float    step;
+    fArray*  values;
 
 } fvRange;
 
-fvRange build_fvRange(uint mag, float step);
-void del_fvRange(fvRange* fvr);
+fvRange* build_fvRange(uint mag, float step);
+void     del_fvRange(fvRange* fvr);
 
 uint32_t fvRange_take_closest(fvRange* fvr, float v);
 uchar    fvRange_take_closest_1b(fvRange* fvr, float v);

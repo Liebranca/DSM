@@ -7,11 +7,11 @@
 #include "../lyutils/ZJC_Evil.h"
 #include "ZJC_BinTypes.h"
 
-fvRange frac8_range;
-fvRange frac4_range;
-fvRange frac16_range;
-fvRange joj8_rg_range;
-fvRange joj8_b_range;
+static fvRange* frac8_range;
+static fvRange* frac4_range;
+static fvRange* frac16_range;
+static fvRange* joj8_rg_range;
+static fvRange* joj8_b_range;
 
 uchar zjc_convertor_flags = 0;
 
@@ -29,9 +29,9 @@ int zjc_convertor_init(uchar flags)             {
 
 int zjc_convertor_end()                         {
 
-    if (zjc_convertor_flags & BUILD_FRAC8)      { del_fvRange(&frac8_range); del_fvRange(&frac4_range);             }
-    if (zjc_convertor_flags & BUILD_FRAC16)     { del_fvRange(&frac16_range);                                       }
-    if (zjc_convertor_flags & BUILD_JOJ8)       { del_fvRange(&joj8_rg_range); del_fvRange(&joj8_b_range);          }
+    if (zjc_convertor_flags & BUILD_FRAC8)      { del_fvRange(frac8_range); del_fvRange(frac4_range);               }
+    if (zjc_convertor_flags & BUILD_FRAC16)     { del_fvRange(frac16_range);                                        }
+    if (zjc_convertor_flags & BUILD_JOJ8)       { del_fvRange(joj8_rg_range); del_fvRange(joj8_b_range);            }
 
     return 0;                                                                                                       }
 
@@ -124,8 +124,8 @@ float frac8_tofloat(f8 frac)                   {
 
 float* frac4_tofloat(f8 frac)                  {
 
-    int   indices[2] = { takebits(frac, 0, 4), takebits(frac, 4, 8) };
-    float v[2]       = { 0.0f,                 0.0f                 };
+    int   indices[2]  =                        { takebits(frac, 0, 4), takebits(frac, 4, 8)                         };
+    static float v[2] =                        { 0.0f,                 0.0f                                         };
 
     for (uint i = 0; i < 2; i++)                { if (indices[i] == 15) { v[i] = 1.0f; }
                                                   else { v[i] = indices[i] * 0.0625f; }                             }
@@ -164,14 +164,14 @@ f16 float_tofrac16(float v) {
 
         if (*decimals == '0')
         {
-            if (*decimals != '0')               { closest = fvRange_take_closest(&frac16_range, w * 10);
+            if (*decimals != '0')               { closest = fvRange_take_closest(frac16_range, w * 10);
                                                   rounding = 0b11;                                                  }
         }
 
         else
         { 
-            closest = fvRange_take_closest(&frac16_range, w);
-            float decimals_packed = *(frac16_range.values.buff + closest);
+            closest = fvRange_take_closest(frac16_range, w);
+            float decimals_packed = *(frac16_range->values->buff + closest);
 
             if      (decimals_packed > w)       { rounding = 0b01;                                                  }
             else if (decimals_packed < w )      { rounding = 0b10;                                                  }
@@ -188,7 +188,7 @@ f16 float_tofrac16(float v) {
 f8 float_tofrac8(float v)                       {
 
     f8    frac;
-    uchar index = fvRange_take_closest_1b(&frac8_range, (float)fabs(v));
+    uchar index = fvRange_take_closest_1b(frac8_range, (float)fabs(v));
 
     frac = (index << 1) + (v < 0);
 
@@ -202,12 +202,22 @@ float* trinormal_8bit(f8 p1[3],
     float p2_unpack[3]   = { frac8_tofloat(p2[0]), frac8_tofloat(p2[1]), frac8_tofloat(p2[2])                       };
     float p3_unpack[3]   = { frac8_tofloat(p3[0]), frac8_tofloat(p3[1]), frac8_tofloat(p3[2])                       };
 
-    return fv3_normalize(fv3_cross(fv3_sub(p2_unpack, p1_unpack), fv3_sub(p3_unpack, p1_unpack)));                  }
+    float* a             = fv3_sub(p2_unpack, p1_unpack);
+    float* b             = fv3_sub(p3_unpack, p1_unpack);
+    float* c             = fv3_normalize(fv3_cross(a, b));
+
+    static float result[3];
+
+    result[0] = c[0];
+    result[1] = c[1];
+    result[2] = c[2];
+
+    return result;                  }
 
 float* sumtrinormals_8bit(float face_normals[3],
                           uint len)             {
 
-    float vertex_normal[3] = { 0, 0, 0 };
+    static float vertex_normal[3] = { 0, 0, 0 };
 
     float dlen          = (float)1/len;
     vertex_normal[0]    = face_normals[0] * dlen;
@@ -220,8 +230,8 @@ f8 float_tofrac4(float v1, float v2)            {
 
     f8 frac;
 
-    uchar index1 = fvRange_take_closest_1b(&frac4_range, v1);
-    uchar index2 = fvRange_take_closest_1b(&frac4_range, v2);
+    uchar index1 = fvRange_take_closest_1b(frac4_range, v1);
+    uchar index2 = fvRange_take_closest_1b(frac4_range, v2);
 
     frac = index1 + (index2 << 4);
 
@@ -233,9 +243,9 @@ uchar color_to_joj8(float r,
                     float g,
                     float b)                    {
 
-    uchar color =   (fvRange_take_closest_1b(&joj8_rg_range, r)      )
-                  + (fvRange_take_closest_1b(&joj8_rg_range, g) << 3 )
-                  + (fvRange_take_closest_1b(&joj8_b_range,  b) << 6 );
+    uchar color =   (fvRange_take_closest_1b(joj8_rg_range, r)      )
+                  + (fvRange_take_closest_1b(joj8_rg_range, g) << 3 )
+                  + (fvRange_take_closest_1b(joj8_b_range,  b) << 6 );
 
     return color;                                                                                                   }
 

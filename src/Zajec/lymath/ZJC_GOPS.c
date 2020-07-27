@@ -4,28 +4,49 @@
 
 //  - --- - --- - --- - --- -
 
-float* fv3_sub(float a[3], float b[3])  { float c[3] = { a[0] + b[0], a[1] + b[1], a[2] + b[2] }; return c; }
-float* fv3_add(float a[3], float b[3])  { float c[3] = { a[0] - b[0], a[1] - b[1], a[2] - b[2] }; return c; }
+float* fv3_sub(float* a, float* b)      {
 
-float* fv3_cross(float a[3],
-                 float b[3])            {
+    static float c[3];
 
-    float vec[3] = { 0.0f, 0.0f, 0.0f };
+    c[0] = a[0] + b[0];
+    c[1] = a[1] + b[1],
+    c[2] = a[2] + b[2];
 
-    vec[0]       = (a[1] * b[2]) - (a[2] * b[1]);
-    vec[1]       = (a[2] * b[0]) - (a[0] * b[2]);
-    vec[2]       = (a[0] * b[1]) - (a[1] * b[0]);
+    return c;                                                                                               }
+
+float* fv3_add(float* a, float* b)      {
+
+    static float c[3];
+
+    c[0] = a[0] - b[0];
+    c[1] = a[1] - b[1],
+    c[2] = a[2] - b[2];
+
+    return c;                                                                                               }
+
+float* fv3_cross(float* a,
+                 float* b)              {
+
+    static float vec[3] = { 0.0f, 0.0f, 0.0f };
+
+    vec[0]              = (a[1] * b[2]) - (a[2] * b[1]);
+    vec[1]              = (a[2] * b[0]) - (a[0] * b[2]);
+    vec[2]              = (a[0] * b[1]) - (a[1] * b[0]);
 
     return vec;                                                                                             }
 
-float  fv3_length(float vec[3])         { return sqrt( (vec[0] * vec[0])
-                                                     + (vec[1] * vec[1])
-                                                     + (vec[2] * vec[2]) );                                 }
+float  fv3_length(float* vec)           { return (float)sqrt( (vec[0] * vec[0])
+                                                            + (vec[1] * vec[1])
+                                                            + (vec[2] * vec[2]) );                          }
 
-float* fv3_normalize(float vec[3])      {
+float* fv3_normalize(float* vec)        {
 
-    float length        = fv3_length(vec);
-    float normalized[3] = { vec[0] / length, vec[1] / length, vec[2] / length };
+    static float normalized[3];
+
+    float length  = fv3_length(vec);
+    normalized[0] = vec[0] / length;
+    normalized[1] = vec[1] / length;
+    normalized[2] = vec[2] / length;
 
     return normalized;                                                                                      }
 
@@ -75,18 +96,20 @@ float approadf(float v1,
 
 //  - --- - --- - --- - --- -
 
-fvRange build_fvRange(uint mag,
+fvRange* build_fvRange(uint mag,
                       float step)       { 
 
-    fvRange fvr; fvr.mag = mag; fvr.step = step;
-    fvr.values = build_fArray(mag);
+    fvRange* fvr = (fvRange*) evil_malloc(1, sizeof(fvRange));
 
-    for(uint i = 0; i < mag; i++)       { *(fvr.values.buff+i) = (i*step);                                  }
+    fvr->mag    = mag;
+    fvr->step   = step;
+    fvr->values = build_fArray(mag);
 
-    return fvr;
-}
+    for(uint i = 0; i < mag; i++)       { *(fvr->values->buff+i) = (i*step);                                }
 
-void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->values.buff);                                }
+    return fvr;                                                                                             }
+
+void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->values->buff); WARD_EVIL_MFREE(fvr);         }
 
 uint32_t fvRange_take_closest(
                           fvRange* fvr,
@@ -97,7 +120,7 @@ uint32_t fvRange_take_closest(
     float newdist;
     uint closest = 0;
 
-    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, *(fvr->values.buff+i), s);
+    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, *(fvr->values->buff+i), s);
                                           if ( newdist < dist ) { dist = newdist; closest = i; }            }
 
     return closest;
@@ -116,7 +139,7 @@ uchar fvRange_take_closest_1b(fvRange* fvr,
     float newdist;
     uint closest = 0;
 
-    for (uint i = 0; i < fvr->mag; i++)         { newdist = approadf(v, *(fvr->values.buff+i), s);
+    for (uint i = 0; i < fvr->mag; i++)         { newdist = approadf(v, *(fvr->values->buff+i), s);
                                                   if ( newdist < dist ) { dist = newdist; closest = i; }                }
 
     return closest;                                                                                                     }

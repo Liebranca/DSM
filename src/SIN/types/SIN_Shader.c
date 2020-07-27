@@ -9,25 +9,24 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SIN_MAX_SHADERS       64
+#define SIN_MAX_SHADERS              64
 
-Program* SIN_shdbucket      = NULL;
-Program  SIN_emptyshd       = {0};
-ushort   SIN_ACTIVE_SHADERS = 0;
+static Program  SIN_emptyshd       = {0};
+static ushort   SIN_ACTIVE_SHADERS = 0;
 
-sStack   SIN_SHD_SLOTSTACK  = {0};
-sHash    SIN_SHDHASH        = {0};
+static sStack*  SIN_SHD_SLOTSTACK  = NULL;
+static sHash*   SIN_SHDHASH        = NULL;
+
+static Program  SIN_shdbucket[SIN_MAX_SHADERS];
 
 //  - --- - --- - --- - --- -
 
 int       SIN_shdbucket_init  ()                {
 
-    SIN_SHDHASH = build_sHash(SIN_MAX_SHADERS);
-
+    SIN_SHDHASH       = build_sHash (SIN_MAX_SHADERS);
     SIN_SHD_SLOTSTACK = build_sStack(SIN_MAX_SHADERS);
-    for(int i = SIN_MAX_SHADERS-1; i > -1; i--)  { sStack_push(&SIN_SHD_SLOTSTACK, i);                                  }
 
-    SIN_shdbucket = (Program*) evil_malloc(SIN_MAX_SHADERS, sizeof(Program));
+    for(int i = SIN_MAX_SHADERS-1; i > -1; i--)  { sStack_push(SIN_SHD_SLOTSTACK, i);                                   }
 
     return 0;                                                                                                           }
 
@@ -40,8 +39,8 @@ void shader_free(Program* program)              {
 
 int       SIN_shdbucket_end   ()                {
 
-    del_sHash(&SIN_SHDHASH);
-    del_sStack(&SIN_SHD_SLOTSTACK);
+    del_sStack(SIN_SHD_SLOTSTACK);
+    del_sHash (SIN_SHDHASH);
 
     for(uint i = 0;
         i < SIN_MAX_SHADERS; i++)               { Program* program = SIN_shdbucket + i;
@@ -49,21 +48,20 @@ int       SIN_shdbucket_end   ()                {
                                                   if(program != NULL) 
                                                 { shader_free(program); }                                               }
 
-    WARD_EVIL_MFREE(SIN_shdbucket);
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
 
 Program* SIN_shdbucket_find  (ushort id)        {
 
-    ushort loc = sh_hashloc(&SIN_SHDHASH, id);
+    ushort loc = sh_hashloc(SIN_SHDHASH, id);
     if(loc == 0)                                { return NULL;                                                          }
 
     return SIN_shdbucket+(loc-1);                                                                                       }
 
 ushort SIN_shdbucket_findloc  (ushort id)       {
 
-    ushort loc = sh_hashloc(&SIN_SHDHASH, id);
+    ushort loc = sh_hashloc(SIN_SHDHASH, id);
     if(loc == 0)                                { fprintf(stderr, "Shader program %u not found\n", id);
                                                   return 0;                                                             }
 
@@ -84,7 +82,7 @@ Program* SIN_shdbucket_get  (ushort loc)        {
 
 //  - --- - --- - --- - --- -
 
-static void checkShaderError(uint shader,
+void checkShaderError(uint shader,
                              uint flag,
                              int isProgram,
                              const char* errorMessage)
@@ -104,17 +102,15 @@ static void checkShaderError(uint shader,
     }
 }
 
-static uint createShader(const char* text, uint shaderType)
+uint createShader(const char* text, uint shaderType)
 {
     uint shader = glCreateShader(shaderType);
     if (!shader)                                { fprintf(stderr, "Shader couldn't be created\n");                      }
 
-    const char* sources[] = { text };
-    const int   lengths[] = { strlen(text) };
+    int len = strlen(text);
 
-    glShaderSource(shader, 1, sources, lengths);
+    glShaderSource(shader, 1, &text, &len);
     glCompileShader(shader);
-    
     checkShaderError(shader, GL_COMPILE_STATUS, 0, "Shader couldn't compile");
 
     return shader;                                                                                                      }
@@ -133,10 +129,14 @@ Program* build_shader(ushort id,
         == SIN_MAX_SHADERS)                     { fprintf(stderr, "Cannot create more than %u shader programs\n",
                                                   SIN_MAX_SHADERS); return NULL;                                        }
 
-        Program new_program = {0};
-        program             = &new_program;
+        uint loc = sStack_pop(SIN_SHD_SLOTSTACK);
+        WARD_EVIL_UNSIG(loc, 1);
 
-        program->location = glCreateProgram();
+        sh_insert(SIN_SHDHASH, id, loc);
+
+        program             = SIN_shdbucket+loc;
+
+        program->location   = glCreateProgram();
 
         program->shaders[0] = createShader(source_v, GL_VERTEX_SHADER);
         program->shaders[1] = createShader(source_p, GL_FRAGMENT_SHADER);
@@ -161,12 +161,6 @@ Program* build_shader(ushort id,
         program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
         program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
 
-        uint loc = sStack_pop(&SIN_SHD_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
-
-        sh_insert(&SIN_SHDHASH, id, loc);
-
-        SIN_shdbucket[loc] = *program;
         SIN_ACTIVE_SHADERS++;
 
     }
@@ -181,7 +175,7 @@ void    del_shader        (Program* program,
     shader_free(program);
 
     SIN_shdbucket[loc] = SIN_emptyshd;
-    int memward = sStack_push(&SIN_SHD_SLOTSTACK, loc);
+    int memward = sStack_push(SIN_SHD_SLOTSTACK, loc);
     WARD_EVIL_UNSIG(memward, 1);
 
     SIN_ACTIVE_SHADERS--;                                                                                               }
@@ -192,6 +186,6 @@ void     unsub_shader       (ushort loc)        {
     if(program)
     {
         program->users--;
-        if(program->users == 0)                 { sh_pop(&SIN_SHDHASH, loc); del_shader(program, loc);                  }
+        if(program->users == 0)                 { sh_pop(SIN_SHDHASH, loc); del_shader(program, loc);                   }
     }
                                                                                                                         }

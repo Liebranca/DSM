@@ -19,8 +19,8 @@ typedef struct FLOAT_DYNARRAY               {
 
 } fArray;
 
-fArray build_fArray(uint32_t size);
-void   del_fArray(fArray* farr);
+fArray* build_fArray(uint32_t size);
+void    del_fArray(fArray* farr);
 
 //  - --- - --- - --- - --- -
 
@@ -33,8 +33,8 @@ typedef struct USHORT_DYNARRAY              {
 
 //  - --- - --- - --- - --- -
 
-usArray build_usArray(uint32_t size);
-void   del_usArray(usArray* usarr);
+usArray* build_usArray(uint32_t size);
+void     del_usArray(usArray* usarr);
 
 #ifdef __cplusplus
 }

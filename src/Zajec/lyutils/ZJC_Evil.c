@@ -57,7 +57,7 @@ void* evil_malloc  (uint count,
                     uint size)            { void* buff = malloc( count * size );
                                             WARD_EVIL_MALLOC(buff); return buff;                            }
 
-void evil_free    (void* buff)            { free(buff);                                                     }
+void evil_free    (void** buff)           { free(*buff); *buff = NULL;                                      }
 
 //  - --- - --- - --- - --- -
 

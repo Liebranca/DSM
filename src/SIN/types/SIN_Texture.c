@@ -9,36 +9,35 @@
 
 #include <stdio.h>
 
-#define  SIN_MAX_TEXTURES      128
+#define  SIN_MAX_TEXTURES             128
 
-Texture* SIN_texbucket       = NULL;
-Texture  SIN_emptytex        = {0};
+static Texture  SIN_emptytex        = {0};
 
-ushort   SIN_ACTIVE_TEXTURES = 0;
+static ushort   SIN_ACTIVE_TEXTURES = 0;
 
-DAF*     TEX_ARCHIVE         = {0};
+static DAF*     TEX_ARCHIVE         = {0};
 
-sStack   SIN_TEX_SLOTSTACK   = {0};
-sHash    SIN_TEXHASH         = {0};
+static sStack*  SIN_TEX_SLOTSTACK   = NULL;
+static sHash*   SIN_TEXHASH         = NULL;
+
+static Texture  SIN_texbucket[SIN_MAX_TEXTURES];
 
 //  - --- - --- - --- - --- -
 
 int SIN_texbucket_init ()                       {
 
-    SIN_TEXHASH     = build_sHash(SIN_MAX_TEXTURES);
-
+    SIN_TEXHASH       = build_sHash (SIN_MAX_TEXTURES);
     SIN_TEX_SLOTSTACK = build_sStack(SIN_MAX_TEXTURES);
-    for(int i = SIN_MAX_TEXTURES-1;
-        i > -1; i--)                            { sStack_push(&SIN_TEX_SLOTSTACK, i);                                   }
 
-    SIN_texbucket = (Texture*) evil_malloc(SIN_MAX_TEXTURES, sizeof(Texture));
+    for(int i = SIN_MAX_TEXTURES-1;
+        i > -1; i--)                            { sStack_push(SIN_TEX_SLOTSTACK, i);                                    }
 
     return 0;                                                                                                           }
 
 int SIN_texbucket_end  ()                       {
 
-    del_sHash(&SIN_TEXHASH);
-    del_sStack(&SIN_TEX_SLOTSTACK);
+    del_sStack(SIN_TEX_SLOTSTACK);
+    del_sHash (SIN_TEXHASH);
 
     for(uint i = 0;
         i < SIN_MAX_TEXTURES; i++)              { Texture* tex = SIN_texbucket + i;
@@ -46,7 +45,6 @@ int SIN_texbucket_end  ()                       {
                                                   if(tex != NULL) 
                                                 { glDeleteTextures(1, &tex->location); }                                }
 
-    WARD_EVIL_MFREE(SIN_texbucket);
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
@@ -59,14 +57,14 @@ int     SIN_tex_extract_end (cchar* filename)  { return extraction_end(filename,
 
 Texture* SIN_texbucket_find (ushort id)         {
 
-    ushort loc = sh_hashloc(&SIN_TEXHASH, id);
+    ushort loc = sh_hashloc(SIN_TEXHASH, id);
     if(loc == 0)                                { return NULL;                                                          }
 
     return SIN_texbucket+(loc-1);                                                                                       }
 
 ushort SIN_texbucket_findloc  (ushort id)       {
 
-    ushort loc = sh_hashloc(&SIN_TEXHASH, id);
+    ushort loc = sh_hashloc(SIN_TEXHASH, id);
     if(loc == 0)                                { fprintf(stderr, "Texture %u not found\n", id);
                                                   return 0;                                                             }
 
@@ -97,13 +95,16 @@ Texture* build_texture(ushort id, uchar offset) {
            == SIN_MAX_TEXTURES)                 { fprintf(stderr, "Cannot create more than %u textures",
                                                   SIN_MAX_TEXTURES); return NULL;                                       }
 
-        Texture new_texture = {0};
-        tex                 = &new_texture;
+        uint loc = sStack_pop(SIN_TEX_SLOTSTACK);
+        WARD_EVIL_UNSIG(loc, 1);
 
-        tex->id = id;
+        sh_insert(SIN_TEXHASH, id, loc);
 
-        uchar*  size;
-        ushort* pixels;
+        tex                 = SIN_texbucket+loc;
+
+        tex->id             = id;
+        uint*   size        = NULL;
+        ushort* pixels      = NULL;
 
         extractjoj(TEX_ARCHIVE,
                    offset,
@@ -141,14 +142,6 @@ Texture* build_texture(ushort id, uchar offset) {
         WARD_EVIL_MFREE(pixel_data);
         WARD_EVIL_MFREE(size);
 
-//  - --- - --- - --- - --- -
-
-        uint loc = sStack_pop(&SIN_TEX_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
-
-        sh_insert(&SIN_TEXHASH, id, loc);
-
-        SIN_texbucket[loc] = *tex;
         SIN_ACTIVE_TEXTURES++;
 
     }
@@ -172,7 +165,7 @@ void     del_tex            (Texture*   tex,
                              ushort loc)        {
 
     SIN_texbucket[loc] = SIN_emptytex;
-    int memward = sStack_push(&SIN_TEX_SLOTSTACK, loc);
+    int memward = sStack_push(SIN_TEX_SLOTSTACK, loc);
     WARD_EVIL_UNSIG(memward, 1);
 
     SIN_ACTIVE_TEXTURES--;                                                                                              }
@@ -184,7 +177,7 @@ void  unsub_tex       (ushort loc)              {
     if(tex)
     {
         tex->users--;
-        if(tex->users == 0)                     { sh_pop(&SIN_TEXHASH, tex->id); del_tex(tex, loc);                     }
+        if(tex->users == 0)                     { sh_pop(SIN_TEXHASH, tex->id); del_tex(tex, loc);                      }
     }
 
                                                                                                                         }

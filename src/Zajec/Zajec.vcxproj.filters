@@ -81,6 +81,9 @@
     <ClInclude Include="lymath\ZJC_VOPS.h">
       <Filter>Header Files\lymath</Filter>
     </ClInclude>
+    <ClInclude Include="lyutils\ZJC_Str.h">
+      <Filter>Header Files\lyutils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZJC_CommonTypes.c">
@@ -115,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="lymath\ZJC_VOPS.cpp">
       <Filter>Source Files\lymath</Filter>
+    </ClCompile>
+    <ClCompile Include="lyutils\ZJC_Str.c">
+      <Filter>Source Files\lyutils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,54 +1,54 @@
 #include "SIN_Material.h"
-#include "SIN_Texture.h"
-#include "SIN_Shader.h"
 
 #include "lyarr/ZJC_Hash.h"
 #include "lyarr/ZJC_Stack.h"
 #include "lyutils/ZJC_Evil.h"
 
+#include "SIN_Texture.h"
+#include "SIN_Shader.h"
+
 #include <stdio.h>
 
-#define   SIN_MAX_MATERIALS       64
+#define   SIN_MAX_MATERIALS             64
 
-Material* SIN_matbucket         = NULL;
-Material  SIN_emptymat          = {0};
-ushort    SIN_ACTIVE_MATERIALS  = 0;
+static Material SIN_emptymat          = {0};
+static ushort   SIN_ACTIVE_MATERIALS  = 0;
 
-sStack    SIN_MAT_SLOTSTACK     = {0};
-sHash     SIN_MATHASH           = {0};
+static sStack*  SIN_MAT_SLOTSTACK     = NULL;
+static sHash*   SIN_MATHASH           = NULL;
+
+static Material SIN_matbucket[SIN_MAX_MATERIALS];
 
 //  - --- - --- - --- - --- -
 
 int       SIN_matbucket_init  ()                {
 
-    SIN_MATHASH = build_sHash(SIN_MAX_MATERIALS);
-
+    SIN_MATHASH       = build_sHash (SIN_MAX_MATERIALS);
     SIN_MAT_SLOTSTACK = build_sStack(SIN_MAX_MATERIALS);
-    for(int i = SIN_MAX_MATERIALS-1; i > -1; i--)  { sStack_push(&SIN_MAT_SLOTSTACK, i);                                }
 
-    SIN_matbucket = (Material*) evil_malloc(SIN_MAX_MATERIALS, sizeof(Material));
+    for(int i = SIN_MAX_MATERIALS-1; i > -1; i--)  { sStack_push(SIN_MAT_SLOTSTACK, i);                                 }
 
     return 0;                                                                                                           }
 
 int       SIN_matbucket_end   ()                {
 
-    del_sHash(&SIN_MATHASH);
-    del_sStack(&SIN_MAT_SLOTSTACK);
-    WARD_EVIL_MFREE(SIN_matbucket);
+    del_sStack(SIN_MAT_SLOTSTACK);
+    del_sHash (SIN_MATHASH);
+
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
 
 Material* SIN_matbucket_find  (ushort matid)    {
 
-    ushort loc = sh_hashloc(&SIN_MATHASH, matid);
+    ushort loc = sh_hashloc(SIN_MATHASH, matid);
     if(loc == 0)                                { return NULL;                                                          }
 
     return SIN_matbucket+(loc-1);                                                                                       }
 
 ushort SIN_matbucket_findloc  (ushort matid)    {
 
-    ushort loc = sh_hashloc(&SIN_MATHASH, matid);
+    ushort loc = sh_hashloc(SIN_MATHASH, matid);
     if(loc == 0)                                { fprintf(stderr, "Material %u not found\n", matid);
                                                   return 0;                                                             }
 
@@ -81,20 +81,18 @@ Material* build_material      (ushort matid,
         == SIN_MAX_MATERIALS)                   { fprintf(stderr, "Cannot create more than %u materials\n",
                                                   SIN_MAX_MATERIALS); return NULL;                                      }
 
-        Material new_material = {0};
-        material              = &new_material;
+        uint loc = sStack_pop(SIN_MAT_SLOTSTACK);
+        WARD_EVIL_UNSIG(loc, 1);
+
+        sh_insert(SIN_MATHASH, matid, loc);
+
+        material         = SIN_matbucket+loc;
 
         material         = 0;
         material->id     = matid;
         material->texloc = SIN_texbucket_findloc(texid);
         material->shdloc = SIN_shdbucket_findloc(shdid);
 
-        uint loc = sStack_pop(&SIN_MAT_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
-
-        sh_insert(&SIN_MATHASH, matid, loc);
-
-        SIN_matbucket[loc] = *material;
         SIN_ACTIVE_MATERIALS++;
 
         Program* program  = SIN_shdbucket_get(material->shdloc);
@@ -113,10 +111,10 @@ void    del_material        (Material* material,
                              ushort loc)        {
 
     unsub_shader(material->shdloc);
-    //TODO: unsub texture
+    unsub_tex(material->texloc);
 
     SIN_matbucket[loc] = SIN_emptymat;
-    int memward = sStack_push(&SIN_MAT_SLOTSTACK, loc);
+    int memward = sStack_push(SIN_MAT_SLOTSTACK, loc);
     WARD_EVIL_UNSIG(memward, 1);
 
     SIN_ACTIVE_MATERIALS--;                                                                                             }
@@ -128,7 +126,7 @@ void    unsub_material      (ushort loc)        {
     if(material)
     {
         material->users--;
-        if(material->users == 0)                { sh_pop(&SIN_MATHASH, loc); del_material(material, loc);               }
+        if(material->users == 0)                { sh_pop(SIN_MATHASH, loc); del_material(material, loc);                }
     }
 
                                                                                                                         }
