@@ -48,7 +48,7 @@ int       SIN_shdbucket_end   ()                {
     for(uint i = 0;
         i < SIN_MAX_SHADERS; i++)               { Program* program = SIN_shdbucket + i;
 
-                                                  if(program->location)
+                                                  if(program->id)
                                                 { shader_free(program); }                                               }
 
     WARD_EVIL_MFREE(SIN_shdbucket);

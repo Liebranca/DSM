@@ -6,12 +6,12 @@
 
 #include <stdio.h>
 
-#define SIN_MAX_BATCHES        64
+#define SIN_MAX_BATCHES               64
 
-#define SIN_BATCH_VERTSIZE     32
+#define SIN_BATCH_VERTSIZE            32
 
-#define SIN_BATCH_MAXOBJECTS   256
-#define SIN_BATCH_MAXVERTS     65536
+#define SIN_BATCH_MAXOBJECTS          256
+#define SIN_BATCH_MAXVERTS            65536
 
 static M3DB    SIN_emptybatch       = {0};
 static ushort  SIN_ACTIVE_BATCHES   = 0;
@@ -20,7 +20,7 @@ static sStack* SIN_BATCH_SLOTSTACK  = NULL;
 
 static uint    SIN_GVAO             = 0;
 
-static M3DB    SIN_meshbatches[SIN_MAX_BATCHES];
+static M3DB*   SIN_meshbatches      = NULL;
 
 #define SIN_BATCH_VBOSIZE SIN_BATCH_MAXVERTS * SIN_BATCH_VERTSIZE
 #define SIN_BATCH_IBOSIZE SIN_BATCH_MAXVERTS * sizeof(uint)
@@ -33,6 +33,7 @@ M3DB*          SIN_active_meshbatch = NULL;
 
 void  SIN_GVAO_init()                           { 
 
+    SIN_meshbatches     = (M3DB*) evil_malloc(SIN_MAX_BATCHES, sizeof(M3DB));
     SIN_BATCH_SLOTSTACK = build_sStack(SIN_MAX_BATCHES);
 
     for(int i = SIN_MAX_BATCHES-1;
@@ -58,7 +59,7 @@ int  SIN_GVAO_end()                             {
     for(uint i = 0;
         i < SIN_ACTIVE_BATCHES; i ++)           { M3DB* batch = SIN_meshbatches + i;
 
-                                                  if(batch != NULL)
+                                                  if(batch->BUFFS[0])
                                                 { SIN_delMeshBatch(SIN_meshbatches+i); }                                }
 
     glBindVertexArray(0);

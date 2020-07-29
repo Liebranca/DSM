@@ -48,14 +48,14 @@
     <ClCompile Include="types\SIN_Texture.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="SIN.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="types\SIN_Shader.cpp">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
     <ClCompile Include="shaders\SIN_DefaultShader.cpp">
       <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Shader.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="SIN.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -89,7 +89,6 @@ Material* build_material      (ushort matid,
 
         material         = SIN_matbucket+loc;
 
-        material         = 0;
         material->id     = matid;
         material->texloc = SIN_texbucket_findloc(texid);
         material->shdloc = SIN_shdbucket_findloc(shdid);

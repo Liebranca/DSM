@@ -174,11 +174,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shaders\SIN_DefaultShader.cpp" />
-    <ClCompile Include="SIN.cpp" />
+    <ClCompile Include="SIN.c" />
     <ClCompile Include="types\SIN_Material.c" />
     <ClCompile Include="types\SIN_Mesh.c" />
     <ClCompile Include="types\SIN_MeshBatch.c" />
-    <ClCompile Include="types\SIN_Shader.cpp" />
+    <ClCompile Include="types\SIN_Shader.c" />
     <ClCompile Include="types\SIN_Shader_EX.cpp" />
     <ClCompile Include="types\SIN_Texture.c" />
   </ItemGroup>

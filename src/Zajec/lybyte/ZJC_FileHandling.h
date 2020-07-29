@@ -21,10 +21,12 @@ int    extraction_start (cchar* filename, uchar archtype, DAF** daf);
 int    extraction_end   (cchar* filename, DAF** daf);
 
 int    extractcrk       (DAF* daf, uchar offset, ushort* vertCount,
-                         ushort* indexCount, pVP3D_8* bounds,
-                         VP3D_8* verts, ushort* indices);
+                         ushort* indexCount, pVP3D_8** bounds,
+                         VP3D_8** verts, ushort** indices);
 
-int    extractjoj       (DAF* daf, uchar offset, uint* size, ushort* width, ushort* height, ushort* pixels);
+int    extractjoj       (DAF* daf, uchar offset, uint* size, ushort* width, ushort* height, ushort** pixels);
+
+DAF*   dafalloc();
 
 #ifdef __cplusplus
 }

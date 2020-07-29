@@ -15,16 +15,19 @@ static Texture  SIN_emptytex        = {0};
 
 static ushort   SIN_ACTIVE_TEXTURES = 0;
 
-static DAF*     TEX_ARCHIVE         = {0};
+static DAF*     TEX_ARCHIVE         = NULL;
 
 static sStack*  SIN_TEX_SLOTSTACK   = NULL;
 static sHash*   SIN_TEXHASH         = NULL;
 
-static Texture  SIN_texbucket[SIN_MAX_TEXTURES];
+static Texture* SIN_texbucket       = NULL;
 
 //  - --- - --- - --- - --- -
 
 int SIN_texbucket_init ()                       {
+
+    TEX_ARCHIVE       = dafalloc();
+    SIN_texbucket     = (Texture*) evil_malloc(SIN_MAX_TEXTURES, sizeof(Texture));
 
     SIN_TEXHASH       = build_sHash (SIN_MAX_TEXTURES);
     SIN_TEX_SLOTSTACK = build_sStack(SIN_MAX_TEXTURES);
@@ -42,8 +45,11 @@ int SIN_texbucket_end  ()                       {
     for(uint i = 0;
         i < SIN_MAX_TEXTURES; i++)              { Texture* tex = SIN_texbucket + i;
 
-                                                  if(tex != NULL) 
+                                                  if(tex->id)
                                                 { glDeleteTextures(1, &tex->location); }                                }
+
+    WARD_EVIL_MFREE(SIN_texbucket);
+    WARD_EVIL_MFREE(TEX_ARCHIVE);
 
     return 0;                                                                                                           }
 
@@ -103,22 +109,22 @@ Texture* build_texture(ushort id, uchar offset) {
         tex                 = SIN_texbucket+loc;
 
         tex->id             = id;
-        uint*   size        = NULL;
+        uint    size        = 0;
         ushort* pixels      = NULL;
 
         extractjoj(TEX_ARCHIVE,
                    offset,
-                   size,
+                   &size,
                    &tex->width,
                    &tex->height,
-                   pixels);
+                   &pixels);
 
 //  - --- - --- - --- - --- -
 
         uchar* pixel_data = (uchar*) evil_malloc(tex->width * tex->height, sizeof(uchar));
         uint   curpix     = 0;
 
-        for(uint i = 0; i < *size; i++)
+        for(uint i = 0; i < size; i++)
         {
             uchar  color = pixels[i] & 255, count = (pixels[i] & 65280) >> 8;
             for(uint j = 0; j < count; j++)     { pixel_data[curpix] = color; curpix++;                                 }
@@ -135,12 +141,11 @@ Texture* build_texture(ushort id, uchar offset) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE_2_3_3_REV, pixel_data);
+                     GL_RGB, GL_UNSIGNED_BYTE_3_3_2, pixel_data);
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
         WARD_EVIL_MFREE(pixel_data);
-        WARD_EVIL_MFREE(size);
 
         SIN_ACTIVE_TEXTURES++;
 
@@ -163,6 +168,8 @@ void bind_tex_to_slot(ushort loc, uint slot)    {
 
 void     del_tex            (Texture*   tex,
                              ushort loc)        {
+
+    glDeleteTextures(1, &tex->location);
 
     SIN_texbucket[loc] = SIN_emptytex;
     int memward = sStack_push(SIN_TEX_SLOTSTACK, loc);

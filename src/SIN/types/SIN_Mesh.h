@@ -28,17 +28,18 @@ typedef struct SIN_MESH_3D                      {
 
 //  - --- - --- - --- - --- -
 
-int     SIN_mesh_extract_from(cchar* filename);
-int     SIN_mesh_extract_end (cchar* filename);
+int     SIN_mesh_extract_from (cchar* filename);
+int     SIN_mesh_extract_end  (cchar* filename);
 
-int     SIN_meshbucket_init ();
-int     SIN_meshbucket_end  ();
+int     SIN_meshbucket_init   ();
+int     SIN_meshbucket_end    ();
 
-void    unsub_mesh          (ushort loc);
+void    unsub_mesh            (ushort loc);
 
-M3D*    SIN_meshbucket_find (ushort id);
-M3D*    SIN_meshbucket_get  (ushort loc);
-M3D*    build_mesh          (ushort id, ushort matid, uchar offset);
+M3D*    SIN_meshbucket_find   (ushort id);
+ushort SIN_meshbucket_findloc (ushort id);
+M3D*    SIN_meshbucket_get    (ushort loc);
+M3D*    build_mesh            (ushort id, ushort matid, uchar offset);
 
 //  - --- - --- - --- - --- -
 

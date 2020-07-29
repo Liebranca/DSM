@@ -16,12 +16,12 @@ static M3D     SIN_emptymesh      = {0};
 
 static ushort  SIN_ACTIVE_MESHES  = 0;
 
-static DAF*    MESH_ARCHIVE       = {0};
+static DAF*    MESH_ARCHIVE       = NULL;
 
 static sStack* SIN_MESH_SLOTSTACK = NULL;
 static sHash*  SIN_MEHASH         = NULL;
 
-static M3D     SIN_meshbucket[SIN_MAX_MESHES];
+static M3D*    SIN_meshbucket     = NULL;
 
 typedef struct TRI_NORMAL_GROUP {
 
@@ -33,6 +33,9 @@ typedef struct TRI_NORMAL_GROUP {
 //  - --- - --- - --- - --- -
 
 int SIN_meshbucket_init ()                      {
+
+    MESH_ARCHIVE       = dafalloc();
+    SIN_meshbucket     = (M3D*) evil_malloc(SIN_MAX_MESHES, sizeof(M3D));
 
     SIN_MEHASH         = build_sHash (SIN_MAX_MESHES);
     SIN_MESH_SLOTSTACK = build_sStack(SIN_MAX_MESHES);
@@ -49,8 +52,11 @@ int SIN_meshbucket_end  ()                      {
     for(uint i = 0;
         i < SIN_MAX_MESHES; i++)                { M3D* mesh = SIN_meshbucket + i;
 
-                                                  if(mesh != NULL) 
+                                                  if(mesh->id)
                                                 { WARD_EVIL_MFREE(mesh->bounds); }                                      }
+
+    WARD_EVIL_MFREE(SIN_meshbucket);
+    WARD_EVIL_MFREE(MESH_ARCHIVE);
 
     return 0;                                                                                                           }
 
@@ -68,6 +74,14 @@ M3D* SIN_meshbucket_find (ushort id)            {
     if(loc == 0)                                { return NULL;                                                          }
 
     return SIN_meshbucket+(loc-1);                                                                                      }
+
+ushort SIN_meshbucket_findloc  (ushort id)      {
+
+    ushort loc = sh_hashloc(SIN_MEHASH, id);
+    if(loc == 0)                                { fprintf(stderr, "Mesh %u not found\n", id);
+                                                  return 0;                                                             }
+
+    return loc-1;                                                                                                       }
 
 M3D* SIN_meshbucket_get  (ushort loc)           {
 
@@ -103,7 +117,6 @@ M3D*    build_mesh          (ushort id,
 
         mesh            = SIN_meshbucket+loc;
 
-        mesh            = 0;
         mesh->id        = id;
         mesh->matloc    = SIN_matbucket_findloc(matid);
 
@@ -114,9 +127,9 @@ M3D*    build_mesh          (ushort id,
                    offset,
                    &mesh->vertCount,
                    &mesh->indexCount,
-                   mesh->bounds,
-                   verts,
-                   indices);
+                   &mesh->bounds,
+                   &verts,
+                   &indices);
 
 //  - --- - --- - --- - --- -
 
@@ -129,8 +142,9 @@ M3D*    build_mesh          (ushort id,
             f8 p2[3] = { 0, 0, 0 };
             f8 p3[3] = { 0, 0, 0 };
 
-            for(uint i = 0; i < (uint)mesh->indexCount * 3; i += 3)
+            for(uint i = 0; i < (uint)mesh->indexCount; i += 3)
             {
+
                 p1[0] = (verts + indices[i+0])->co[0];
                 p1[1] = (verts + indices[i+0])->co[1];
                 p1[2] = (verts + indices[i+0])->co[2];

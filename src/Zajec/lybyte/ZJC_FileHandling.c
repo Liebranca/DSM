@@ -7,6 +7,8 @@
 #include "../lymath/ZJC_GOPS.h"
 #include "../lyutils/ZJC_Evil.h"
 
+#include <string.h>
+
 //  - --- - --- - --- - --- -
 
 #define EVIL_FREAD(type, count, buff)            buff = (type*) evil_malloc(count, sizeof(type));\
@@ -157,8 +159,6 @@ int openarch(cchar*        filename,
 
         for(uint i = 0; i < 8; i++)             { if(sign[i] != archtype[i])
                                                 { terminator(0x67, filename); return ERROR; }                           }
-
-        printf("Good enough\n");
 
         fread(&daf->fileCount, sizeof(ushort), 1, curfile);
         fread(&daf->size,      sizeof(uint32_t), 1,   curfile);
@@ -709,6 +709,8 @@ cchar* get_archtype(uint8_t archtype)           {
     else                                             { return FBGM;                                                     }
                                                                                                                         }
 
+DAF* dafalloc()                                 { return (DAF*) evil_malloc(1, sizeof(DAF));                            }
+
 int    extraction_start (cchar*  filename,
                          uchar   archtype,
                          DAF**    daf)           {
@@ -729,7 +731,7 @@ int    extraction_end   (cchar* filename,
                          DAF**  daf)            {
 
     closebin(filename, 0);
-    **daf = emptyarch;
+    memset(*daf, 0, sizeof(**daf));
 
     return 0;                                                                                                           }
 
@@ -737,9 +739,9 @@ int extractcrk (DAF*     daf,
                 uchar    offset,
                 ushort*  vertCount,
                 ushort*  indexCount,
-                pVP3D_8* bounds,
-                VP3D_8*  verts,
-                ushort*  indices)               {
+                pVP3D_8** bounds,
+                VP3D_8**  verts,
+                ushort**  indices)              {
 
     rewind(curfile);
     fseek(curfile, 0, SEEK_CUR);
@@ -749,18 +751,18 @@ int extractcrk (DAF*     daf,
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
     
-    EVIL_FREAD(pVP3D_8, 8,           bounds);
-    EVIL_FREAD(VP3D_8,  *vertCount,  verts);
-    EVIL_FREAD(ushort,  *indexCount, indices);
+    EVIL_FREAD(pVP3D_8, 8,           *bounds);
+    EVIL_FREAD(VP3D_8,  *vertCount,  *verts);
+    EVIL_FREAD(ushort,  *indexCount, *indices);
 
     return 0;                                                                                                           }
 
-int    extractjoj (DAF*    daf,
-                   uchar   offset,
-                   uint*   size,
-                   ushort* width,
-                   ushort* height,
-                   ushort* pixels)              {
+int    extractjoj (DAF*     daf,
+                   uchar    offset,
+                   uint*    size,
+                   ushort*  width,
+                   ushort*  height,
+                   ushort** pixels)             {
 
     rewind(curfile);
     fseek(curfile, 0, SEEK_CUR);
@@ -771,7 +773,7 @@ int    extractjoj (DAF*    daf,
     fread(height,  sizeof(ushort),  1, curfile);
     fread(size,    sizeof(uint),    1, curfile);
 
-    EVIL_FREAD(ushort, *size, pixels);
+    EVIL_FREAD(ushort, *size, *pixels);
 
     return 0;                                                                                                           }
 
