@@ -54,10 +54,10 @@ void terminator(uint errorcode,
 //  - --- - --- - --- - --- -
 
 void* evil_malloc  (uint count,
-                    uint size)            { void* buff = malloc( count * size );
-                                            WARD_EVIL_MALLOC(buff); return buff;                            }
+                    uint size)            { void* buff = malloc( count * size ); WARD_EVIL_MALLOC(buff);
+                                            memset(buff, 0, count * size); return buff;                     }
 
-void evil_free    (void** buff)           { free(*buff); *buff = NULL;                                      }
+void evil_free    (void* buff)            { free(buff);                                                     }
 
 //  - --- - --- - --- - --- -
 

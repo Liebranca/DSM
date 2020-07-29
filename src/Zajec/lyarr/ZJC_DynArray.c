@@ -1,5 +1,7 @@
 #include "ZJC_DynArray.h"
 
+#include <stdio.h>
+
 //  - --- - --- - --- - --- -
 
 fArray* build_fArray(uint32_t size)             {
@@ -19,8 +21,8 @@ usArray* build_usArray(uint32_t size)           {
 
     usArray* usarr = (usArray*) evil_malloc(1, sizeof(usArray));
 
-    usarr->size    = size;
-    usarr->buff    = (ushort*) evil_malloc(size, sizeof(ushort));
+    usarr->size = size;
+    usarr->buff = (ushort*) evil_malloc(size, sizeof(ushort));
 
     return usarr;                                                                                                       }
 

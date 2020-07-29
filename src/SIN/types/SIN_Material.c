@@ -26,7 +26,8 @@ int       SIN_matbucket_init  ()                {
     SIN_MATHASH       = build_sHash (SIN_MAX_MATERIALS);
     SIN_MAT_SLOTSTACK = build_sStack(SIN_MAX_MATERIALS);
 
-    for(int i = SIN_MAX_MATERIALS-1; i > -1; i--)  { sStack_push(SIN_MAT_SLOTSTACK, i);                                 }
+    for(int i = SIN_MAX_MATERIALS-1;
+        i > 0; i--)                             { sStack_push(SIN_MAT_SLOTSTACK, i);                                    }
 
     return 0;                                                                                                           }
 

@@ -30,13 +30,18 @@ int chmang_init         (cchar* title,
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 3);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 3);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 2);
+
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 
     chmang.curwin   = 0;
     chmang.openwins = 1;
@@ -46,10 +51,13 @@ int chmang_init         (cchar* title,
     *chmang.wins    = build_whandle(title, width, height);
     chmang.context  = SDL_GL_CreateContext(chmang_curwin()->window);
 
+    glewExperimental = GL_TRUE;
     GLenum status = glewInit();
     if (status != GLEW_OK)                      { fprintf(stderr, "GLEW failed it's own init; something's wrong...\n");
                                                   chmang_end(); return FATAL;                                           }
 
+    if (!glewIsSupported("GL_VERSION_3_2"))     { printf("This application requires OpenGL v1.30 compatibility\n");     }
+    
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);

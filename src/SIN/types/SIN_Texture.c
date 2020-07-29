@@ -30,7 +30,7 @@ int SIN_texbucket_init ()                       {
     SIN_TEX_SLOTSTACK = build_sStack(SIN_MAX_TEXTURES);
 
     for(int i = SIN_MAX_TEXTURES-1;
-        i > -1; i--)                            { sStack_push(SIN_TEX_SLOTSTACK, i);                                    }
+        i > 0; i--)                             { sStack_push(SIN_TEX_SLOTSTACK, i);                                    }
 
     return 0;                                                                                                           }
 

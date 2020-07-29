@@ -6,21 +6,21 @@ extern "C" {
 #endif
 
 #include "../ZJC_CommonTypes.h"
-#include "ZJC_DynArray.h"
+#include <stdint.h>
 
 //  - --- - --- - --- - --- -
 
 typedef struct SHORT_STACK { 
 
-    ulong    size;
-    ulong    top;
-    usArray* values;
+    size_t  size;
+    ulong   top;
+    ushort* values;
 
 } sStack;
 
 //  - --- - --- - --- - --- -
 
-sStack* build_sStack(ulong size);
+sStack* build_sStack(size_t size);
 void    del_sStack  (sStack* stack);
 int     sStack_push (sStack* stack, ushort value);
 ushort  sStack_pop  (sStack* stack);

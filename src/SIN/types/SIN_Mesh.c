@@ -37,7 +37,7 @@ int SIN_meshbucket_init ()                      {
     SIN_MEHASH         = build_sHash (SIN_MAX_MESHES);
     SIN_MESH_SLOTSTACK = build_sStack(SIN_MAX_MESHES);
 
-    for(int i = SIN_MAX_MESHES-1; i > -1; i--)  { sStack_push(SIN_MESH_SLOTSTACK, i);                                   }
+    for(int i = SIN_MAX_MESHES-1; i > 0; i--)   { sStack_push(SIN_MESH_SLOTSTACK, i);                                   }
 
     return 0;                                                                                                           }
 

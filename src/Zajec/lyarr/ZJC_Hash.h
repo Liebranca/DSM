@@ -5,15 +5,16 @@
 extern "C" {
 #endif
 
-#include "ZJC_DynArray.h"
+#include "../ZJC_CommonTypes.h"
+#include <stdint.h>
 
 //  - --- - --- - --- - --- -
 
 typedef struct SHORT_HASH_TABLE {
 
-    size_t    size;
-    ulong     maxloc;
-    usArray*  locs;
+    size_t  size;
+    ulong   maxloc;
+    ushort* locs;
 
 } sHash;
 

@@ -1,11 +1,11 @@
 #ifndef __SIN_SHADER_H__
 #define __SIN_SHADER_H__
 
+#include "../Zajec/ZJC_CommonTypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "../Zajec/ZJC_CommonTypes.h"
 
 #define __SIN_MAX_SHADERS_PER_PROGRAM__ 2
 
@@ -33,7 +33,7 @@ int      SIN_shdbucket_end  ();
 ushort   SIN_shdbucket_findloc  (ushort id);
 Program* SIN_shdbucket_get      (ushort loc);
 Program* SIN_shdbucket_find     (ushort id);
-Program* build_shader           (ushort id, const char* source_v, const char* source_p);
+Program* build_shader           (ushort id, cchar** vert_source, cchar** frag_source);
 
 void     unsub_shader           (ushort loc);
 

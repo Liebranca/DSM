@@ -1,7 +1,7 @@
 #include "SIN.h"
 #include <stdio.h>
 
-unsigned char INITFLAGS = 0;
+static unsigned char INITFLAGS = 0;
 
 //  - --- - --- - --- - --- -
 
@@ -11,7 +11,7 @@ void SIN_INIT(unsigned char flags)              {
 
     SIN_texbucket_init();
     SIN_shdbucket_init();
-    //SIN_matbucket_init();
+    SIN_matbucket_init();
     SIN_meshbucket_init();
 
     INITFLAGS = flags;
@@ -20,14 +20,12 @@ void SIN_INIT(unsigned char flags)              {
 
 void SIN_END()                                  { 
 
-    printf("Shutting down SIN: ");
+    SIN_meshbucket_end();
+    SIN_matbucket_end();
+    SIN_shdbucket_end();
+    SIN_texbucket_end();
 
-    printf("%i", SIN_meshbucket_end());
-    //printf("%i", SIN_matbucket_end());
-    printf("%i", SIN_shdbucket_end());
-    printf("%i", SIN_texbucket_end());
-
-    printf("%i\n", SIN_GVAO_end());
+    SIN_GVAO_end();
 
                                                                                                                         }
 

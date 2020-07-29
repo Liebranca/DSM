@@ -35,6 +35,9 @@ void  SIN_GVAO_init()                           {
 
     SIN_BATCH_SLOTSTACK = build_sStack(SIN_MAX_BATCHES);
 
+    for(int i = SIN_MAX_BATCHES-1;
+        i > 0; i--)                             { sStack_push(SIN_BATCH_SLOTSTACK, i);                                  }
+
     glGenVertexArrays(1, &SIN_GVAO);
     glBindVertexArray(SIN_GVAO);
 
@@ -52,8 +55,6 @@ void  SIN_GVAO_init()                           {
 
 int  SIN_GVAO_end()                             {
 
-    del_sStack(SIN_BATCH_SLOTSTACK);
-
     for(uint i = 0;
         i < SIN_ACTIVE_BATCHES; i ++)           { M3DB* batch = SIN_meshbatches + i;
 
@@ -62,6 +63,8 @@ int  SIN_GVAO_end()                             {
 
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &SIN_GVAO);
+
+    del_sStack(SIN_BATCH_SLOTSTACK);
 
     return 0;                                                                                                           }
 

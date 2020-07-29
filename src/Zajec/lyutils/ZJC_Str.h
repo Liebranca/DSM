@@ -9,8 +9,8 @@ extern "C" {
 
 //      - --- - --- - --- - --- -
 
-cchar* subpath(cchar* fullpath, uint levels);
-cchar* catpath(cchar* root, cchar* added);
+char* subpath(cchar* fullpath, uint levels);
+char* catpath(cchar* root, cchar* added);
 
 //      - --- - --- - --- - --- -
 

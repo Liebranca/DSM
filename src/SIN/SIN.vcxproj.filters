@@ -39,12 +39,6 @@
     <ClCompile Include="types\SIN_Material.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="SIN.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="types\SIN_Shader.c">
-      <Filter>Source Files\types</Filter>
-    </ClCompile>
     <ClCompile Include="types\SIN_Shader_EX.cpp">
       <Filter>Source Files\types</Filter>
     </ClCompile>
@@ -54,7 +48,13 @@
     <ClCompile Include="types\SIN_Texture.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="shaders\SIN_DefaultShader.c">
+    <ClCompile Include="SIN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SIN_Shader.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_DefaultShader.cpp">
       <Filter>Source Files\shaders</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,11 +77,11 @@
     <ClInclude Include="types\SIN_MeshBatch.h">
       <Filter>Header Files\types</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\SIN_DefaultShader.h">
-      <Filter>Header Files\shaders</Filter>
-    </ClInclude>
     <ClInclude Include="types\SIN_Texture.h">
       <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_DefaultShader.h">
+      <Filter>Header Files\shaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 #include "GL/glew.h"
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <string.h>
 
 #define SIN_MAX_SHADERS              64
@@ -17,16 +18,18 @@ static ushort   SIN_ACTIVE_SHADERS = 0;
 static sStack*  SIN_SHD_SLOTSTACK  = NULL;
 static sHash*   SIN_SHDHASH        = NULL;
 
-static Program  SIN_shdbucket[SIN_MAX_SHADERS];
+static Program* SIN_shdbucket      = NULL;
 
 //  - --- - --- - --- - --- -
 
 int       SIN_shdbucket_init  ()                {
 
+    SIN_shdbucket     = (Program*) evil_malloc(SIN_MAX_SHADERS, sizeof(Program));
+
     SIN_SHDHASH       = build_sHash (SIN_MAX_SHADERS);
     SIN_SHD_SLOTSTACK = build_sStack(SIN_MAX_SHADERS);
 
-    for(int i = SIN_MAX_SHADERS-1; i > -1; i--)  { sStack_push(SIN_SHD_SLOTSTACK, i);                                   }
+    for(int i = SIN_MAX_SHADERS-1; i > 0; i--)  { sStack_push(SIN_SHD_SLOTSTACK, i);                                    }
 
     return 0;                                                                                                           }
 
@@ -45,8 +48,10 @@ int       SIN_shdbucket_end   ()                {
     for(uint i = 0;
         i < SIN_MAX_SHADERS; i++)               { Program* program = SIN_shdbucket + i;
 
-                                                  if(program != NULL) 
+                                                  if(program->location)
                                                 { shader_free(program); }                                               }
+
+    WARD_EVIL_MFREE(SIN_shdbucket);
 
     return 0;                                                                                                           }
 
@@ -102,15 +107,14 @@ void checkShaderError(uint shader,
     }
 }
 
-uint createShader(const char* text, uint shaderType)
+uint createShader(cchar** source, uint shaderType)
 {
     uint shader = glCreateShader(shaderType);
     if (!shader)                                { fprintf(stderr, "Shader couldn't be created\n");                      }
 
-    int len = strlen(text);
-
-    glShaderSource(shader, 1, &text, &len);
+    glShaderSource(shader, 1, source, NULL);
     glCompileShader(shader);
+
     checkShaderError(shader, GL_COMPILE_STATUS, 0, "Shader couldn't compile");
 
     return shader;                                                                                                      }
@@ -118,8 +122,8 @@ uint createShader(const char* text, uint shaderType)
 //  - --- - --- - --- - --- -
 
 Program* build_shader(ushort id,
-                     const char* source_v,
-                     const char* source_p)      {
+                     cchar** vert_source,
+                     cchar** frag_source)       {
 
     Program* program = SIN_shdbucket_find(id);
 
@@ -138,8 +142,8 @@ Program* build_shader(ushort id,
 
         program->location   = glCreateProgram();
 
-        program->shaders[0] = createShader(source_v, GL_VERTEX_SHADER);
-        program->shaders[1] = createShader(source_p, GL_FRAGMENT_SHADER);
+        program->shaders[0] = createShader(vert_source, GL_VERTEX_SHADER);
+        program->shaders[1] = createShader(frag_source, GL_FRAGMENT_SHADER);
 
         for (uint i = 0; i < 2; i++)            { glAttachShader(program->location, program->shaders[i]);               }
     

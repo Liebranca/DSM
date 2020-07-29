@@ -1,10 +1,6 @@
 #ifndef __SIN_H__
 #define __SIN_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "types/SIN_Texture.h"
 #include "types/SIN_Shader.h"
 #include "types/SIN_Material.h"
@@ -12,6 +8,10 @@ extern "C" {
 #include "types/SIN_MeshBatch.h"
 
 #include "GL/glew.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //  - --- - --- - --- - --- -
 

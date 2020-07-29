@@ -5,7 +5,7 @@
 
 //      - --- - --- - --- - --- -
 
-cchar* subpath(cchar* path, uint levels) {
+char* subpath(cchar* path, uint levels) {
 
     char*  file    = (char*)path;
     cchar* curchar = '\0';
@@ -25,22 +25,23 @@ cchar* subpath(cchar* path, uint levels) {
         }
     }
 
-    return (cchar*)file;                                                                                                }
+    return file;                                                                                                        }
 
 //      - --- - --- - --- - --- -
 
-cchar* catpath(cchar* root, cchar* added)       {
+char* catpath(cchar* root, cchar* added)       {
 
     uint  rootlen  = strlen(root);
     uint  addedlen = strlen(added);
 
-    char* catted = (char*) evil_malloc(rootlen + addedlen, sizeof(char));
+    char* catted = (char*) evil_malloc(rootlen + addedlen + 2, sizeof(char));
+    catted[0]    = '\0';
 
     strcat(catted, root);
-    catted[rootlen] = '\0';
+    catted[rootlen + 1] = '\0';
 
     strcat(catted, added);
-    catted[rootlen + addedlen] = '\0';
+    catted[rootlen + addedlen + 1] = '\0';
 
-    return (cchar*)catted;                                                                                              }
+    return catted;                                                                                                      }
 
