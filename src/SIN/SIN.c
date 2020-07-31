@@ -7,7 +7,7 @@ static unsigned char INITFLAGS = 0;
 
 void SIN_INIT(unsigned char flags)              { 
 
-    SIN_GVAO_init();
+    SIN_Batcher_init();
 
     SIN_texbucket_init();
     SIN_shdbucket_init();
@@ -25,7 +25,7 @@ void SIN_END()                                  {
     SIN_shdbucket_end();
     SIN_texbucket_end();
 
-    SIN_GVAO_end();
+    SIN_Batcher_end();
 
                                                                                                                         }
 
@@ -41,6 +41,6 @@ void SIN_SWIPESCREEN(float color[4],
                  color[2] * mult,
                  color[3] * mult);
 
-    glClear(GL_COLOR_BUFFER_BIT); // GL_DEPTH_BUFFER_BIT
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                                                                                                                         }
 

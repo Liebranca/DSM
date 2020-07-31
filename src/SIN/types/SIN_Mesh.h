@@ -18,6 +18,7 @@ typedef struct SIN_MESH_3D                      {
 
     uint     drawLoc;
     uint     drawOffset;
+    uint     buffOffset;
 
     pVP3D_8* bounds;
 

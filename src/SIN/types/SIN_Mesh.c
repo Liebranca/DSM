@@ -142,7 +142,7 @@ M3D*    build_mesh          (ushort id,
             f8 p2[3] = { 0, 0, 0 };
             f8 p3[3] = { 0, 0, 0 };
 
-            for(uint i = 0; i < (uint)mesh->indexCount; i += 3)
+            for(uint i = 0; i < (uint)mesh->indexCount * 3; i += 3)
             {
 
                 p1[0] = (verts + indices[i+0])->co[0];
@@ -171,21 +171,19 @@ M3D*    build_mesh          (ushort id,
             for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 8)
             {
 
-                vertex_data[j]  = 0;
-
-                vertex_data[j+1] = frac8_tofloat((verts + i)->co[0]);
-                vertex_data[j+2] = frac8_tofloat((verts + i)->co[1]);
-                vertex_data[j+3] = frac8_tofloat((verts + i)->co[2]);
+                vertex_data[j+0] = frac8_tofloat((verts + i)->co[0]);
+                vertex_data[j+1] = frac8_tofloat((verts + i)->co[1]);
+                vertex_data[j+2] = frac8_tofloat((verts + i)->co[2]);
 
                 float* n = sumtrinormals_8bit(vert_normal_data[i].face_normals, vert_normal_data[i].len);
 
-                vertex_data[j+4] += n[0];
-                vertex_data[j+5] += n[1];
-                vertex_data[j+6] += n[2];
+                vertex_data[j+3] = n[0];
+                vertex_data[j+4] = n[1];
+                vertex_data[j+5] = n[2];
 
                 float* uvs = frac4_tofloat((verts + i)->uv);
-                vertex_data[j+7] += uvs[0];
-                vertex_data[j+8] += uvs[1];
+                vertex_data[j+6] = uvs[0];
+                vertex_data[j+7] = uvs[1];
 
             }
 
@@ -196,7 +194,10 @@ M3D*    build_mesh          (ushort id,
 //  - --- - --- - --- - --- -
 
         mesh->drawLoc    = SIN_active_meshbatch->loc;
-        mesh->drawOffset = SIN_meshbatch_upload(mesh->vertCount, mesh->indexCount, vertex_data, indices);
+        mesh->drawOffset = SIN_active_meshbatch->icursor;
+        mesh->buffOffset = SIN_active_meshbatch->vcursor;
+
+        SIN_meshbatch_upload(mesh->vertCount, mesh->indexCount, vertex_data, indices);
 
         WARD_EVIL_MFREE(vertex_data);
         WARD_EVIL_MFREE(verts);

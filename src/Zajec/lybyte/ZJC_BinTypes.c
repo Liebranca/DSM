@@ -119,7 +119,7 @@ float frac16_tofloat(f16 frac)                 {
 
 float frac8_tofloat(f8 frac)                   {
 
-    float  v = (frac >> 1) * 0.003125f;
+    float  v = (frac >> 1) * 0.03125f;
     return v * (1 - (2 * (frac & 1)));                                                                              }
 
 float* frac4_tofloat(f8 frac)                  {

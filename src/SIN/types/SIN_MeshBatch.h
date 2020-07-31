@@ -13,21 +13,24 @@ enum { SIN_BATCH_VBO, SIN_BATCH_IBO, SIN_BATCH_NUM_BUFFERS };
 
 typedef struct SIN_MESH_3D_BATCH {
 
+    uint VAO;
     uint BUFFS[SIN_BATCH_NUM_BUFFERS];
+
     uint loc;
     uint vcursor;
     uint icursor;
 
 } M3DB;
 
-void  SIN_GVAO_init();
-int   SIN_GVAO_end();
+void  SIN_Batcher_init();
+int   SIN_Batcher_end();
 
 M3DB* SIN_meshbatches_get(ushort loc);
 M3DB* SIN_genMeshBatch();
+void  SIN_bindMeshBatch(ushort loc);
 void  SIN_delMeshBatch(M3DB* batch);
 
-uint  SIN_meshbatch_upload(ushort numVerts, ushort numIndices, float* vertex_data, ushort* indices);
+void  SIN_meshbatch_upload(ushort numVerts, ushort numIndices, float* vertex_data, ushort* indices);
 
 extern M3DB* SIN_active_meshbatch;
 

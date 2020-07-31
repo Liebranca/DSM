@@ -146,7 +146,7 @@ Program* build_shader(ushort id,
         program->shaders[1] = createShader(frag_source, GL_FRAGMENT_SHADER);
 
         for (uint i = 0; i < 2; i++)            { glAttachShader(program->location, program->shaders[i]);               }
-    
+
         glBindAttribLocation(program->location, 0, "Position");
         glBindAttribLocation(program->location, 1, "Normal");
         glBindAttribLocation(program->location, 2, "UV");

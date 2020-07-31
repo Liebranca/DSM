@@ -1,5 +1,9 @@
 #include "chWIN.h"
 
+#include "lymath/ZJC_GOPS.h"
+
+#include <stdio.h>
+
 //  - --- - --- - --- - --- -
 
 static int kFWD   = SDLK_w;
@@ -27,20 +31,31 @@ chWH        build_whandle(const char title[],
                                       height,
                                       SDL_WINDOW_OPENGL      );
 
-    whandle.width       = width;
-    whandle.height      = height;
+    whandle.width           = width;
+    whandle.height          = height;
 
-    whandle.isClosed    = 0;
-    whandle.pkeys       = 0;
-    whandle.helkeys     = 0;
+    whandle.h_width         = width  / 2;
+    whandle.h_height        = height / 2;
 
-    whandle.mouseIgnore = 0;
-    whandle.mousePos_x  = 0;
-    whandle.mousePos_y  = 0;
+    whandle.q_width         = width  / 4;
+    whandle.q_height        = height / 4;
 
-    whandle.mouseRel_x  = 0.0f;
-    whandle.mouseRel_y  = 0.0f;
-    whandle.mouseSens   = 2.0f;
+    whandle.isClosed        = 0;
+    whandle.pkeys           = 0;
+    whandle.helkeys         = 0;
+
+    whandle.mouseIgnore     = 0;
+    whandle.mousePos_x      = whandle.h_width;
+    whandle.mousePos_y      = whandle.h_height;
+
+    whandle.prev_mousePos_x = whandle.mousePos_x;
+    whandle.prev_mousePos_y = whandle.mousePos_y;
+
+    whandle.mouseRel_x      = 0.0f;
+    whandle.mouseRel_y      = 0.0f;
+    whandle.mouseSens       = 2.0f;
+
+    whandle.id = SDL_GetWindowID(whandle.window);
 
     return whandle;                                                                                                     };
 
@@ -48,15 +63,49 @@ int         del_whandle  (chWH* whandle)        { SDL_DestroyWindow(whandle->win
 
 //  - --- - --- - --- - --- -
 
+void onMouseReset        (chWH* whandle)        {
+
+    whandle->mouseIgnore     = 1;
+                             
+    whandle->mouseRel_x      = 0.0f;
+    whandle->mouseRel_y      = 0.0f;
+
+    whandle->prev_mousePos_x = whandle->mousePos_x;
+    whandle->prev_mousePos_y = whandle->mousePos_y;                                                                     }
+
 void mouseWrap           (chWH* whandle)        {
 
+    onMouseReset(whandle);
     SDL_WarpMouseInWindow(whandle->window,
-                          whandle->height/2,
-                          whandle->width/2);
+                          whandle->width/2,
+                          whandle->height/2);                                                                           }
 
-    whandle->mouseIgnore = 1;
-    whandle->mouseRel_x  = 0.0f;
-    whandle->mouseRel_y  = 0.0f;                                                                                        }
+void mouseLoop           (chWH* whandle)        {
+
+    onMouseReset(whandle);
+
+    int new_x = whandle->mousePos_x;
+    int new_y = whandle->mousePos_y;
+
+    if      ( whandle->mousePos_x
+            < whandle->h_width
+            - whandle->q_width       )          { new_x = whandle->width;                                               }
+
+    else if ( whandle->mousePos_x
+            > whandle->h_width
+            + whandle->q_width       )          { new_x = 0;                                                            }
+
+    if      ( whandle->mousePos_y
+            < whandle->h_height 
+            - whandle->q_height      )          { new_y = whandle->height;                                              }
+
+    else if ( whandle->mousePos_y
+            > whandle->h_height
+            + whandle->q_height      )          { new_y = 0;                                                            }
+
+    SDL_WarpMouseInWindow(whandle->window,
+                          new_x,
+                          new_y);                                                                                       }
 
 void        swapBuffers  (chWH* whandle)        { SDL_GL_SwapWindow(whandle->window);                                   }
 void        hideCursor   ()                     { SDL_ShowCursor(SDL_DISABLE);                                          }
@@ -70,13 +119,47 @@ void        pollEvents   (chWH* whandle)        {
     int k;
     SDL_Event event;
 
-    if (SDL_PollEvent(&event)) {
-        switch (event.type) {
+    if (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
 
-        case SDL_QUIT:    whandle->isClosed = 0;
+        case SDL_QUIT:
+        {
+            whandle->isClosed = 0;
             break;
+        }
 
-        case SDL_KEYDOWN: k = event.key.keysym.sym;
+        case SDL_WINDOWEVENT:
+        {
+            if (event.window.windowID
+                == whandle->id)
+            {
+
+                switch (event.window.event)
+                {
+
+                case SDL_WINDOWEVENT_ENTER:
+                {
+                    // hideCursor();
+                    // mouseLoop(whandle);
+                    break;
+                }
+                case SDL_WINDOWEVENT_LEAVE:
+                {
+                    mouseLoop(whandle);
+                    //showCursor();
+                    break;
+                }
+
+                }
+
+            }
+        }
+
+        case SDL_KEYDOWN:
+        {
+            k = event.key.keysym.sym;
 
             if      (k == kESC)                 { whandle->isClosed = 1;                                                }
             if      (k == kFWD &&
@@ -95,8 +178,11 @@ void        pollEvents   (chWH* whandle)        {
                    !(whandle->pkeys & 64))      { whandle->pkeys   += 64;                                               }
 
             break;
+        }
 
-        case SDL_KEYUP:   k = event.key.keysym.sym;
+        case SDL_KEYUP:
+        {
+            k = event.key.keysym.sym;
 
             if      (k == kFWD)                 { whandle->pkeys   -= 1;                                                }
             else if (k == kBCK)                 { whandle->pkeys   -= 2;                                                }
@@ -110,16 +196,19 @@ void        pollEvents   (chWH* whandle)        {
             if      (k == kUSE)                 { whandle->pkeys   -= 64;                                               }
 
             break;
+        }
 
         case SDL_MOUSEMOTION:
+        {
 
-            whandle->mousePos_x = event.motion.x;
-            whandle->mousePos_y = event.motion.y;
-
-            if (whandle->mouseIgnore)           { whandle->mouseRel_x = (float)(event.motion.xrel * whandle->mouseSens);
+            if (!whandle->mouseIgnore)          { whandle->mousePos_x = event.motion.x;
+                                                  whandle->mousePos_y = event.motion.y;
+                                                  whandle->mouseRel_x = (float)(event.motion.xrel * whandle->mouseSens);
                                                   whandle->mouseRel_y = (float)(event.motion.yrel * whandle->mouseSens);}
 
             break;
         }
+        }
+
     }
                                                                                                                         }

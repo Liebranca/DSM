@@ -26,9 +26,9 @@ typedef struct TRANSFORM3D {
 
     TRANSFORM3D* parent;
 
-    TRANSFORM3D(const glm::vec3& pos,
-                const glm::quat& rot,
-                const glm::vec3& scale)
+    TRANSFORM3D(glm::vec3 pos   = { 0,0,0   },
+                glm::quat rot   = { 0,0,0,1 },
+                glm::vec3 scale = { 1,1,1   })
                :position   (pos),
                 orientation(rot),
                 scaling    (scale)              { dirn = {1, 1};                                                        }

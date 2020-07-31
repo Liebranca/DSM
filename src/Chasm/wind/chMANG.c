@@ -5,13 +5,15 @@
 
 #include <stdio.h>
 
+float fBy = 0.0;
+
 //  - --- - --- - --- - --- -
 
 Uint8 CH_MAXWINS = 8;
 chMG  chmang     = {0};
 
 int  chmang_winOpen     ()                      { return !chmang_curwin()->isClosed;                                    }
-void chmang_frameStart  ()                      { clock_frameStart();
+void chmang_frameStart  ()                      { clock_frameStart(); fBy = clock_fBy(1.0f);
                                                   pollEvents(chmang_curwin());                                          }
 
 void  chmang_frameEnd   ()                      { swapBuffers(chmang_curwin());
@@ -46,7 +48,7 @@ int chmang_init         (cchar* title,
     chmang.curwin   = 0;
     chmang.openwins = 1;
 
-    chmang.wins = (chWH*) evil_malloc(8, sizeof(chWH));
+    chmang.wins     = (chWH*) evil_malloc(8, sizeof(chWH));
 
     *chmang.wins    = build_whandle(title, width, height);
     chmang.context  = SDL_GL_CreateContext(chmang_curwin()->window);
@@ -56,11 +58,13 @@ int chmang_init         (cchar* title,
     if (status != GLEW_OK)                      { fprintf(stderr, "GLEW failed it's own init; something's wrong...\n");
                                                   chmang_end(); return FATAL;                                           }
 
-    if (!glewIsSupported("GL_VERSION_3_2"))     { printf("This application requires OpenGL v1.30 compatibility\n");     }
-    
-    glEnable(GL_DEPTH_TEST);
+    if (!glewIsSupported("GL_VERSION_3_2"))     { printf("This application requires OpenGL v3.2\n");                    }
+
+    SDL_GL_SetSwapInterval(1);
+
+    /*glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glCullFace(GL_BACK);*/
 
     clock_init();
 

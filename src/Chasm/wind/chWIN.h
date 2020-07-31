@@ -11,15 +11,26 @@ extern "C" {
 
 typedef struct CHASM_WINDOW_HANDLE              { 
 
+    Uint32        id;
+
     int           isClosed;
     int           width;
     int           height;
+
+    int           h_width;
+    int           h_height;
+    int           q_width;
+    int           q_height;
+
     int           pkeys;
     int           helkeys;
 
     int           mouseIgnore;
     int           mousePos_x;
     int           mousePos_y;
+
+    int           prev_mousePos_x;
+    int           prev_mousePos_y;
 
     float         mouseRel_x;
     float         mouseRel_y;
@@ -40,6 +51,7 @@ void        showCursor      ();
 int         getIsClosed     (chWH* whandle);
 void        pollEvents      (chWH* whandle);
 void        mouseWrap       (chWH* whandle);
+void        mouseLoop       (chWH* whandle);
 
 //  - --- - --- - --- - --- -
 

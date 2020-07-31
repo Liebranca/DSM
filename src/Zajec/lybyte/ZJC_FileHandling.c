@@ -277,10 +277,10 @@ int crk_to_daf(CrkFile*    crk,
     ushort sizes[2] = { crk->vertCount, crk->indexCount};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(ushort,  2,               sizes,        filename);
-    EVIL_FWRITE(pVP3D_8, 8,               crk->bounds,  filename);
-    EVIL_FWRITE(VP3D_8,  crk->vertCount,  crk->verts,   filename);
-    EVIL_FWRITE(ushort,  crk->indexCount, crk->indices, filename);
+    EVIL_FWRITE(ushort,  2,                   sizes,        filename);
+    EVIL_FWRITE(pVP3D_8, 8,                   crk->bounds,  filename);
+    EVIL_FWRITE(VP3D_8,  crk->vertCount,      crk->verts,   filename);
+    EVIL_FWRITE(ushort,  crk->indexCount * 3, crk->indices, filename);
     fseek(curfile, 0, SEEK_CUR);
 
     return 0;                                                                                                           }
@@ -751,9 +751,9 @@ int extractcrk (DAF*     daf,
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
     
-    EVIL_FREAD(pVP3D_8, 8,           *bounds);
-    EVIL_FREAD(VP3D_8,  *vertCount,  *verts);
-    EVIL_FREAD(ushort,  *indexCount, *indices);
+    EVIL_FREAD(pVP3D_8, 8,               *bounds);
+    EVIL_FREAD(VP3D_8,  *vertCount,      *verts);
+    EVIL_FREAD(ushort,  *indexCount * 3, *indices);
 
     return 0;                                                                                                           }
 
