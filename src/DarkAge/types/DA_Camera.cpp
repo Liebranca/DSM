@@ -3,10 +3,12 @@
 #include "ZJC_CommonTypes.h"
 #include "spatial/ZJC_Transform.h"
 
+#include <stdio.h>
+
 DA_CAMERA* active_camera   = NULL;
 glm::mat4  actcam_viewproj = IDENTITY;
-glm::vec3  actcam_fwd      = { 0,0,0   };
-glm::vec4  actcam_pos      = { 0,0,0,0 };
+glm::vec3  actcam_fwd      = { 0,0,0 };
+glm::vec3  actcam_pos      = { 0,0,0 };
 
 //  - --- - --- - --- - --- -
 

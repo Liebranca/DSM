@@ -62,9 +62,9 @@ int chmang_init         (cchar* title,
 
     SDL_GL_SetSwapInterval(1);
 
-    /*glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);*/
+    glCullFace(GL_BACK);
 
     clock_init();
 

@@ -159,9 +159,10 @@ Program* build_shader(ushort id,
         program->uniforms[SIN_TRANSFORM_U]  = glGetUniformLocation(program->location, "Model");
         program->uniforms[SIN_NORMAL_U]     = glGetUniformLocation(program->location, "ModelInverseTranspose");
         program->uniforms[SIN_PROJECTION_U] = glGetUniformLocation(program->location, "ViewProjection");
-        program->uniforms[SIN_SUNFWD_U]     = glGetUniformLocation(program->location, "SunEye");
-        program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CamEye");
-        program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "AmbientColor");
+        program->uniforms[SIN_SUNFWD_U]     = glGetUniformLocation(program->location, "SunFwd");
+        program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CamFwd");
+        program->uniforms[SIN_CAMPOS_U]     = glGetUniformLocation(program->location, "CamPos");
+        program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "Ambient");
         program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
         program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
 

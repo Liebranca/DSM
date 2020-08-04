@@ -9,11 +9,11 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-float* fv3_sub(float* a, float* b);
-float* fv3_add(float* a, float* b);
-float* fv3_cross(float* a, float* b);
-float  fv3_length(float* vec);
-float* fv3_normalize(float* vec);
+void  fv3_sub(float* a, float* b);
+void  fv3_add(float* a, float* b);
+void  fv3_cross(float* dest, float* a, float* b);
+float fv3_length(float* vec);
+void  fv3_normalize(float* vec);
 
 //  - --- - --- - --- - --- -
 

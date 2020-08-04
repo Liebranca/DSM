@@ -131,6 +131,9 @@ void  SIN_meshbatch_upload(ushort  numVerts,
     uint  vsize = numVerts   * sizeof(float)  * 8;
     uint  isize = numIndices * sizeof(ushort) * 3;
 
+    for(uint i = 0;
+        i < (uint)(numIndices * 3); i++ )       { indices[i] += SIN_active_meshbatch->icursor;                          }
+
     glBindVertexArray(SIN_active_meshbatch->VAO);
 
     glBindBuffer     (GL_ARRAY_BUFFER, SIN_active_meshbatch->BUFFS[SIN_BATCH_VBO]);

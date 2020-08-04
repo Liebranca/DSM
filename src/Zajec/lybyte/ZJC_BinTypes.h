@@ -25,25 +25,25 @@ typedef uchar frac8, f8;
 
 //  - --- - --- - --- - --- -
 
-uchar  color_to_joj8(float r, float g, float b);
+uchar  color_to_joj8     (float r, float g, float b);
 
 
-int    nthbit(uchar b, int n);
-int    takebits(uchar b, uint iStart, uint iEnd);
+int    nthbit            (uchar b, int n);
+int    takebits          (uchar b, uint iStart, uint iEnd);
 
-float  frac16_tofloat(f16 frac);
-f16    float_tofrac16(float v);
+float  frac16_tofloat    (f16 frac);
+f16    float_tofrac16    (float v);
 
-float  frac8_tofloat(f8 frac);
-float* frac4_tofloat(f8 frac);
-f8     float_tofrac8(float v);
-f8     float_tofrac4(float v1, float v2);
+float  frac8_tofloat     (f8 frac);
+float* frac4_tofloat     (f8 frac);
+f8     float_tofrac8     (float v);
+f8     float_tofrac4     (float v1, float v2);
 
-float* trinormal_8bit(f8 p1[3], f8 p2[3], f8 p3[3]);
-float* sumtrinormals_8bit(float face_normals[3], uint len);
+void   trinormal_8bit    (float* dest, f8 p1[3], f8 p2[3], f8 p3[3]);
+void   sumtrinormals_8bit(float* dest, float* normals, uint len);
 
 int    zjc_convertor_init(uchar flags);
-int    zjc_convertor_end();
+int    zjc_convertor_end ();
 
 //  - --- - --- - --- - --- -
 
@@ -58,6 +58,7 @@ VP3D_16 build_vertpacked_3d_16bit(float* values);
 
 typedef struct VertexPacked3D_8bit {
     f8 co[3];
+    f8 normal[3];
     f8 uv;
 
 } VP3D_8;

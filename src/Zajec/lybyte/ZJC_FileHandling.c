@@ -191,20 +191,20 @@ int read_crkdump(cchar*     filename,
     crk->indexCount = sizes[1];
 
     EVIL_FREAD(float,  24,                  bounds);
-    EVIL_FREAD(float,  crk->vertCount * 5,  verts);
+    EVIL_FREAD(float,  crk->vertCount * 8,  verts);
     EVIL_FREAD(ushort, crk->indexCount * 3, crk->indices);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
 //  - --- - --- - --- - --- -
 
-    crk->size   = 4 + (8 * 3) + (crk->vertCount * 4) + (crk->indexCount * 2);
+    crk->size   = 4 + (8 * 3) + (crk->vertCount * 7) + (crk->indexCount * 2);
     crk->bounds = (pVP3D_8*) evil_malloc(8,      sizeof(pVP3D_8));
     crk->verts  = (VP3D_8*)  evil_malloc(*sizes, sizeof(VP3D_8) );
 
     for(uint i = 0, j = 0;
-        i < (uint) crk->vertCount * 5;
-        i+= 5, j++ )                            { *(crk->verts+j) =  build_vertpacked_3d_8bit(verts+i);                 }
+        i < (uint) crk->vertCount * 8;
+        i+= 8, j++ )                            { *(crk->verts+j) =  build_vertpacked_3d_8bit(verts+i);                 }
 
     for(uint i = 0, j = 0;
         i < 24; i+= 3, j++ )                    { *(crk->bounds+j) = build_physvert_3d_8bit(bounds+i);                  }

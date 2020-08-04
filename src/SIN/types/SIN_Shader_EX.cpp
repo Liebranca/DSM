@@ -22,10 +22,12 @@ void shader_update_nmat   (glm::mat3* nmat)     { glUniformMatrix3fv(__program->
                                                                      1, GL_FALSE, &((*nmat)[0][0]));                    }
 
 void shader_update_camera (glm::mat4* viewprojection,
-                           glm::vec3* camfwd)   {
+                           glm::vec3* camfwd,
+                           glm::vec3* campos)   {
 
     glUniformMatrix4fv(__program->uniforms[SIN_PROJECTION_U], 1, GL_FALSE, &((*viewprojection)[0][0]));
-    glUniform3fv(__program->uniforms[SIN_CAMFWD_U], 1, &camfwd[0][0]);                                                  }
+    glUniform3fv(__program->uniforms[SIN_CAMFWD_U], 1, &((*camfwd)[0]));
+    glUniform3fv(__program->uniforms[SIN_CAMPOS_U], 1, &((*campos)[0]));                                                }
 
 void shader_update_ambient(glm::vec4* ambient_color)
                                                 { glUniform4fv(__program->uniforms[SIN_AMBIENT_U],

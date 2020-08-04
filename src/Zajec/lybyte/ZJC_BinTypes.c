@@ -54,10 +54,15 @@ VP3D_16 build_vertpacked_3d_16bit(float* values)     {
 VP3D_8 build_vertpacked_3d_8bit(float* values)      {
 
     VP3D_8 vert;
-    vert.co[0] = float_tofrac8(*values);
-    vert.co[1] = float_tofrac8(*(values+1));
-    vert.co[2] = float_tofrac8(*(values+2));
-    vert.uv    = float_tofrac4(*(values+3), *(values+4));
+    vert.co[0]     = float_tofrac8(*values);
+    vert.co[1]     = float_tofrac8(*(values+1));
+    vert.co[2]     = float_tofrac8(*(values+2));
+
+    vert.normal[0] = float_tofrac8(*(values+3));
+    vert.normal[1] = float_tofrac8(*(values+4));
+    vert.normal[2] = float_tofrac8(*(values+5));
+
+    vert.uv        = float_tofrac4(*(values+6), *(values+7));
 
     return vert;                                                                                                    }
 
@@ -194,37 +199,27 @@ f8 float_tofrac8(float v)                       {
 
     return frac;                                                                                                    }
 
-float* trinormal_8bit(f8 p1[3],
+void trinormal_8bit  (float* dest,
+                      f8 p1[3],
                       f8 p2[3],
                       f8 p3[3])                 {
 
-    float p1_unpack[3]   = { frac8_tofloat(p1[0]), frac8_tofloat(p1[1]), frac8_tofloat(p1[2])                       };
-    float p2_unpack[3]   = { frac8_tofloat(p2[0]), frac8_tofloat(p2[1]), frac8_tofloat(p2[2])                       };
-    float p3_unpack[3]   = { frac8_tofloat(p3[0]), frac8_tofloat(p3[1]), frac8_tofloat(p3[2])                       };
+    float a[3] =                                { frac8_tofloat(p1[0]), frac8_tofloat(p1[1]), frac8_tofloat(p1[2])  };
+    float b[3] =                                { frac8_tofloat(p2[0]), frac8_tofloat(p2[1]), frac8_tofloat(p2[2])  };
+    float c[3] =                                { frac8_tofloat(p3[0]), frac8_tofloat(p3[1]), frac8_tofloat(p3[2])  };
 
-    float* a             = fv3_sub(p2_unpack, p1_unpack);
-    float* b             = fv3_sub(p3_unpack, p1_unpack);
-    float* c             = fv3_normalize(fv3_cross(a, b));
+    fv3_sub(b, a);
+    fv3_sub(c, a);
+    fv3_cross(dest, b, c);
+    fv3_normalize(dest);                                                                                            }
 
-    static float result[3];
+void sumtrinormals_8bit  (float* dest,
+                          float* normals,
+                          uint len)             { float dlen = (float)1/len;
 
-    result[0] = c[0];
-    result[1] = c[1];
-    result[2] = c[2];
-
-    return result;                  }
-
-float* sumtrinormals_8bit(float face_normals[3],
-                          uint len)             {
-
-    static float vertex_normal[3] = { 0, 0, 0 };
-
-    float dlen          = (float)1/len;
-    vertex_normal[0]    = face_normals[0] * dlen;
-    vertex_normal[1]    = face_normals[1] * dlen;
-    vertex_normal[2]    = face_normals[2] * dlen;
-
-    return vertex_normal;                                                                                           }
+                                                  dest[0]    = normals[0] * dlen;
+                                                  dest[1]    = normals[1] * dlen;
+                                                  dest[2]    = normals[2] * dlen;                                   }
 
 f8 float_tofrac4(float v1, float v2)            {
 

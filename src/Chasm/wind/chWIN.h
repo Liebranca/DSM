@@ -14,6 +14,7 @@ typedef struct CHASM_WINDOW_HANDLE              {
     Uint32        id;
 
     int           isClosed;
+    int           isOnTop;
     int           width;
     int           height;
 
@@ -26,11 +27,9 @@ typedef struct CHASM_WINDOW_HANDLE              {
     int           helkeys;
 
     int           mouseIgnore;
+    int           mouseActive;
     int           mousePos_x;
     int           mousePos_y;
-
-    int           prev_mousePos_x;
-    int           prev_mousePos_y;
 
     float         mouseRel_x;
     float         mouseRel_y;
@@ -50,8 +49,7 @@ void        hideCursor      ();
 void        showCursor      ();
 int         getIsClosed     (chWH* whandle);
 void        pollEvents      (chWH* whandle);
-void        mouseWrap       (chWH* whandle);
-void        mouseLoop       (chWH* whandle);
+void        onMouseMotion   (chWH* whandle);
 
 //  - --- - --- - --- - --- -
 

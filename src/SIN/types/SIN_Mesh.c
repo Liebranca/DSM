@@ -9,6 +9,7 @@
 #include "SIN_MeshBatch.h"
 
 #include <stdio.h>
+#include <math.h>
 
 #define SIN_MAX_MESHES              512
 
@@ -135,60 +136,20 @@ M3D*    build_mesh          (ushort id,
 
         float* vertex_data = (float*) evil_malloc(mesh->vertCount * 8, sizeof(float));
 
+        for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 8)
         {
-            TNG* vert_normal_data = (TNG*) evil_malloc(mesh->vertCount, sizeof(TNG));
 
-            f8 p1[3] = { 0, 0, 0 };
-            f8 p2[3] = { 0, 0, 0 };
-            f8 p3[3] = { 0, 0, 0 };
+            vertex_data[j+0] = frac8_tofloat((verts + i)->co[0]);
+            vertex_data[j+1] = frac8_tofloat((verts + i)->co[1]);
+            vertex_data[j+2] = frac8_tofloat((verts + i)->co[2]);
 
-            for(uint i = 0; i < (uint)mesh->indexCount * 3; i += 3)
-            {
+            vertex_data[j+3] = frac8_tofloat((verts + i)->normal[0]);
+            vertex_data[j+4] = frac8_tofloat((verts + i)->normal[1]);
+            vertex_data[j+5] = frac8_tofloat((verts + i)->normal[2]);
 
-                p1[0] = (verts + indices[i+0])->co[0];
-                p1[1] = (verts + indices[i+0])->co[1];
-                p1[2] = (verts + indices[i+0])->co[2];
-
-                p2[0] = (verts + indices[i+1])->co[0];
-                p2[1] = (verts + indices[i+1])->co[1];
-                p2[2] = (verts + indices[i+1])->co[2];
-
-                p3[0] = (verts + indices[i+2])->co[0];
-                p3[1] = (verts + indices[i+2])->co[1];
-                p3[2] = (verts + indices[i+2])->co[2];
-
-                float* face_normal = trinormal_8bit(p1, p2, p3);
-                for(uint j = 0; j < 3; j++) { vert_normal_data[indices[i+0]].face_normals[j] += face_normal[j]; }
-
-                vert_normal_data[indices[i+0]].len++;
-                vert_normal_data[indices[i+1]].len++;
-                vert_normal_data[indices[i+2]].len++;
-
-            }
-
-//  - --- - --- - --- - --- -
-
-            for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 8)
-            {
-
-                vertex_data[j+0] = frac8_tofloat((verts + i)->co[0]);
-                vertex_data[j+1] = frac8_tofloat((verts + i)->co[1]);
-                vertex_data[j+2] = frac8_tofloat((verts + i)->co[2]);
-
-                float* n = sumtrinormals_8bit(vert_normal_data[i].face_normals, vert_normal_data[i].len);
-
-                vertex_data[j+3] = n[0];
-                vertex_data[j+4] = n[1];
-                vertex_data[j+5] = n[2];
-
-                float* uvs = frac4_tofloat((verts + i)->uv);
-                vertex_data[j+6] = uvs[0];
-                vertex_data[j+7] = uvs[1];
-
-            }
-
-            WARD_EVIL_MFREE(vert_normal_data);
-
+            float* uvs = frac4_tofloat((verts + i)->uv);
+            vertex_data[j+6] = uvs[0];
+            vertex_data[j+7] = uvs[1];
         }
 
 //  - --- - --- - --- - --- -

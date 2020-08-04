@@ -31,7 +31,8 @@ class DA_CAMERA {
         void move(glm::vec3& mvec, bool local = false);
 
         void rotate(glm::vec3& rvec);
-
+        
+        float getPitch()                        { return pitch;                                                         }
         glm::vec3& getFwd()                     { return fwd;                                                           }
         glm::vec3& getPos()                     { return pos;                                                           }
         glm::vec3 getFwdCast(float dist = 3.5f) { return pos + (fwd * dist);                                            }
@@ -69,7 +70,7 @@ class DA_CAMERA {
 extern DA_CAMERA* active_camera;
 extern glm::mat4  actcam_viewproj;
 extern glm::vec3  actcam_fwd;
-extern glm::vec4  actcam_pos;
+extern glm::vec3  actcam_pos;
 
 //  - --- - --- - --- - --- -
 

@@ -4,51 +4,29 @@
 
 //  - --- - --- - --- - --- -
 
-float* fv3_sub(float* a, float* b)      {
+void fv3_sub(float* a, float* b)        { a[0] = a[0] - b[0];
+                                          a[1] = a[1] - b[1],
+                                          a[2] = a[2] - b[2];                                               }
 
-    static float c[3];
+void fv3_add(float* a, float* b)        { a[0] = a[0] + b[0];
+                                          a[1] = a[1] + b[1],
+                                          a[2] = a[2] + b[2];                                               }
 
-    c[0] = a[0] + b[0];
-    c[1] = a[1] + b[1],
-    c[2] = a[2] + b[2];
-
-    return c;                                                                                               }
-
-float* fv3_add(float* a, float* b)      {
-
-    static float c[3];
-
-    c[0] = a[0] - b[0];
-    c[1] = a[1] - b[1],
-    c[2] = a[2] - b[2];
-
-    return c;                                                                                               }
-
-float* fv3_cross(float* a,
-                 float* b)              {
-
-    static float vec[3] = { 0.0f, 0.0f, 0.0f };
-
-    vec[0]              = (a[1] * b[2]) - (a[2] * b[1]);
-    vec[1]              = (a[2] * b[0]) - (a[0] * b[2]);
-    vec[2]              = (a[0] * b[1]) - (a[1] * b[0]);
-
-    return vec;                                                                                             }
+void fv3_cross(float* dest,
+               float* a,
+               float* b)                { dest[0] = (a[1] * b[2]) - (a[2] * b[1]);
+                                          dest[1] = (a[2] * b[0]) - (a[0] * b[2]);
+                                          dest[2] = (a[0] * b[1]) - (a[1] * b[0]);                          }
 
 float  fv3_length(float* vec)           { return (float)sqrt( (vec[0] * vec[0])
                                                             + (vec[1] * vec[1])
                                                             + (vec[2] * vec[2]) );                          }
 
-float* fv3_normalize(float* vec)        {
+void fv3_normalize(float* vec)          { float length  = fv3_length(vec);
 
-    static float normalized[3];
-
-    float length  = fv3_length(vec);
-    normalized[0] = vec[0] / length;
-    normalized[1] = vec[1] / length;
-    normalized[2] = vec[2] / length;
-
-    return normalized;                                                                                      }
+                                          vec[0]        = vec[0] / length;
+                                          vec[1]        = vec[1] / length;
+                                          vec[2]        = vec[2] / length;                                  }
 
 //  - --- - --- - --- - --- -
 
