@@ -35,7 +35,7 @@ float  frac16_tofloat    (f16 frac);
 f16    float_tofrac16    (float v);
 
 float  frac8_tofloat     (f8 frac);
-float* frac4_tofloat     (f8 frac);
+void   frac4_tofloat     (float* dest, f8 frac);
 f8     float_tofrac8     (float v);
 f8     float_tofrac4     (float v1, float v2);
 

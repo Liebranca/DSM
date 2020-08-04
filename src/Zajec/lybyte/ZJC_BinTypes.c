@@ -122,20 +122,18 @@ float frac16_tofloat(f16 frac)                 {
 
     return result;                                                                                                  }
 
-float frac8_tofloat(f8 frac)                   {
+float frac8_tofloat(f8 frac)                    {
 
     float  v = (frac >> 1) * 0.03125f;
     return v * (1 - (2 * (frac & 1)));                                                                              }
 
-float* frac4_tofloat(f8 frac)                  {
+void frac4_tofloat(float* dest, f8 frac)        {
 
-    int   indices[2]  =                        { takebits(frac, 0, 4), takebits(frac, 4, 8)                         };
-    static float v[2] =                        { 0.0f,                 0.0f                                         };
+    int   indices[2]  =                         { takebits(frac, 0, 4), takebits(frac, 4, 8)                         };
 
-    for (uint i = 0; i < 2; i++)                { if (indices[i] == 15) { v[i] = 1.0f; }
-                                                  else { v[i] = indices[i] * 0.0625f; }                             }
-
-    return v;                                                                                                       }
+    for (uint i = 0; i < 2; i++)                { if (indices[i] == 15) { dest[i] = 1.0f; }
+                                                  else { dest[i] = indices[i] * 0.0625f; }                          }
+                                                                                                                    }
 
 //      - --- - --- - --- - --- -
 
@@ -227,6 +225,12 @@ f8 float_tofrac4(float v1, float v2)            {
 
     uchar index1 = fvRange_take_closest_1b(frac4_range, v1);
     uchar index2 = fvRange_take_closest_1b(frac4_range, v2);
+
+    if( (v1 > frac4_range->values->buff[15])
+     && (!index1)                            )  { index1 = 15;                                                      }
+
+    if( (v2 > frac4_range->values->buff[15])
+     && (!index2)                            )  { index2 = 15;                                                      }
 
     frac = index1 + (index2 << 4);
 

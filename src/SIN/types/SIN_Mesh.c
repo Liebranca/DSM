@@ -147,7 +147,9 @@ M3D*    build_mesh          (ushort id,
             vertex_data[j+4] = frac8_tofloat((verts + i)->normal[1]);
             vertex_data[j+5] = frac8_tofloat((verts + i)->normal[2]);
 
-            float* uvs = frac4_tofloat((verts + i)->uv);
+            float uvs[2]     = {0.0f,0.0f                           };
+            frac4_tofloat      (uvs, (verts + i)->uv                );
+
             vertex_data[j+6] = uvs[0];
             vertex_data[j+7] = uvs[1];
         }

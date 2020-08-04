@@ -204,7 +204,7 @@ int read_crkdump(cchar*     filename,
 
     for(uint i = 0, j = 0;
         i < (uint) crk->vertCount * 8;
-        i+= 8, j++ )                            { *(crk->verts+j) =  build_vertpacked_3d_8bit(verts+i);                 }
+        i+= 8, j++ )                            { *(crk->verts+j)  = build_vertpacked_3d_8bit(verts+i);                 }
 
     for(uint i = 0, j = 0;
         i < 24; i+= 3, j++ )                    { *(crk->bounds+j) = build_physvert_3d_8bit(bounds+i);                  }

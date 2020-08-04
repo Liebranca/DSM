@@ -127,7 +127,7 @@ Texture* build_texture(ushort id, uchar offset) {
         for(uint i = 0; i < size; i++)
         {
             uchar  color = pixels[i] & 255, count = (pixels[i] & 65280) >> 8;
-            for(uint j = 0; j < count; j++)     { pixel_data[curpix] = color; curpix++;                                 }
+            for(uint j = 0; j < count; j++)     { pixel_data[curpix] = color;curpix++;                                  }
 
         }
 
@@ -141,9 +141,7 @@ Texture* build_texture(ushort id, uchar offset) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE_3_3_2, pixel_data);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
+                     GL_RGB, GL_UNSIGNED_BYTE_2_3_3_REV, pixel_data);
 
         WARD_EVIL_MFREE(pixel_data);
 
