@@ -226,12 +226,6 @@ f8 float_tofrac4(float v1, float v2)            {
     uchar index1 = fvRange_take_closest_1b(frac4_range, v1);
     uchar index2 = fvRange_take_closest_1b(frac4_range, v2);
 
-    if( (v1 > frac4_range->values->buff[15])
-     && (!index1)                            )  { index1 = 15;                                                      }
-
-    if( (v2 > frac4_range->values->buff[15])
-     && (!index2)                            )  { index2 = 15;                                                      }
-
     frac = index1 + (index2 << 4);
 
     return frac;                                                                                                    }

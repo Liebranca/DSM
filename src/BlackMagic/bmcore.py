@@ -8,7 +8,7 @@ from .jojwriter import writejoj
 isrunning   = False;
 
 writerlist  = ["writecrk", "writejoj", "meshfrac"];
-setterlist  = ["setpath", "setname", "setarch", "setmode", "setoffs"];
+setterlist  = ["setpath", "setname", "setarch", "setmode", "setoffs", "settexm"];
 systemlist  = ["quit", "help"];
 
 #   ---     ---     ---     ---     ---

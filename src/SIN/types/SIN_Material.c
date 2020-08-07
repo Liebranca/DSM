@@ -71,7 +71,7 @@ Material* SIN_matbucket_get      (ushort loc)   {
 //  - --- - --- - --- - --- -
 
 Material* build_material      (ushort matid,
-                               ushort texid,
+                               ushort texid[3],
                                ushort shdid)    {
 
     Material* material = SIN_matbucket_find(matid);
@@ -90,7 +90,12 @@ Material* build_material      (ushort matid,
         material         = SIN_matbucket+loc;
 
         material->id     = matid;
-        material->texloc = SIN_texbucket_findloc(texid);
+        for(uint i = 0; i < 3; i++)             { if(texid[i])
+                                                { material->texloc[i] = SIN_texbucket_findloc(texid[i]); }
+
+                                                  else
+                                                { material->texloc[i] = 0; }                                            }
+
         material->shdloc = SIN_shdbucket_findloc(shdid);
 
         SIN_ACTIVE_MATERIALS++;
@@ -98,8 +103,9 @@ Material* build_material      (ushort matid,
         Program* program  = SIN_shdbucket_get(material->shdloc);
         program->users++;
 
-        Texture* tex      = SIN_texbucket_get(material->texloc);
-        tex->users++;
+        for(uint i = 0; i < 3; i++)             { if(material->texloc[i])
+                                                { Texture* tex      = SIN_texbucket_get(material->texloc[i]);
+                                                  tex->users++; }                                                       }
 
     }
 
@@ -111,7 +117,8 @@ void    del_material        (Material* material,
                              ushort loc)        {
 
     unsub_shader(material->shdloc);
-    unsub_tex(material->texloc);
+    for(uint i = 0; i < 3; i++)                 { if(material->texloc[i])
+                                                { unsub_tex(material->texloc[i]); }                                     }
 
     SIN_matbucket[loc] = SIN_emptymat;
     int memward = sStack_push(SIN_MAT_SLOTSTACK, loc);

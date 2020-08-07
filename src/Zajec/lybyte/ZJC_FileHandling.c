@@ -451,6 +451,8 @@ int writejoj_daf(JojFile*    joj,
             && mode != DAF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
                                                   return 0;                                                             }
 
+    uint32_t joj_realsize = 4 + 4 + (joj->size * 2);
+
     if      (mode == DAF_WRITE)
     {
         WARD_EVIL_WRAP(evilstate, joj_to_daf(joj, filename));
@@ -460,7 +462,7 @@ int writejoj_daf(JojFile*    joj,
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize_offset[2] = { daf->size + joj->size, DAF_HSIZE };
+        uint32_t newsize_offset[2] = { daf->size + joj_realsize, DAF_HSIZE };
 
         EVIL_FWRITE(ushort,   1, &daf->fileCount, filename);
         EVIL_FWRITE(uint32_t, 2, newsize_offset,  filename);
@@ -477,8 +479,9 @@ int writejoj_daf(JojFile*    joj,
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize = daf->size + joj->size;
+        uint32_t newsize   = daf->size + joj_realsize;
         uint32_t newoffset = daf->size;
+
         uint16_t offset_stride = (daf->fileCount) * 4;
 
         daf->fileCount++;
@@ -501,7 +504,7 @@ int writejoj_daf(JojFile*    joj,
 
         if(isLastChunk)
         {
-            newsize   = chunk_start + joj->size;
+            newsize   = chunk_start + joj_realsize;
             old_end   = daf->size;
             byteshift = newsize - old_end;
 
@@ -521,10 +524,10 @@ int writejoj_daf(JojFile*    joj,
         {
             uint32_t chunk_end;
 
-            chunk_end = chunk_start + joj->size;
+            chunk_end = chunk_start + joj_realsize;
             old_end   = daf->offsets[offset+1];
             byteshift = chunk_end - old_end;
-            newsize   = (daf->size - (old_end - chunk_start)) + joj->size;
+            newsize   = (daf->size - (old_end - chunk_start)) + joj_realsize;
 
             fseek(curfile, 0,           SEEK_CUR);
             fseek(curfile, chunk_start, SEEK_CUR);

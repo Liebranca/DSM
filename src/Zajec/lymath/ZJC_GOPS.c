@@ -107,6 +107,9 @@ uint32_t fvRange_take_closest(
 uchar fvRange_take_closest_1b(fvRange* fvr,
                               float v)          {
 
+    if (v >= fvr->values->buff[fvr->mag-1])     { return (uchar)fvr->mag-1;                                             }
+    if (v <= fvr->values->buff[0]         )     { return (uchar)0;                                                      }
+
     if (fvr->mag >= 256)                        { fprintf(stderr,
                                                   "fvRange_take_closest_1b rejects float scales outside the range(0, 256)\n");
 

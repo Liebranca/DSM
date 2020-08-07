@@ -57,6 +57,7 @@ in float  fogFac;
 in vec3   CamPos0;
 
 uniform sampler2D DiffuseMap;
+uniform sampler2D ShadeMap;
 
 uniform vec4   Ambient;
 //uniform vec3 SunFwd;
@@ -81,6 +82,7 @@ void main()
     //float black  = smoothstep(0.01, 0.8, base);
 
     vec4 diffuse = texture2D(DiffuseMap, texCoords);
+    vec4 shade   = texture2D(ShadeMap, texCoords);
 
     //vec4 lighting = diffuse * lightColor + vec4(0.01f, 0.01f, 0.02f, 1) + (AmbientColor * 0.1f);
     //vec4 composite = mix(AmbientColor*4, diffuse * lighting, fogFac);
@@ -93,7 +95,7 @@ void main()
     // diff           = smoothstep(0.06, 0.49, diff);
     diffuse       *= diff;
 
-    vec3 composite = vec3(diffuse.xyz + ambient);
+    vec3 composite = vec3( (diffuse.xyz * shade.g) + (ambient * shade.r) ) * shade.b ;
     
     gl_FragColor   =  vec4(composite, 1);
 
