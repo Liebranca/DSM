@@ -9,12 +9,14 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
+#define SIN_MATERIAL_MAX_TEXTURES 4
+
 typedef struct SIN_MATERIAL {
 
     ushort id;
 
     ushort shdloc;
-    ushort texloc[3];
+    ushort texloc[SIN_MATERIAL_MAX_TEXTURES];
     ushort users;
 
 } Material;

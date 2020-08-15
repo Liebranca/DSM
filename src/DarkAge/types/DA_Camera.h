@@ -20,7 +20,7 @@ class DA_CAMERA {
 
         DA_CAMERA(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar);
         
-        glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos+fwd, yAxis);                }        
+        glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos+fwd, yAxis);                }
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
@@ -28,9 +28,9 @@ class DA_CAMERA {
         bool rectInFrustum(glm::vec3* bounds);
         bool pointInFrustum(glm::vec3& point);
 
-        void move(glm::vec3& mvec, bool local = false);
+        void move(glm::vec3 mvec, bool local = false);
 
-        void rotate(glm::vec3& rvec);
+        void rotate(glm::vec3 rvec);
         
         float getPitch()                        { return pitch;                                                         }
         glm::vec3& getFwd()                     { return fwd;                                                           }

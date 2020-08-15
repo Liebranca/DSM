@@ -149,7 +149,9 @@ Program* build_shader(ushort id,
 
         glBindAttribLocation(program->location, 0, "Position");
         glBindAttribLocation(program->location, 1, "Normal");
-        glBindAttribLocation(program->location, 2, "UV");
+        glBindAttribLocation(program->location, 2, "Tangent");
+        glBindAttribLocation(program->location, 3, "Bitangent");
+        glBindAttribLocation(program->location, 4, "UV");
 
         glLinkProgram    (program->location);
         checkShaderError (program->location, GL_LINK_STATUS, 1, "Shader linking failed");
@@ -165,6 +167,16 @@ Program* build_shader(ushort id,
         program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "Ambient");
         program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
         program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
+
+        glUseProgram(program->loc);
+
+        int diffuseLoc = glGetUniformLocation(defaultShader_loc, "DiffuseMap");
+        int infoLoc    = glGetUniformLocation(defaultShader_loc, "ShadingInfo");
+        int normalLoc  = glGetUniformLocation(defaultShader_loc, "NormalMap");
+
+        glUniform1i(diffuseLoc, 0);
+        glUniform1i(infoLoc,    1);
+        glUniform1i(normalLoc,  2);
 
         SIN_ACTIVE_SHADERS++;
 

@@ -12,6 +12,7 @@ extern "C" {
 #define   BUILD_FRAC8  0x01
 #define   BUILD_FRAC16 0x02
 #define   BUILD_JOJ8   0x04
+#define   BUILD_JOJ16  0x08
 
 //  - --- - --- - --- - --- -
 
@@ -26,6 +27,7 @@ typedef uchar frac8, f8;
 //  - --- - --- - --- - --- -
 
 uchar  color_to_joj8     (float r, float g, float b);
+ushort color_to_joj16    (float r, float g, float b);
 
 
 int    nthbit            (uchar b, int n);
@@ -59,7 +61,9 @@ VP3D_16 build_vertpacked_3d_16bit(float* values);
 typedef struct VertexPacked3D_8bit {
     f8 co[3];
     f8 normal[3];
-    f8 uv;
+    f8 tangent[3];
+    f8 bitangent[3];
+    f8 uv[2];
 
 } VP3D_8;
 

@@ -191,20 +191,20 @@ int read_crkdump(cchar*     filename,
     crk->indexCount = sizes[1];
 
     EVIL_FREAD(float,  24,                  bounds);
-    EVIL_FREAD(float,  crk->vertCount * 8,  verts);
+    EVIL_FREAD(float,  crk->vertCount * 14,  verts);
     EVIL_FREAD(ushort, crk->indexCount * 3, crk->indices);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
 //  - --- - --- - --- - --- -
 
-    crk->size   = 4 + (8 * 3) + (crk->vertCount * 7) + (crk->indexCount * 2);
+    crk->size   = 4 + (8 * 3) + (crk->vertCount * 14) + (crk->indexCount * 2);
     crk->bounds = (pVP3D_8*) evil_malloc(8,      sizeof(pVP3D_8));
     crk->verts  = (VP3D_8*)  evil_malloc(*sizes, sizeof(VP3D_8) );
 
     for(uint i = 0, j = 0;
-        i < (uint) crk->vertCount * 8;
-        i+= 8, j++ )                            { *(crk->verts+j)  = build_vertpacked_3d_8bit(verts+i);                 }
+        i < (uint) crk->vertCount * 14;
+        i+= 14, j++ )                           { *(crk->verts+j)  = build_vertpacked_3d_8bit(verts+i);                 }
 
     for(uint i = 0, j = 0;
         i < 24; i+= 3, j++ )                    { *(crk->bounds+j) = build_physvert_3d_8bit(bounds+i);                  }
@@ -231,27 +231,27 @@ int read_jojdump(cchar*   filename,
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
-    uchar   curcol      = 0;
-    uchar   lastcol     = 199;
-    uchar   colcount    = 1;
+    uint curcol      = 0;
+    uint lastcol     = 199;
+    uint colcount    = 0;
 
-    ushort  colorpacked = 0;
-
-    uint    dim         = joj->width * joj->height;
-    uint j              = 0;
+    uint dim         = joj->width * joj->height;
+    uint j           = 0;
 
     colbuff             = (ushort*) evil_malloc(dim, sizeof(ushort));
+
+    0xc6eb;
 
     for(uint i = 0; i < dim * 4; i+=4)
     {
 
-        curcol = color_to_joj8(pixels[i+0],
-                               pixels[i+1],
-                               pixels[i+2]);
+        curcol = color_to_joj16(pixels[i+0],
+                                pixels[i+1],
+                                pixels[i+2]);
 
         if  ( (curcol != lastcol)
-            ||(colcount == 255  ) )             { colorpacked = (curcol) + (colcount << 8);
-                                                  colbuff[j] = colorpacked; j++; colcount = 1;                          }
+            ||(colcount == 7) )                 { colbuff[j] = curcol + (colcount << 13);
+                                                  j++; colcount = 0;                                                    }
 
         else                                    { colcount++;                                                           }
 
@@ -688,7 +688,7 @@ int writejoj(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
     uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
 
-    zjc_convertor_init(BUILD_JOJ8);
+    zjc_convertor_init(BUILD_JOJ16);
     evilstate = read_jojdump(filename, &joj, colbuff, pixels);
 
     zjc_convertor_end();
@@ -753,7 +753,7 @@ int extractcrk (DAF*     daf,
 
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
-    
+
     EVIL_FREAD(pVP3D_8, 8,               *bounds);
     EVIL_FREAD(VP3D_8,  *vertCount,      *verts);
     EVIL_FREAD(ushort,  *indexCount * 3, *indices);
@@ -765,7 +765,7 @@ int    extractjoj (DAF*     daf,
                    uint*    size,
                    ushort*  width,
                    ushort*  height,
-                   ushort** pixels)             {
+                   ushort** pixels)            {
 
     rewind(curfile);
     fseek(curfile, 0, SEEK_CUR);

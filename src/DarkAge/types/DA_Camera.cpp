@@ -77,7 +77,7 @@ bool DA_CAMERA::pointInFrustum(
 
 //  - --- - --- - --- - --- -
 
-void DA_CAMERA::move(glm::vec3& mvec,
+void DA_CAMERA::move(glm::vec3 mvec,
                      bool local)                {
 
     update = true;
@@ -101,14 +101,14 @@ void DA_CAMERA::move(glm::vec3& mvec,
 
     pos += displace;                                                                                                    }
 
-void DA_CAMERA::rotate(glm::vec3& rvec)         {
+void DA_CAMERA::rotate(glm::vec3 rvec)          {
 
     update = true;
 
     pitch += rvec.y; yaw += rvec.x;
 
     if      (pitch < -1.49f)                    { pitch = -1.49f;                                                       }
-    else if (pitch >  1.49f)                    { pitch = 1.49f;                                                        }
+    else if (pitch >  1.49f)                    { pitch =  1.49f;                                                       }
 
     glm::vec3 hAxis = glm::normalize(glm::cross(yAxis, fwd));
 

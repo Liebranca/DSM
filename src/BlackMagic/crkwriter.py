@@ -3,8 +3,8 @@ original_mesh = None
 #   ---     ---     ---     ---     ---
 
 from mathutils import Matrix, Vector
-from math import degrees
-import bmesh
+from math import degrees, sqrt
+import bmesh, itertools
 
 from .bmutils import *
 
@@ -54,7 +54,7 @@ def writecrk(ob_name):
 
     context = bpy.context
     original_object = ob = context.object
-    mesh = ob.data    
+    mesh = ob.data
 
     if not ob:
         raise STAHP ("No object selected -- export failed.")
@@ -62,7 +62,7 @@ def writecrk(ob_name):
     elif not isinstance(mesh, bpy.types.Mesh):
         raise STAHP ("Selected object has no mesh data -- export failed.")
 
-    #   ---     ---     ---     ---     ---
+#   ---     ---     ---     ---     ---
 
     obstrs = ob.name.split(":")
     if len(obstrs) > 1:
@@ -70,7 +70,7 @@ def writecrk(ob_name):
     else:
         obname = ob.name; obkls = ""
 
-    #   ---     ---     ---     ---     ---
+#   ---     ---     ---     ---     ---
 
     meshname = mesh.name
 
@@ -101,58 +101,95 @@ def writecrk(ob_name):
             ob = context.object; mesh = ob.data
 
     else: hasProps, merge = [], [];
+
+    sumdic = {};
+    for vert in mesh.vertices:
+        sumdic[(vert.co[0], vert.co[1], vert.co[2])] = [vert.normal[0], vert.normal[1], vert.normal[2]];
+
     mesh_triangulate(ob, mesh)
 
     header, vertBuff, indexBuff = None, None, None;
 
+#   ---     ---     ---     ---     ---
+
     try:
-        start = time.time()
+        start = time.time();
 
-        if ob.parent: reset_pose(ob)
+        if ob.parent: reset_pose(ob);
 
-        numVerts = len(mesh.vertices)
-        numIndices = len(mesh.polygons)
+        numVerts   = len(mesh.vertices);
+        numIndices = len(mesh.polygons);
 
-        uv = mesh.uv_layers.active.data
+        uv         = mesh.uv_layers.active.data;
 
-        sf = 1 if "actors" in obkls else 1
+        sf = 1/1 if "actors" in obkls else 1/1;
 
-        gaolerSize = 96; ii = 4;
-        header = bytearray(4 + gaolerSize)
-        
-        header[0:2] = numVerts.to_bytes(2, "little")
-        header[2:4] = numIndices.to_bytes(2, "little")
+        gaolerSize             = 96;
+        header                 = bytearray(4 + gaolerSize);
+
+        header[0:2]            = numVerts.to_bytes(2, "little");
+        header[2:4]            = numIndices.to_bytes(2, "little");
+        ii                     = 4;
 
         l = []; i = 0;
         for v in ob.bound_box:
-            header[ii:ii+4] = ftb(v[0]/sf)
-            header[ii+4:ii+8] = ftb(v[2]/sf)
-            header[ii+8:ii+12] = ftb(-v[1]/sf)
-            ii += 12;
+            header[ii+0:ii+4 ] = ftb(v[0] *sf);
+            header[ii+4:ii+8 ] = ftb(v[2] *sf);
+            header[ii+8:ii+12] = ftb(-v[1]*sf);
+            ii                += 12;
         
-        stride = 32;
-        vertBuff = bytearray(numVerts*32);
+        faces        = [poly  for poly in mesh.polygons];
+        olverts      = {};
 
-        for vert in mesh.vertices:
-            vi = vert.index * stride;
-            vertBuff[vi:vi+4] = ftb(vert.co[0]/sf)
-            vertBuff[vi+4:vi+8] = ftb(vert.co[2]/sf)
-            vertBuff[vi+8:vi+12] = ftb(-vert.co[1]/sf)
+        stride       = 56;
+        indexBuff    = bytearray(6*numIndices); i = 0;
+        vertBuff     = bytearray(numVerts*stride);
 
-            vertBuff[vi+12:vi+16] = ftb(vert.normal[0]/sf)
-            vertBuff[vi+16:vi+20] = ftb(vert.normal[2]/sf)
-            vertBuff[vi+20:vi+24] = ftb(-vert.normal[1]/sf)
-        
-        faces = [poly for poly in mesh.polygons]
-        indexBuff = bytearray(6*numIndices); i = 0;
+#   ---     ---     ---     ---     ---
 
         for face in faces:
+
             for vi, loop_index in zip(face.vertices, face.loop_indices):
-                svi = (vi * stride) + 24
-                vertBuff[svi:svi+4] = ftb(uv[loop_index].uv[0])
-                vertBuff[svi+4:svi+8] = ftb(uv[loop_index].uv[1])
+
+                loop                    = mesh.loops[loop_index];
+                vert                    = mesh.vertices[vi];
+                svi                     = vi * stride;
+                n                       = sumdic[(vert.co[0], vert.co[1], vert.co[2])]
+
+                vertBuff[svi+0 :svi+4 ] = ftb( vert.co[0]*sf);
+                vertBuff[svi+4 :svi+8 ] = ftb( vert.co[2]*sf);
+                vertBuff[svi+8 :svi+12] = ftb(-vert.co[1]*sf);
+
+                vertBuff[svi+12:svi+16] = ftb( n[0]*sf);
+                vertBuff[svi+16:svi+20] = ftb( n[2]*sf);
+                vertBuff[svi+20:svi+24] = ftb(-n[1]*sf);
+
+                vertBuff[svi+48:svi+52] = ftb(uv[loop_index].uv[0]);
+                vertBuff[svi+52:svi+56] = ftb(uv[loop_index].uv[1]);
 
                 indexBuff[i:i+2] = vi.to_bytes(2, "little"); i += 2;
+
+        del sumdic;
+        mesh.calc_tangents();
+
+#   ---     ---     ---     ---     ---
+
+        for face in faces:
+
+            for vi, loop_index in zip(face.vertices, face.loop_indices):
+
+                loop                    =  mesh.loops[loop_index];
+                svi                     =  vi * stride;
+
+                vertBuff[svi+24:svi+28] = ftb( loop.tangent[0]*sf);
+                vertBuff[svi+28:svi+32] = ftb( loop.tangent[2]*sf);
+                vertBuff[svi+32:svi+36] = ftb(-loop.tangent[1]*sf);
+
+                vertBuff[svi+36:svi+40] = ftb( loop.bitangent[0]*sf);
+                vertBuff[svi+40:svi+44] = ftb( loop.bitangent[2]*sf);
+                vertBuff[svi+44:svi+48] = ftb(-loop.bitangent[1]*sf);
+
+#   ---     ---     ---     ---     ---
 
         with open(filepath + "\\" + filename + ".crk", "wb+") as file: file.write(header + vertBuff + indexBuff)
         mesh_restore(mesh)
@@ -177,8 +214,12 @@ def writecrk(ob_name):
 
         print("");
 
+#   ---     ---     ---     ---     ---
+
 
     finally:
+
+        mesh.free_tangents();
 
         global original_mesh;
 

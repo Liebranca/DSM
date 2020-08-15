@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define SIN_BATCH_VERTSIZE            32
+#define SIN_BATCH_VERTSIZE            56
 #define SIN_MAX_BATCHES               64
 
 #define SIN_BATCH_MAXOBJECTS          256
@@ -95,7 +95,13 @@ M3DB* SIN_genMeshBatch()                        {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(3 * sizeof(float)));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(6 * sizeof(float)));
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(9 * sizeof(float)));
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(12 * sizeof(float)));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batch->BUFFS[SIN_BATCH_IBO]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, SIN_BATCH_IBOSIZE, NULL, GL_STATIC_DRAW);
@@ -128,7 +134,7 @@ void  SIN_meshbatch_upload(ushort  numVerts,
                            float*  vertex_data,
                            ushort* indices)     {
 
-    uint  vsize = numVerts   * sizeof(float)  * 8;
+    uint  vsize = numVerts   * sizeof(float)  * 14;
     uint  isize = numIndices * sizeof(ushort) * 3;
 
     for(uint i = 0;

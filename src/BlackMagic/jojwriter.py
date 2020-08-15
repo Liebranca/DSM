@@ -60,9 +60,21 @@ def writejoj(ob_name):
 
         del acmb;
 
+        mat.active_texture_index = 2;
+        tex = mat.active_texture;
+        texchk(tex);
+
+        norb = bytearray(dim);
+        norb[0:dim] = ftbarr(tex.image.pixels)[0:dim];
+
+        with open(filepath + "\\" + filename + "_n" + ".joj", "wb+") as file:
+            file.write(sizes+norb);
+
+        del norb;
+
     if texmode != 0:
 
-        mat.active_texture_index = 2;
+        mat.active_texture_index = 3;
         tex = mat.active_texture;
         texchk(tex);
 
@@ -95,6 +107,13 @@ def writejoj(ob_name):
         os.system(  bmpath   + "\\BlackMagic.exe" + " "  + "joj" + " "
         
                   + filepath + "\\" + filename + "_a"    + ".joj"  + " "
+                  + filepath + "\\" + archive  + ".daf"  + " "
+                  + writemode                            + " "
+                  + writeoffset                        );
+
+        os.system(  bmpath   + "\\BlackMagic.exe" + " "  + "joj" + " "
+        
+                  + filepath + "\\" + filename + "_n"    + ".joj"  + " "
                   + filepath + "\\" + archive  + ".daf"  + " "
                   + writemode                            + " "
                   + writeoffset                        );

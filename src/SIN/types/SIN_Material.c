@@ -90,7 +90,8 @@ Material* build_material      (ushort matid,
         material         = SIN_matbucket+loc;
 
         material->id     = matid;
-        for(uint i = 0; i < 3; i++)             { if(texid[i])
+        for(uint i = 0;
+            i < SIN_MATERIAL_MAX_TEXTURES; i++) { if(texid[i])
                                                 { material->texloc[i] = SIN_texbucket_findloc(texid[i]); }
 
                                                   else
@@ -103,7 +104,8 @@ Material* build_material      (ushort matid,
         Program* program  = SIN_shdbucket_get(material->shdloc);
         program->users++;
 
-        for(uint i = 0; i < 3; i++)             { if(material->texloc[i])
+        for(uint i = 0;
+            i < SIN_MATERIAL_MAX_TEXTURES; i++) { if(material->texloc[i])
                                                 { Texture* tex      = SIN_texbucket_get(material->texloc[i]);
                                                   tex->users++; }                                                       }
 
@@ -117,7 +119,8 @@ void    del_material        (Material* material,
                              ushort loc)        {
 
     unsub_shader(material->shdloc);
-    for(uint i = 0; i < 3; i++)                 { if(material->texloc[i])
+    for(uint i = 0;
+        i < SIN_MATERIAL_MAX_TEXTURES; i++)     { if(material->texloc[i])
                                                 { unsub_tex(material->texloc[i]); }                                     }
 
     SIN_matbucket[loc] = SIN_emptymat;

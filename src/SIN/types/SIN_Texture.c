@@ -91,7 +91,9 @@ Texture* SIN_texbucket_get  (ushort loc)        {
 
 //  - --- - --- - --- - --- -
 
-Texture* build_texture(ushort id, uchar offset) {
+Texture* build_texture(ushort id,
+                       uchar offset,
+                       int isNormalMap)         {
 
     Texture* tex = SIN_texbucket_find(id);
 
@@ -108,9 +110,9 @@ Texture* build_texture(ushort id, uchar offset) {
 
         tex                 = SIN_texbucket+loc;
 
-        tex->id             = id;
-        uint    size        = 0;
-        ushort* pixels      = NULL;
+        tex->id           = id;
+        uint  size        = 0;
+        ushort* pixels    = NULL;
 
         extractjoj(TEX_ARCHIVE,
                    offset,
@@ -121,13 +123,27 @@ Texture* build_texture(ushort id, uchar offset) {
 
 //  - --- - --- - --- - --- -
 
-        uchar* pixel_data = (uchar*) evil_malloc(tex->width * tex->height, sizeof(uchar));
+        float* pixel_data = (float*) evil_malloc(tex->width * tex->height * 3, sizeof(float));
         uint   curpix     = 0;
 
         for(uint i = 0; i < size; i++)
         {
-            uchar  color = pixels[i] & 255, count = (pixels[i] & 65280) >> 8;
-            for(uint j = 0; j < count; j++)     { pixel_data[curpix] = color;curpix++;                                  }
+
+            ushort color_index =  pixels[i] & (0b0001111111111111);
+            uchar  count       = (pixels[i] & (0b1110000000000000)) >> 13;
+            count             += 1;
+
+            float  r = ( color_index &  31              ) * 0.03125f;
+            float  g = ((color_index & (31 << 5 )) >> 5 ) * 0.03125f;
+            float  b = ((color_index & (7  << 10)) >> 10) * 0.125f;
+
+            if (isNormalMap)                    { b = 1.0f;                                                             }
+
+            for(uint j = 0; j < count; j++)     { pixel_data[curpix+0] = r;
+                                                  pixel_data[curpix+1] = g;
+                                                  pixel_data[curpix+2] = b;
+
+                                                  curpix += 3;                                                          }
 
         }
 
@@ -141,7 +157,7 @@ Texture* build_texture(ushort id, uchar offset) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE_2_3_3_REV, pixel_data);
+                     GL_RGB, GL_FLOAT, pixel_data);
 
         WARD_EVIL_MFREE(pixel_data);
 
@@ -157,7 +173,7 @@ void bind_tex_to_slot(ushort loc, uint slot)    {
 
     Texture* tex = SIN_texbucket_get(loc);
 
-    if(slot <= 31)                              { slot = 31;                                                            }
+    if(slot >= 31)                              { slot = 31;                                                            }
 
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, tex->location);                                                                        }

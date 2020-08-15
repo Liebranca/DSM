@@ -12,16 +12,20 @@ static fvRange* frac4_range;
 static fvRange* frac16_range;
 static fvRange* joj8_rg_range;
 static fvRange* joj8_b_range;
+static fvRange* joj16_rg_range;
+static fvRange* joj16_b_range;
 
 uchar zjc_convertor_flags = 0;
 
 int zjc_convertor_init(uchar flags)             {
 
-    if (flags & BUILD_FRAC8)                    { frac8_range   = build_fvRange(128, 0.03125f);
-                                                  frac4_range   = build_fvRange(16,  0.0625f);                      }
-    if (flags & BUILD_FRAC16)                   { frac16_range  = build_fvRange(128, 0.0078125f);                   }
-    if (flags & BUILD_JOJ8)                     { joj8_rg_range = build_fvRange(8, (float)1/8);
-                                                  joj8_b_range  = build_fvRange(4, (float)1/4);                     }
+    if (flags & BUILD_FRAC8)                    { frac8_range    = build_fvRange(128, 0.03125f);
+                                                  frac4_range    = build_fvRange(16,  0.0625f);                     }
+    if (flags & BUILD_FRAC16)                   { frac16_range   = build_fvRange(128, 0.0078125f);                  }
+    if (flags & BUILD_JOJ8)                     { joj8_rg_range  = build_fvRange(8,  (float)1/8);
+                                                  joj8_b_range   = build_fvRange(4,  (float)1/4);                   }
+    if (flags & BUILD_JOJ16)                    { joj16_rg_range = build_fvRange(32, (float)1/32);
+                                                  joj16_b_range  = build_fvRange(8,  (float)1/8);                   }
 
     zjc_convertor_flags = flags;
 
@@ -32,6 +36,7 @@ int zjc_convertor_end()                         {
     if (zjc_convertor_flags & BUILD_FRAC8)      { del_fvRange(frac8_range); del_fvRange(frac4_range);               }
     if (zjc_convertor_flags & BUILD_FRAC16)     { del_fvRange(frac16_range);                                        }
     if (zjc_convertor_flags & BUILD_JOJ8)       { del_fvRange(joj8_rg_range); del_fvRange(joj8_b_range);            }
+    if (zjc_convertor_flags & BUILD_JOJ16)      { del_fvRange(joj16_rg_range); del_fvRange(joj16_b_range);          }
 
     return 0;                                                                                                       }
 
@@ -54,15 +59,24 @@ VP3D_16 build_vertpacked_3d_16bit(float* values)     {
 VP3D_8 build_vertpacked_3d_8bit(float* values)      {
 
     VP3D_8 vert;
-    vert.co[0]     = float_tofrac8(*values);
-    vert.co[1]     = float_tofrac8(*(values+1));
-    vert.co[2]     = float_tofrac8(*(values+2));
+    vert.co[0]        = float_tofrac8(*(values+0));
+    vert.co[1]        = float_tofrac8(*(values+1));
+    vert.co[2]        = float_tofrac8(*(values+2));
+                      
+    vert.normal[0]    = float_tofrac8(*(values+3));
+    vert.normal[1]    = float_tofrac8(*(values+4));
+    vert.normal[2]    = float_tofrac8(*(values+5));
 
-    vert.normal[0] = float_tofrac8(*(values+3));
-    vert.normal[1] = float_tofrac8(*(values+4));
-    vert.normal[2] = float_tofrac8(*(values+5));
+    vert.tangent[0]   = float_tofrac8(*(values+6));
+    vert.tangent[1]   = float_tofrac8(*(values+7));
+    vert.tangent[2]   = float_tofrac8(*(values+8));
 
-    vert.uv        = float_tofrac4(*(values+6), *(values+7));
+    vert.bitangent[0] = float_tofrac8(*(values+9));
+    vert.bitangent[1] = float_tofrac8(*(values+10));
+    vert.bitangent[2] = float_tofrac8(*(values+11));
+
+    vert.uv[0]        = float_tofrac8(*(values+12));
+    vert.uv[1]        = float_tofrac8(*(values+13));
 
     return vert;                                                                                                    }
 
@@ -239,6 +253,16 @@ uchar color_to_joj8(float r,
     uchar color =   (fvRange_take_closest_1b(joj8_rg_range, r)      )
                   + (fvRange_take_closest_1b(joj8_rg_range, g) << 3 )
                   + (fvRange_take_closest_1b(joj8_b_range,  b) << 6 );
+
+    return color;                                                                                                   }
+
+ushort color_to_joj16(float r,
+                      float g,
+                      float b)                  {
+
+    ushort color =   (fvRange_take_closest_1b(joj16_rg_range, r)       )
+                   + (fvRange_take_closest_1b(joj16_rg_range, g) << 5  )
+                   + (fvRange_take_closest_1b(joj16_b_range,  b) << 10 );
 
     return color;                                                                                                   }
 

@@ -5,7 +5,7 @@ version     = "0.1 BETA";
 
 filepath    = "D:\\lieb_git\\dsm\\src\\OrangeBox";
 filename    = "dsm_hexdump";
-archive     = "Textures";
+archive     = "Meshes";
 writemode   = "0x00";
 writeoffset = "0x00";
 
@@ -44,3 +44,5 @@ def set_bm_ars(setpath = "", setname = "", setarch = "", setmode = "", setoffs =
     if setmode: set_bm_writemode   (setmode);
     if setoffs: set_bm_writeoffset (setoffs);
     if settexm: set_bm_texmode     (settexm);
+
+
