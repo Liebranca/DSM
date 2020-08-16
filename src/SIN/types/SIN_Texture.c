@@ -91,9 +91,40 @@ Texture* SIN_texbucket_get  (ushort loc)        {
 
 //  - --- - --- - --- - --- -
 
+void loadtex(float*  pixel_data,
+             uint size,
+             ushort* pixels,
+             int     isNormalMap)               {
+
+    uint   curpix     = 0;
+
+    for(uint i = 0; i < size; i++)
+    {
+
+        ushort color_index =  pixels[i] & (0b0001111111111111);
+        uchar  count       = (pixels[i] & (0b1110000000000000)) >> 13;
+        count             += 1;
+
+        float  r = ( color_index &  31              ) * 0.03125f;
+        float  g = ((color_index & (31 << 5 )) >> 5 ) * 0.03125f;
+        float  b = ((color_index & (7  << 10)) >> 10) * 0.125f;
+
+        if (isNormalMap)                    { b = 1.0f;                                                                 }
+
+        for(uint j = 0; j < count; j++)     { pixel_data[curpix+0] = r;
+                                                pixel_data[curpix+1] = g;
+                                                pixel_data[curpix+2] = b;
+
+                                                curpix += 3;                                                            }
+
+    }
+                                                                                                                        }
+
+//  - --- - --- - --- - --- -
+
 Texture* build_texture(ushort id,
                        uchar offset,
-                       int isNormalMap)         {
+                       int flags)               {
 
     Texture* tex = SIN_texbucket_find(id);
 
@@ -102,6 +133,9 @@ Texture* build_texture(ushort id,
         if(SIN_ACTIVE_TEXTURES
            == SIN_MAX_TEXTURES)                 { fprintf(stderr, "Cannot create more than %u textures",
                                                   SIN_MAX_TEXTURES); return NULL;                                       }
+
+        int isNormalMap = flags & SIN_TEXFLAGS_NORMALMAP;
+        int isCubeMap   = flags & SIN_TEXFLAGS_CUBEMAP;
 
         uint loc = sStack_pop(SIN_TEX_SLOTSTACK);
         WARD_EVIL_UNSIG(loc, 1);
@@ -124,28 +158,7 @@ Texture* build_texture(ushort id,
 //  - --- - --- - --- - --- -
 
         float* pixel_data = (float*) evil_malloc(tex->width * tex->height * 3, sizeof(float));
-        uint   curpix     = 0;
-
-        for(uint i = 0; i < size; i++)
-        {
-
-            ushort color_index =  pixels[i] & (0b0001111111111111);
-            uchar  count       = (pixels[i] & (0b1110000000000000)) >> 13;
-            count             += 1;
-
-            float  r = ( color_index &  31              ) * 0.03125f;
-            float  g = ((color_index & (31 << 5 )) >> 5 ) * 0.03125f;
-            float  b = ((color_index & (7  << 10)) >> 10) * 0.125f;
-
-            if (isNormalMap)                    { b = 1.0f;                                                             }
-
-            for(uint j = 0; j < count; j++)     { pixel_data[curpix+0] = r;
-                                                  pixel_data[curpix+1] = g;
-                                                  pixel_data[curpix+2] = b;
-
-                                                  curpix += 3;                                                          }
-
-        }
+        loadtex(pixel_data, size, pixels, isNormalMap);
 
         glGenTextures(1, &tex->location);
         glBindTexture(GL_TEXTURE_2D, tex->location);

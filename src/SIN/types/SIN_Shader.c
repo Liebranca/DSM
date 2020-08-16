@@ -168,15 +168,19 @@ Program* build_shader(ushort id,
         program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
         program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
 
-        glUseProgram(program->loc);
+        glUseProgram(program->location);
 
-        int diffuseLoc = glGetUniformLocation(defaultShader_loc, "DiffuseMap");
-        int infoLoc    = glGetUniformLocation(defaultShader_loc, "ShadingInfo");
-        int normalLoc  = glGetUniformLocation(defaultShader_loc, "NormalMap");
+        int diffuseLoc = glGetUniformLocation(program->location, "DiffuseMap");
+        int infoLoc    = glGetUniformLocation(program->location, "ShadingInfo");
+        int normalLoc  = glGetUniformLocation(program->location, "NormalMap");
+        int env1Loc    = glGetUniformLocation(program->location, "shineRough");
+        int env2Loc    = glGetUniformLocation(program->location, "shineSoft");
 
         glUniform1i(diffuseLoc, 0);
         glUniform1i(infoLoc,    1);
         glUniform1i(normalLoc,  2);
+        glUniform1i(env1Loc,    3);
+        glUniform1i(env2Loc,    4);
 
         SIN_ACTIVE_SHADERS++;
 

@@ -56,10 +56,20 @@ uniform sampler2D DiffuseMap;
 uniform sampler2D ShadingInfo;
 uniform sampler2D NormalMap;
 
+uniform sampler2D shineRough;
+uniform sampler2D shineSoft;
+
 uniform vec4   Ambient;
 //uniform vec3 SunFwd;
 uniform vec3   CamFwd;
 
+vec2 voodoo_UV(vec3 u, vec3 n)
+{
+    vec3  r = reflect(u, n);
+    float m = 2 * sqrt( (r.x*r.x) + (r.y*r.y) + ((r.z+1.0)*(r.z+1.0)) );
+
+    return vec2(r.x/m + 0.5, r.y/m + 0.5);
+}
 
 void main()
 {
@@ -70,25 +80,34 @@ void main()
 
     vec3 diffuse     = texture2D(DiffuseMap,  texCoords).rgb;
     vec3 shadinginfo = texture2D(ShadingInfo, texCoords).rgb;
-    vec3 normal      = texture2D(NormalMap,   texCoords).rgb;
-    normal           = normal * 2.0 - 1.0;
-    normal           = normalize(TBN * normal);
+    vec3 normalmap   = texture2D(NormalMap,   texCoords).rgb;
+    normalmap        = normalmap * 2.0 - 1.0;
+
+    vec3 normal      = normalize(TBN * normalmap);
+    vec3 softnormal  = normalize(TBN[2] + (normalmap * 0.35));
 
     float ao         = shadinginfo.r;
-    float softness   = shadinginfo.g;
+    float softness   = 1 - shadinginfo.g;
     float metallic   = shadinginfo.b;
 
-    float specfac = clamp(dot(reflect(-lightDir, normal), CamFwd), 0.0, 1.49);
-    vec3 specular = (diffuse * specfac);
+    float eyeshd     = clamp(dot(-CamFwd, softnormal), 0.18, 1.49);
+    eyeshd           = smoothstep(0.00, 0.23, eyeshd);
+
+    float specfac    = clamp(dot(reflect(-lightDir, normal), CamFwd), 0.0, 1.49);
+    vec3 specular    = (diffuse * specfac * softness);
 
     float diff       = clamp(dot(lightDir, normal), 0.06, 1.49);
-    diffuse         *= diff;
+    diffuse         += (softness * 0.25);
+    diffuse         *= diff * ao * eyeshd;
 
-    vec3 refmapping  = normalize(reflect(CamFwd, normal));
-    float metalshine = texture2D(DiffuseMap, refmapping.xy).r;
+    vec2 refUV       = voodoo_UV(CamFwd, softnormal);
 
-    vec3 composite   = ambient + (diffuse * ao) + (specular * softness)
-                     + (vec3(metalshine, metalshine, metalshine) * metallic);
+    vec3 rougshine   = texture2D(shineRough, refUV).rgb * 0.75;
+    vec3 softshine   = texture2D(shineSoft, refUV).rgb  * 0.75;
+
+    vec3 refshine    = mix(rougshine, softshine, softness) * metallic;
+
+    vec3 composite   = ambient + diffuse + specular + refshine;
 
     gl_FragColor = vec4(composite, 1);
 
