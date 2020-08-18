@@ -40,7 +40,6 @@ chWH* chmang_getwin         (Uint8 i);
 //  - --- - --- - --- - --- -
 
 extern chMG chmang;
-extern float fBy;
 
 #ifdef __cplusplus
 }

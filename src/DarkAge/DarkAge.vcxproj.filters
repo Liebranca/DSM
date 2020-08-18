@@ -27,12 +27,18 @@
     <ClCompile Include="types\DA_Camera.cpp">
       <Filter>Source Files\types</Filter>
     </ClCompile>
+    <ClCompile Include="types\DA_GameObject.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DarkAge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="types\DA_Camera.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="types\DA_GameObject.h">
       <Filter>Header Files\types</Filter>
     </ClInclude>
   </ItemGroup>

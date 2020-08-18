@@ -25,8 +25,8 @@ class DA_CAMERA {
 
         void getFrustum();
 
-        bool rectInFrustum(glm::vec3* bounds);
-        bool pointInFrustum(glm::vec3& point);
+        bool rectInFrustum (glm::vec3  bounds[8]);
+        bool pointInFrustum(glm::vec3 point);
 
         void move(glm::vec3 mvec, bool local = false);
 

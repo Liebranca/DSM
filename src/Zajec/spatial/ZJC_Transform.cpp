@@ -19,8 +19,8 @@ glm::mat4 TRANSFORM3D::getModel
 
     return parentMatrix * (wPosMatrix * wRotMatrix * wScaleMatrix);                                                     }
 
-glm::mat4 TRANSFORM3D::getNormal
-                        (bool ignoreParent)     { return glm::inverseTranspose(getModel(ignoreParent));                 }
+glm::mat3 TRANSFORM3D::getNormal
+                        (glm::mat4& model)      { return glm::inverseTranspose(model);                                  }
 
 //  - --- - --- - --- - --- -
 

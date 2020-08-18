@@ -27,16 +27,16 @@ typedef struct TRANSFORM3D {
     TRANSFORM3D* parent;
 
     TRANSFORM3D(glm::vec3 pos   = { 0,0,0   },
-                glm::quat rot   = { 0,0,0,1 },
+                glm::quat rot   = { 1,0,0,0 },
                 glm::vec3 scale = { 1,1,1   })
                :position   (pos),
-                orientation(rot),
-                scaling    (scale)              { dirn = {1, 1};                                                        }
+                orientation(glm::quat(1,0,0,0)),
+                scaling    (scale)              { dirn = {1, 1}; rotate(rot);                                           }
 
     ~TRANSFORM3D()                              { ;                                                                     }
 
     glm::mat4 getModel     (bool ignoreParent = false);
-    glm::mat4 getNormal    (bool ignoreParent = false);
+    glm::mat3 getNormal    (glm::mat4& model);
 
     void      setParent    (TRANSFORM3D* par)   { this->parent = par;                                                   }
 
@@ -46,7 +46,7 @@ typedef struct TRANSFORM3D {
                             bool fullRot = false);
 
     void      rotate       (glm::quat delta);
-    void      move         (glm::vec3& pos)     { position += pos;                                                      }
+    void      move         (glm::vec3 pos)      { position += pos;                                                      }
 
 } T3D;
 

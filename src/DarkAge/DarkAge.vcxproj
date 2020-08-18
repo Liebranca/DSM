@@ -95,7 +95,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Zajec;..\Gaoler;..\..\include;..\..\include\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Zajec;..\Gaoler;..\SIN;..\..\include;..\..\include\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,10 +107,10 @@
       <Path>$(SolutionDir)\trashcan\$(MSBuildProjectName)\$(MSBuildProjectName).log</Path>
     </BuildLog>
     <Lib>
-      <AdditionalDependencies>Zajec.lib;Gaoler.lib</AdditionalDependencies>
+      <AdditionalDependencies>Zajec.lib;Gaoler.lib;SIN.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>..\Zajec;..\Gaoler;..\..\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Zajec;..\Gaoler;..\SIN;..\..\lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -165,10 +165,12 @@
   <ItemGroup>
     <ClInclude Include="DarkAge.h" />
     <ClInclude Include="types\DA_Camera.h" />
+    <ClInclude Include="types\DA_GameObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DarkAge.cpp" />
     <ClCompile Include="types\DA_Camera.cpp" />
+    <ClCompile Include="types\DA_GameObject.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

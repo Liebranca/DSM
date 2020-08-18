@@ -5,8 +5,6 @@
 
 #include <stdio.h>
 
-float fBy = 0.0;
-
 //  - --- - --- - --- - --- -
 
 Uint8 CH_MAXWINS = 8;

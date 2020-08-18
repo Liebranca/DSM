@@ -60,15 +60,15 @@ void DA_CAMERA::getFrustum()                    {
 //  - --- - --- - --- - --- -
 
 bool DA_CAMERA::rectInFrustum(
-                    glm::vec3* bounds)          {
+                    glm::vec3 bounds[8])        {
 
-    for (uint i = 0; i < 6; i++)                { if (pointInFrustum(bounds[i]))
+    for (uint i = 0; i < 6; i++)                { if (this->pointInFrustum(bounds[i]))
                                                 { return true; }                                                        }
 
     return false;                                                                                                       }
 
 bool DA_CAMERA::pointInFrustum(
-                    glm::vec3& point)           {
+                    glm::vec3 point)            {
 
     for (uint i = 0; i < 6; i++)                { if ( (dot(planes[i].normal, point)+planes[i].d) < 0)
                                                 { return false; }                                                       }

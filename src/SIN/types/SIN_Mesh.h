@@ -42,6 +42,8 @@ ushort SIN_meshbucket_findloc (ushort id);
 M3D*    SIN_meshbucket_get    (ushort loc);
 M3D*    build_mesh            (ushort id, ushort matid, uchar offset);
 
+void    draw_mesh             (M3D*   mesh);
+
 //  - --- - --- - --- - --- -
 
 #ifdef __cplusplus

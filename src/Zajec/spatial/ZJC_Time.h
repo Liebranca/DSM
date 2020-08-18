@@ -21,6 +21,8 @@ float  clock_secondLength   ();
 
 //  - --- - --- - --- - --- -
 
+extern float fBy;
+
 /*DS_TICKER(float max) { this->max = max; this->curr = max; }
 
 virtual ~DS_TICKER() { ; }

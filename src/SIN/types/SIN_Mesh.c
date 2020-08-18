@@ -8,6 +8,8 @@
 #include "SIN_Material.h"
 #include "SIN_MeshBatch.h"
 
+#include "GL/glew.h"
+
 #include <stdio.h>
 #include <math.h>
 
@@ -181,6 +183,9 @@ M3D*    build_mesh          (ushort id,
     return mesh;                                                                                                        }
 
 //  - --- - --- - --- - --- -
+
+void    draw_mesh             (M3D*   mesh)     { glDrawElements(GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
+                                                                 (void*) (mesh->drawOffset * sizeof(uint)) );           }
 
 void     del_mesh            (M3D*   mesh,
                               ushort loc)       {

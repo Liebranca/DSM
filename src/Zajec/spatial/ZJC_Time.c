@@ -4,10 +4,8 @@
 #include <stdio.h>
 #include <time.h>
 
-
-
 //  - --- - --- - --- - --- -
-
+float          fBy         = 0.0f;
 const  float   CPS         = 1.0f/CLOCKS_PER_SEC;
 
 static clock_t begin       = 0;
