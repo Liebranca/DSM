@@ -9,6 +9,8 @@
 #include "GAOL_Constants.h"
 #include "GAOL_Bounds.h"
 
+#include <vector>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,15 +21,17 @@ class DA_NODE {
 
     public:
 
-        DA_NODE(ushort meshid,
-                glm::vec3 pos   = {0,0,0},
-                glm::quat rot   = {1,0,0,0},
-                glm::vec3 scale = {1,1,1});
+        DA_NODE         (ushort meshid,
+                         glm::vec3 pos   = {0,0,0},
+                         glm::quat rot   = {1,0,0,0},
+                         glm::vec3 scale = {1,1,1});
 
         virtual ~DA_NODE();
 
 //  - --- - --- - --- - --- -
 
+        int        isDynamic    ()              { return this->physMode  == GAOL_PHYSMODE_DYNAMIC;                      }
+        int        isStatic     ()              { return this->physMode  == GAOL_PHYSMODE_STATIC;                       }
         glm::mat4  getModel     (bool ig)       { return transform->getModel(ig);                                       }
         glm::mat4  getNormal    ()              { return transform->getNormal(this->model);                             }
         void       setParent    (DA_NODE* other){ this->transform->setParent(other->transform);                         }
@@ -43,12 +47,9 @@ class DA_NODE {
         void       removeTarget ()              { this->target = nullptr;                                               }
         bool       groundCheck  ()              { return this->bounds->box->groundCheck( this->ground->bounds->box,
                                                                                        -10.0f).a;                       }
-        bool       dynOnDyn     (DA_NODE* other){ return (  (other->physMode == GAOL_PHYSMODE_DYNAMIC)
-                                                         && (this->physMode  == GAOL_PHYSMODE_DYNAMIC));                }
-        bool       stcOnStc     (DA_NODE* other){ return (  (other->physMode == GAOL_PHYSMODE_STATIC)
-                                                         && (this->physMode  == GAOL_PHYSMODE_STATIC));                 }
-        bool       canCol       ()              { return (  (this->physMode  == GAOL_PHYSMODE_STATIC)
-                                                         || (this->physMode  == GAOL_PHYSMODE_DYNAMIC));                }
+        bool       dynOnDyn     (DA_NODE* other){ return other->isDynamic() && this->isDynamic();                       }
+        bool       stcOnStc     (DA_NODE* other){ return other->isStatic()  && this->isStatic();                        }
+        bool       canCol       ()              { return isStatic() || isDynamic();                                     }
         float      getSpeed     ()              { return glm::length(this->accel + this->angvel) / (fBy * 2.0f);        }
         bool       pointInside  (glm::vec3 p)   { return this->bounds->box->pointInside(p);                             }
         void       standingOn   (DA_NODE* other){ this->ground = other;                                                 }
@@ -56,6 +57,8 @@ class DA_NODE {
 
 //  - --- - --- - --- - --- -
 
+        void       onCellExit   ();
+        void       move         (glm::vec3 mvec, bool local = false);
         Booflo     colCheckBox  (DA_NODE* other, bool& mote);
         bool       distCheck    (DA_NODE* other, float fac = 1.25f);
         void       physicsSim   (DA_NODE* other, Booflo& groundCheck, bool& motCheck, bool& foundGround);
@@ -64,6 +67,8 @@ class DA_NODE {
 //  - --- - --- - --- - --- -
 
     protected:
+
+        ushort     id;
 
         T3D*       transform;
         COLBOUNDS* bounds;
@@ -92,18 +97,21 @@ class DA_NODE {
 
         bool       visible      = false;
         bool       doRender     = true;
+        bool       needsUpdate  = true;
 
         bool       commands[5]  = { false, false, false, false, false };
 
-//  - --- - --- - --- - --- -
-
-    private:
-
-        
+        int        gridpos [2]  = { 1, -1    };
+        uint       cellinfo[3]  = { 0,  1, -1};
 
 };
 
 //  - --- - --- - --- - --- -
+
+void     DA_objects_init ();
+void     DA_objects_end  ();
+
+extern std::vector<DA_NODE*> SCENE_OBJECTS;
 
 #ifdef __cplusplus
 }

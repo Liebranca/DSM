@@ -1,11 +1,37 @@
 #include "DA_GameObject.h"
+#include "DA_WorldManager.h"
 #include "DA_Camera.h"
 
 #include "lyutils/ZJC_Evil.h"
 #include "lymath/ZJC_GOPS.h"
 #include "lymath/ZJC_VOPS.h"
+#include "lyarr/ZJC_Stack.h"
 
 #include "types/SIN_Shader_EX.h"
+
+#define               DA_MAX_OBJECTS      1024
+
+static sStack*        DA_OBJ_SLOTSTACK  = NULL;
+static ushort         DA_ACTIVE_OBJECTS = 0;
+
+std::vector<DA_NODE*> SCENE_OBJECTS(DA_MAX_OBJECTS, 0);
+
+//  - --- - --- - --- - --- -
+
+void DA_objects_init()                          {
+
+    DA_OBJ_SLOTSTACK = build_sStack(DA_MAX_OBJECTS);
+    for(int i = DA_MAX_OBJECTS-1; i > 0; i--)   { sStack_push(DA_OBJ_SLOTSTACK, i);                                     }
+                                                                                                                        }
+
+void DA_objects_end()                           {
+
+    for(uint i = 0; i < DA_MAX_OBJECTS; i++)    { DA_NODE* ob = SCENE_OBJECTS[i];
+                                                  if(ob) { delete ob; }                                                 }
+
+    del_sStack(DA_OBJ_SLOTSTACK);                                                                                       }
+
+//  - --- - --- - --- - --- -
 
 DA_NODE::DA_NODE(ushort meshid,
                  glm::vec3 pos,
@@ -36,14 +62,26 @@ DA_NODE::DA_NODE(ushort meshid,
 
     }
 
-    bounds = GAOL_boundbucket_get(meshloc);
+    mesh->users++;
 
-    }
+    bounds   = GAOL_boundbucket_get(meshloc);
+    ushort obloc = sStack_pop(DA_OBJ_SLOTSTACK);
+    WARD_EVIL_UNSIG(obloc, 1);
+
+    SCENE_OBJECTS[obloc] = this;
+    DA_ACTIVE_OBJECTS++;
+
+    float fpos[3] = { pos.x, pos.y, pos.z };
+    DA_grid_findpos(this->gridpos, fpos);
+
+    this->id     = obloc;
+    DA_grid_regObject(gridpos, cellinfo, obloc, isDynamic());                                                           }
 
 DA_NODE::~DA_NODE()                             {
 
     delete this->transform;
-    }
+    unsub_mesh (SIN_meshbucket_findloc(this->mesh->id));
+    sStack_push(DA_OBJ_SLOTSTACK, this->id);                                                                            }
 
 //  - --- - --- - --- - --- -
 
@@ -135,12 +173,28 @@ bool DA_NODE::distCheck(DA_NODE* other,
 
 //  - --- - --- - --- - --- -
 
+void DA_NODE::onCellExit()                      {
+
+    DA_grid_unregObject(cellinfo, isDynamic());
+    DA_NODE* other = SCENE_OBJECTS[cellinfo[1]];
+    other->cellinfo[0] = cellinfo[0];
+    }
+
+void DA_NODE::move      (glm::vec3 mvec,
+                         bool local)            {
+
+    worldPosition() += mvec;
+    needsUpdate      = true;                                                                                            }
+
 bool DA_NODE::draw() {
 
-    model = transform->getModel();
-    buildBounds();
+    if(needsUpdate)                             { model       = transform->getModel();
+                                                  nmat        = transform->getNormal(model);
+                                                  needsUpdate = false;
 
-    if (doRender)
+                                                  buildBounds();                                                        }
+
+    if(doRender)
     {
 
         /*for (unsigned int i = 0; i < this->children.size(); i++) {
@@ -149,9 +203,8 @@ bool DA_NODE::draw() {
             this->children[i]->draw();
         }*/
 
-        if (active_camera->rectInFrustum(bounds->box->points))
+        if(actcam->rectInFrustum(bounds->box->points))
         {
-            nmat  = transform->getNormal(model);
 
             // TODO: handle ANS here
 
@@ -161,6 +214,8 @@ bool DA_NODE::draw() {
 
             return true;
         }
+
+        // else{ printf("Cube did not get drawn\n"); }
     }
-    return false;
-}
+
+    return false;                                                                                                       }

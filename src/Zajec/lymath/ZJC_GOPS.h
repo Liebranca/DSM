@@ -29,6 +29,9 @@ float subminf(float v1, float v2);
 int   submaxi(int v1, int v2);
 float submaxf(float v1, float v2);
 
+int   flipifi(int v1, int boo);
+float flipiff(float v1, int boo);
+
 //  - --- - --- - --- - --- -
 
 int   clampi(int v, int start, int end);

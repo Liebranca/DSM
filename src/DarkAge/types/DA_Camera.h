@@ -39,6 +39,9 @@ class DA_CAMERA {
         void snapTo(glm::vec3 newpos)           { this->altpos = this->pos;
                                                   this->pos = newpos;                                                   }
         void undoSnap()                         { this->pos = this->altpos;                                             }
+        bool getUpdate()                        { return this->update;                                                  }
+        void endUpdate()                        { this->update = false;                                                 }
+        int* getGridpos()                       { return this->gridpos;                                                 }
 
     private:
 
@@ -59,15 +62,17 @@ class DA_CAMERA {
         float     hNear;
         float     wNear;
 
-        glm::vec3 yAxis  = glm::vec3(0, 1, 0);
+        glm::vec3 yAxis      = glm::vec3(0, 1, 0);
+                             
+        bool      update     = true;
+        float     pitch      = 0;
+        float     yaw        = 0;
 
-        bool      update = true;
-        float     pitch  = 0;
-        float     yaw    = 0;
+        int       gridpos[2] = { 1, -1 };
 
 };
 
-extern DA_CAMERA* active_camera;
+extern DA_CAMERA* actcam;
 extern glm::mat4  actcam_viewproj;
 extern glm::vec3  actcam_fwd;
 extern glm::vec3  actcam_pos;

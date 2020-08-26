@@ -9,6 +9,11 @@ extern "C" {
 #include "GL/glew.h"
 #include "ZJC_CommonTypes.h"
 
+#define  CHASM_KEY_FWD 1
+#define  CHASM_KEY_BCK 2
+#define  CHASM_KEY_LFT 4
+#define  CHASM_KEY_RGT 8
+
 //  - --- - --- - --- - --- -
 
 typedef struct CHASM_WINDOW_MANAGER             {
@@ -36,6 +41,8 @@ int   chmang_buildwin       (cchar* title, uint width, uint height);
 
 chWH* chmang_curwin         ();
 chWH* chmang_getwin         (Uint8 i);
+
+int   getKeyPress           (int keys);
 
 //  - --- - --- - --- - --- -
 

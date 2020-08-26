@@ -7,8 +7,10 @@
 
 //  - --- - --- - --- - --- -
 
-Uint8 CH_MAXWINS = 8;
-chMG  chmang     = {0};
+Uint8        CH_MAXWINS = 8;
+chMG         chmang     = {0};
+
+static chWH* curwin     = NULL;
 
 int  chmang_winOpen     ()                      { return !chmang_curwin()->isClosed;                                    }
 void chmang_frameStart  ()                      { clock_frameStart(); fBy = clock_fBy(1.0f);
@@ -29,11 +31,6 @@ int chmang_init         (cchar* title,
                          uint height)           {
 
     SDL_Init(SDL_INIT_EVERYTHING);
-
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 3);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 3);
@@ -58,13 +55,15 @@ int chmang_init         (cchar* title,
 
     if (!glewIsSupported("GL_VERSION_3_2"))     { printf("This application requires OpenGL v3.2\n");                    }
 
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(0);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     clock_init();
+
+    curwin = chmang_curwin();
 
     return 0;
 
@@ -109,3 +108,8 @@ chWH* chmang_getwin     (Uint8 i)               {
 
     if(i > CH_MAXWINS && i < chmang.openwins)   { return chmang.wins + i;                                               }
     return chmang_curwin();                                                                                             }
+
+//  - --- - --- - --- - --- -
+
+int   getKeyPress       (int keys)              { return curwin->pkeys & keys;                                          }
+

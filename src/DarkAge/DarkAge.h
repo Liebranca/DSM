@@ -1,6 +1,7 @@
 #ifndef __DARKAGE_H__
 #define __DARKAGE_H__
 
+#include "types/DA_WorldManager.h"
 #include "types/DA_GameObject.h"
 #include "types/DA_Camera.h"
 

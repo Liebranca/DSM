@@ -42,6 +42,9 @@ float subminf(float v1, float v2)       { return maxf(v1, v2) - minf(v1, v2);   
 int   submaxi(int v1, int v2)           { return mini(v1, v2) - maxi(v1, v2);                               }
 float submaxf(float v1, float v2)       { return minf(v1, v2) - maxf(v1, v2);                               }
 
+int   flipifi(int v1, int boo)          { return v1 * (1 - (2 * (boo != 0)) );                              }
+float flipiff(float v1, int boo)        { return v1 * (1 - (2 * (boo != 0)) );                              }
+
 //  - --- - --- - --- - --- -
 
 int   clampi(int v,

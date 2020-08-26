@@ -1,11 +1,11 @@
 #include "DA_Camera.h"
+#include "DA_WorldManager.h"
 
-#include "ZJC_CommonTypes.h"
 #include "spatial/ZJC_Transform.h"
 
 #include <stdio.h>
 
-DA_CAMERA* active_camera   = NULL;
+DA_CAMERA* actcam          = NULL;
 glm::mat4  actcam_viewproj = IDENTITY;
 glm::vec3  actcam_fwd      = { 0,0,0 };
 glm::vec3  actcam_pos      = { 0,0,0 };
@@ -20,17 +20,21 @@ DA_CAMERA::DA_CAMERA(const glm::vec3& pos,
 
     perspective = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
 
-    this->pos   = pos;
-    this->zNear = zNear;
-    this->zFar  = zFar;
+    this->pos     = pos;
+    this->zNear   = zNear;
+    this->zFar    = zFar;
 
-    this->hNear = 2 * tan(fov / 2) * zFar;
-    this->wNear = this->hNear * aspect;
-    this->hFar  = 2 * tan(fov / 2) * zFar;
-    this->wFar  = hFar * aspect;
+    float fpos[3] = { pos.x, pos.y, pos.z };
 
-    fwd         = glm::vec3(0, 0, 1);
-    up          = glm::vec3(0, 1, 0);                                                                                   }
+    this->hNear   = 2 * tan(fov / 2) * zFar;
+    this->wNear   = this->hNear * aspect;
+    this->hFar    = 2 * tan(fov / 2) * zFar;
+    this->wFar    = hFar * aspect;
+                  
+    fwd           = glm::vec3(0, 0, 1);
+    up            = glm::vec3(0, 1, 0);
+
+    DA_grid_findpos(this->gridpos, fpos);                                                                               }
 
 //  - --- - --- - --- - --- -
 
@@ -99,7 +103,10 @@ void DA_CAMERA::move(glm::vec3 mvec,
 
     else                                        { displace = mvec;                                                      }
 
-    pos += displace;                                                                                                    }
+    pos += displace;
+
+    float fpos[3] = { pos.x, pos.y, pos.z };
+    DA_grid_findpos(this->gridpos, fpos);                                                                               }
 
 void DA_CAMERA::rotate(glm::vec3 rvec)          {
 

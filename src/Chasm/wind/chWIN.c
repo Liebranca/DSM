@@ -64,11 +64,12 @@ int         del_whandle  (chWH* whandle)        { SDL_DestroyWindow(whandle->win
 
 //  - --- - --- - --- - --- -
 
-void onMouseReset        (chWH* whandle)        { whandle->mouseIgnore     = 0;
-                                                  whandle->mouseRel_x      = 0.0f;
-                                                  whandle->mouseRel_y      = 0.0f;                                      }
+void onMouseReset        (chWH* whandle)        { whandle->mouseIgnore = 1;
+                                                  whandle->mouseActive = 0;
+                                                  whandle->mouseRel_x  = 0.0f;
+                                                  whandle->mouseRel_y  = 0.0f;                                          }
 
-void onMouseMotion       (chWH* whandle)        { whandle->mouseActive = 0;
+void onMouseMotion       (chWH* whandle)        { // whandle->mouseActive = 0;
                                                   whandle->mouseRel_x  = 0.0f;
                                                   whandle->mouseRel_y  = 0.0f;                                          }
 
@@ -96,8 +97,8 @@ void mouseWrap           (chWH* whandle)        {
             + whandle->q_height      )          { new_y = wrapMargin;                                                   }
 
     SDL_WarpMouseInWindow(whandle->window,
-                          new_x,
-                          new_y);                                                                                       }
+                          whandle->h_width,
+                          whandle->h_height);                                                                           }
 
 //  - --- - --- - --- - --- -
 
@@ -120,7 +121,7 @@ void        pollEvents   (chWH* whandle)        {
        && !(wFlags & (SDL_WINDOW_MINIMIZED))
        &&  (whandle->isOnTop)              )    { mouseWrap(whandle);                                                   }
 
-    if (SDL_PollEvent(&event))
+    while (SDL_PollEvent(&event))
     {
         switch (event.type)
         {
@@ -152,7 +153,8 @@ void        pollEvents   (chWH* whandle)        {
                     whandle->isOnTop = 0;
                     break;
                 }
-
+                
+                default: break;
                 }
 
             }
@@ -215,10 +217,9 @@ void        pollEvents   (chWH* whandle)        {
             }
 
             break;
+
         }
-
         default: break;
-
         }
 
     }
