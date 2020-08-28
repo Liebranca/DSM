@@ -69,7 +69,7 @@ void onMouseReset        (chWH* whandle)        { whandle->mouseIgnore = 1;
                                                   whandle->mouseRel_x  = 0.0f;
                                                   whandle->mouseRel_y  = 0.0f;                                          }
 
-void onMouseMotion       (chWH* whandle)        { // whandle->mouseActive = 0;
+void onMouseMotion       (chWH* whandle)        { whandle->mouseActive = 0;
                                                   whandle->mouseRel_x  = 0.0f;
                                                   whandle->mouseRel_y  = 0.0f;                                          }
 

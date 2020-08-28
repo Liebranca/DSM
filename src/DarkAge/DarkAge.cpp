@@ -14,6 +14,9 @@ void DARKAGE_BEGIN(int flags)                   {
 void DARKAGE_END  ()                            {
 
     DA_objects_end      ();
+    delete actcam;
+
     DA_grid_end();
     GAOL_boundbucket_end();
+
     }

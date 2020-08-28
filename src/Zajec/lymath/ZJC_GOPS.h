@@ -9,6 +9,10 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
+float iv2_distance(int a[2], int b[2]);
+
+//  - --- - --- - --- - --- -
+
 void  fv3_sub(float* a, float* b);
 void  fv3_add(float* a, float* b);
 void  fv3_cross(float* dest, float* a, float* b);

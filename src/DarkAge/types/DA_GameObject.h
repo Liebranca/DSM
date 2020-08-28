@@ -54,6 +54,9 @@ class DA_NODE {
         bool       pointInside  (glm::vec3 p)   { return this->bounds->box->pointInside(p);                             }
         void       standingOn   (DA_NODE* other){ this->ground = other;                                                 }
         void       clampToSurf  ()              { this->worldPosition().y = ground->bounds->box->faces[1].centroid.y;   }
+        int*       getGridpos   ()              { return this->gridpos;                                                 }
+        void       setVisible   (bool x)        { this->visible = x;                                                    }
+        bool       getVisible  ()               { return this->visible;                                                 }
 
 //  - --- - --- - --- - --- -
 
@@ -62,7 +65,7 @@ class DA_NODE {
         Booflo     colCheckBox  (DA_NODE* other, bool& mote);
         bool       distCheck    (DA_NODE* other, float fac = 1.25f);
         void       physicsSim   (DA_NODE* other, Booflo& groundCheck, bool& motCheck, bool& foundGround);
-        bool       draw         ();
+        void       draw         ();
 
 //  - --- - --- - --- - --- -
 
@@ -101,15 +104,16 @@ class DA_NODE {
 
         bool       commands[5]  = { false, false, false, false, false };
 
-        int        gridpos [2]  = { 1, -1    };
-        uint       cellinfo[3]  = { 0,  1, -1};
+        int        gridpos [2]  = { 1, -1     };
+        int        cellinfo[3]  = { 0,  1, -1 };
 
 };
 
 //  - --- - --- - --- - --- -
 
-void     DA_objects_init ();
-void     DA_objects_end  ();
+void     DA_objects_init  ();
+void     DA_objects_end   ();
+void     DA_objects_update();
 
 extern std::vector<DA_NODE*> SCENE_OBJECTS;
 

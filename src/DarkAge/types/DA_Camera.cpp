@@ -1,6 +1,8 @@
 #include "DA_Camera.h"
 #include "DA_WorldManager.h"
 
+#include "lyutils/ZJC_Evil.h"
+#include "lymath/ZJC_GOPS.h"
 #include "spatial/ZJC_Transform.h"
 
 #include <stdio.h>
@@ -36,6 +38,8 @@ DA_CAMERA::DA_CAMERA(const glm::vec3& pos,
 
     DA_grid_findpos(this->gridpos, fpos);                                                                               }
 
+DA_CAMERA::~DA_CAMERA()                         { WARD_EVIL_MFREE(cell_positions);                                      }
+
 //  - --- - --- - --- - --- -
 
 void DA_CAMERA::getFrustum()                    {
@@ -62,6 +66,35 @@ void DA_CAMERA::getFrustum()                    {
     planes[5]       = COLFACE(ftr,ftl,fbl);                                                                             }
 
 //  - --- - --- - --- - --- -
+
+void DA_CAMERA::onAreaChange()                  {
+
+    WARD_EVIL_MFREE(cell_positions);
+    cell_positions = (int*) evil_malloc(DA_grid_getFrustumFac() * 2, sizeof(int));                                      }
+
+void DA_CAMERA::cellCulling(uint num_cells)     {
+
+    cint h = 64;
+    cint w = DA_CELL_SIZE / 2;
+
+    for(uint i = 0; i < num_cells; i += 2)
+    {
+
+        int cx = (cell_positions[i + 0] * 8) - flipifi(4, cell_positions[i + 0] < 0);
+        int cy = (cell_positions[i + 1] * 8) - flipifi(4, cell_positions[i + 1] < 0);
+
+        glm::vec3 origin(cx, 0, cy);
+
+        glm::vec3 cellbounds[8] = {  origin + glm::vec3( w,  h,  w), origin + glm::vec3(-w,  h,  w),
+                                     origin + glm::vec3( w,  h, -w), origin + glm::vec3(-w,  h, -w),
+                                     origin + glm::vec3( w, -h,  w), origin + glm::vec3(-w, -h,  w),
+                                     origin + glm::vec3( w, -h, -w), origin + glm::vec3(-w, -h, -w)                     };
+
+        int cellpos[2]          = {  cell_positions[i + 0], cell_positions[i + 1]                                       };
+        DA_grid_cullCell          (  cellpos,              (int) !rectInFrustum(cellbounds)                             );
+    }
+
+                                                                                                                        }
 
 bool DA_CAMERA::rectInFrustum(
                     glm::vec3 bounds[8])        {

@@ -1,12 +1,14 @@
 #ifndef __DARKAGE_CAMERA_H__
 #define __DARKAGE_CAMERA_H__
 
-#include <math.h>
+#include "ZJC_CommonTypes.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
 #include "GAOL_Face.h"
+
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,17 +21,20 @@ class DA_CAMERA {
     public:
 
         DA_CAMERA(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar);
-        
+
+        virtual ~DA_CAMERA();
+
         glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos+fwd, yAxis);                }
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
 
+        void onAreaChange  ();
+        void cellCulling   (uint num_cells);
         bool rectInFrustum (glm::vec3  bounds[8]);
         bool pointInFrustum(glm::vec3 point);
 
         void move(glm::vec3 mvec, bool local = false);
-
         void rotate(glm::vec3 rvec);
         
         float getPitch()                        { return pitch;                                                         }
@@ -42,6 +47,7 @@ class DA_CAMERA {
         bool getUpdate()                        { return this->update;                                                  }
         void endUpdate()                        { this->update = false;                                                 }
         int* getGridpos()                       { return this->gridpos;                                                 }
+        int* getCellPositions()                 { return this->cell_positions;                                          }
 
     private:
 
@@ -62,13 +68,14 @@ class DA_CAMERA {
         float     hNear;
         float     wNear;
 
-        glm::vec3 yAxis      = glm::vec3(0, 1, 0);
-                             
-        bool      update     = true;
-        float     pitch      = 0;
-        float     yaw        = 0;
+        glm::vec3 yAxis          = glm::vec3(0, 1, 0);
 
-        int       gridpos[2] = { 1, -1 };
+        bool      update         = true;
+        float     pitch          = 0;
+        float     yaw            = 0;
+
+        int       gridpos[2]     = { 1, -1 };
+        int*      cell_positions = 0;
 
 };
 

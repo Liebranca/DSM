@@ -9,12 +9,15 @@
 
 #include "types/SIN_Shader_EX.h"
 
-#define               DA_MAX_OBJECTS      1024
+#define                DA_MAX_OBJECTS      1024
 
-static sStack*        DA_OBJ_SLOTSTACK  = NULL;
-static ushort         DA_ACTIVE_OBJECTS = 0;
+static sStack*         DA_OBJ_SLOTSTACK  = NULL;
+static ushort          DA_ACTIVE_OBJECTS = 0;
 
-std::vector<DA_NODE*> SCENE_OBJECTS(DA_MAX_OBJECTS, 0);
+static ushort          DA_OBJECT_LOCATIONS[DA_MAX_OBJECTS];
+
+std::vector<DA_NODE*>  SCENE_OBJECTS(DA_MAX_OBJECTS, 0);
+std::vector<ushort>    FRAME_OBJECTS(DA_MAX_OBJECTS, 0);
 
 //  - --- - --- - --- - --- -
 
@@ -30,6 +33,62 @@ void DA_objects_end()                           {
                                                   if(ob) { delete ob; }                                                 }
 
     del_sStack(DA_OBJ_SLOTSTACK);                                                                                       }
+
+void DA_objects_update()                        {
+
+    uint num_objects = 0;
+    uint num_cells   = 0;
+
+    DA_grid_fetchOblocs(actcam->getGridpos(),
+                        actcam->getCellPositions(),
+                        &num_cells, &num_objects,
+                        DA_OBJECT_LOCATIONS        );
+
+//  - --- - --- - --- - --- -
+
+    // TODO: handle physics|logic update here
+
+//  - --- - --- - --- - --- -
+
+    actcam->cellCulling(num_cells);
+
+    uint k = 0;
+    for(uint i = 0; i < num_objects; i++)
+    {
+
+        ushort    closest  = 0;
+        float     dist     = 520200;
+        float     new_dist = 520200;
+
+        for(uint j = 0; j < num_objects; j++)
+        {
+            if(DA_OBJECT_LOCATIONS[j])
+            {
+                DA_NODE* ob = SCENE_OBJECTS[DA_OBJECT_LOCATIONS[j]];
+
+                if(DA_grid_getInFrustum(ob->getGridpos()))
+                {
+                    new_dist    = glm::distance(actcam_pos, ob->worldPosition());
+                    if(new_dist < dist)         { dist = new_dist; closest = j;                                         }
+
+                    // TODO: dont set visibility here. wait until we can do occlusion culling next loop
+                    ob->setVisible(true);
+
+                }
+
+                printf("%i\n", ob->getVisible());
+
+            }
+        }
+
+        if(closest)                             { FRAME_OBJECTS[k]             = DA_OBJECT_LOCATIONS[closest];
+                                                  DA_OBJECT_LOCATIONS[closest] = 0; k++;                                }
+
+    }
+
+//  - --- - --- - --- - --- -
+
+    }
 
 //  - --- - --- - --- - --- -
 
@@ -72,12 +131,16 @@ DA_NODE::DA_NODE(ushort meshid,
     DA_ACTIVE_OBJECTS++;
 
     float fpos[3] = { pos.x, pos.y, pos.z };
-    DA_grid_findpos(this->gridpos, fpos);
-
     this->id     = obloc;
+
+    DA_grid_findpos  (this->gridpos,     fpos              );
     DA_grid_regObject(gridpos, cellinfo, obloc, isDynamic());                                                           }
 
 DA_NODE::~DA_NODE()                             {
+
+    DA_grid_unregObject(cellinfo, isDynamic());
+    if(cellinfo[2])                             { DA_NODE* other     = SCENE_OBJECTS[cellinfo[1]];
+                                                  other->cellinfo[0] = cellinfo[0];                                     }
 
     delete this->transform;
     unsub_mesh (SIN_meshbucket_findloc(this->mesh->id));
@@ -176,17 +239,25 @@ bool DA_NODE::distCheck(DA_NODE* other,
 void DA_NODE::onCellExit()                      {
 
     DA_grid_unregObject(cellinfo, isDynamic());
-    DA_NODE* other = SCENE_OBJECTS[cellinfo[1]];
-    other->cellinfo[0] = cellinfo[0];
-    }
+    if(cellinfo[2])                             { DA_NODE* other     = SCENE_OBJECTS[cellinfo[1]];
+                                                  other->cellinfo[0] = cellinfo[0];                                     }
+
+    DA_grid_regObject  (gridpos,  cellinfo, this->id, isDynamic());                                                     }
 
 void DA_NODE::move      (glm::vec3 mvec,
                          bool local)            {
 
     worldPosition() += mvec;
+
+    float fpos[3] = { transform->position.x, transform->position.y, transform->position.z };
+    DA_grid_findpos(gridpos, fpos);
+
+    if (  (gridpos[0] != cellinfo[1])
+       || (gridpos[1] != cellinfo[2])  )        { onCellExit();                                                         }
+
     needsUpdate      = true;                                                                                            }
 
-bool DA_NODE::draw() {
+void DA_NODE::draw() {
 
     if(needsUpdate)                             { model       = transform->getModel();
                                                   nmat        = transform->getNormal(model);
@@ -203,7 +274,7 @@ bool DA_NODE::draw() {
             this->children[i]->draw();
         }*/
 
-        if(actcam->rectInFrustum(bounds->box->points))
+        if(visible)
         {
 
             // TODO: handle ANS here
@@ -212,10 +283,6 @@ bool DA_NODE::draw() {
             shader_update_nmat (&nmat );
             draw_mesh          (mesh  );
 
-            return true;
+            visible = false;
         }
-
-        // else{ printf("Cube did not get drawn\n"); }
-    }
-
-    return false;                                                                                                       }
+    }                                                                                                                   }
