@@ -32,6 +32,8 @@ typedef struct GAOL_COLLISION_BOX {
     bool               cageIsect     (RAYDATA cage[12]);
     bool               lineInside    (COLLINE* ray);
     bool               pointInDomain (glm::vec3 v);
+    bool               cageIsect_opt (COLFACE* other);
+    bool               rayToBox      (RAYDATA  ray);
 
     glm::vec3          boxToBox      (GAOL_COLLISION_BOX* b, glm::vec3 dirn);
 

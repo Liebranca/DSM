@@ -1,12 +1,12 @@
 #ifndef __DARKAGE_CAMERA_H__
 #define __DARKAGE_CAMERA_H__
 
-#include "ZJC_CommonTypes.h"
-
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
 #include "GAOL_Face.h"
+
+#include "../DA_CommonTypes.h"
 
 #include <math.h>
 
@@ -28,9 +28,11 @@ class DA_CAMERA {
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
+        void drawBounds(glm::vec3 bounds[8]);
 
         void onAreaChange  ();
         void cellCulling   (uint num_cells);
+        void resetCulling  ();
         bool rectInFrustum (glm::vec3  bounds[8]);
         bool pointInFrustum(glm::vec3 point);
 
@@ -43,11 +45,12 @@ class DA_CAMERA {
         glm::vec3 getFwdCast(float dist = 3.5f) { return pos + (fwd * dist);                                            }
         void snapTo(glm::vec3 newpos)           { this->altpos = this->pos;
                                                   this->pos = newpos;                                                   }
-        void undoSnap()                         { this->pos = this->altpos;                                             }
-        bool getUpdate()                        { return this->update;                                                  }
-        void endUpdate()                        { this->update = false;                                                 }
-        int* getGridpos()                       { return this->gridpos;                                                 }
-        int* getCellPositions()                 { return this->cell_positions;                                          }
+        void    undoSnap()                      { this->pos = this->altpos;                                             }
+        bool    getUpdate()                     { return this->update;                                                  }
+        void    endUpdate()                     { this->update = false;                                                 }
+        uint*   getGridpos()                    { return this->curcell.gridpos;                                         }
+        int*    getCellpos()                    { return this->curcell.worldpos;                                        }
+        DAGCI*  getCellPositions()              { return this->nearcells;                                               }
 
     private:
 
@@ -68,14 +71,15 @@ class DA_CAMERA {
         float     hNear;
         float     wNear;
 
-        glm::vec3 yAxis          = glm::vec3(0, 1, 0);
+        glm::vec3 yAxis           = glm::vec3(0, 1, 0);
 
-        bool      update         = true;
-        float     pitch          = 0;
-        float     yaw            = 0;
+        bool      update          = true;
+        float     pitch           = 0;
+        float     yaw             = 0;
 
-        int       gridpos[2]     = { 1, -1 };
-        int*      cell_positions = 0;
+        DAGCI     curcell         = { 0, 0, 0, 0 };
+        DAGCI*    nearcells       = 0;
+        uint      prevframe_cells = 0;
 
 };
 
@@ -83,6 +87,8 @@ extern DA_CAMERA* actcam;
 extern glm::mat4  actcam_viewproj;
 extern glm::vec3  actcam_fwd;
 extern glm::vec3  actcam_pos;
+
+void caminit();
 
 //  - --- - --- - --- - --- -
 

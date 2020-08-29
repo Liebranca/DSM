@@ -9,10 +9,13 @@
 
 #include "types/SIN_Shader_EX.h"
 
-#define                DA_MAX_OBJECTS      1024
+#define                DA_MAX_OBJECTS              1024
 
-static sStack*         DA_OBJ_SLOTSTACK  = NULL;
-static ushort          DA_ACTIVE_OBJECTS = 0;
+static sStack*         DA_OBJ_SLOTSTACK          = NULL;
+static ushort          DA_ACTIVE_OBJECTS         = 0;
+
+static uint            DA_OBJECT_UPDATE_NUMOBJS  = 0;
+static uint            DA_OBJECT_UPDATE_NUMCELLS = 0;
 
 static ushort          DA_OBJECT_LOCATIONS[DA_MAX_OBJECTS];
 
@@ -36,57 +39,55 @@ void DA_objects_end()                           {
 
 void DA_objects_update()                        {
 
-    uint num_objects = 0;
-    uint num_cells   = 0;
+    DA_OBJECT_UPDATE_NUMOBJS = 0;
+    DA_OBJECT_UPDATE_NUMCELLS   = 0;
 
-    DA_grid_fetchOblocs(actcam->getGridpos(),
+    actcam->resetCulling();
+
+    DA_grid_fetchOblocs(actcam->getCellpos(),
                         actcam->getCellPositions(),
-                        &num_cells, &num_objects,
+                        &DA_OBJECT_UPDATE_NUMCELLS,
+                        &DA_OBJECT_UPDATE_NUMOBJS,
                         DA_OBJECT_LOCATIONS        );
 
 //  - --- - --- - --- - --- -
 
-    // TODO: handle physics|logic update here
-
-//  - --- - --- - --- - --- -
-
-    actcam->cellCulling(num_cells);
+    actcam->cellCulling(DA_OBJECT_UPDATE_NUMCELLS);
 
     uint k = 0;
-    for(uint i = 0; i < num_objects; i++)
+    for(uint i = 0; i < DA_OBJECT_UPDATE_NUMOBJS; i++)
     {
-
         ushort    closest  = 0;
         float     dist     = 520200;
         float     new_dist = 520200;
 
-        for(uint j = 0; j < num_objects; j++)
+        for(uint j = 0; j < DA_OBJECT_UPDATE_NUMOBJS; j++)
         {
             if(DA_OBJECT_LOCATIONS[j])
             {
                 DA_NODE* ob = SCENE_OBJECTS[DA_OBJECT_LOCATIONS[j]];
+                ob->prePhysUpdate();
 
-                if(DA_grid_getInFrustum(ob->getGridpos()))
+                if(DA_grid_getInFrustum(ob->cellinfo.gridpos))
                 {
-                    new_dist    = glm::distance(actcam_pos, ob->worldPosition());
+
+                    // TODO: dont set visibility here. wait until we do occlusion culling next pass
+                    ob->visible = true;
+
+                    new_dist    = glm::distance (actcam_pos, ob->transform->position);
                     if(new_dist < dist)         { dist = new_dist; closest = j;                                         }
 
-                    // TODO: dont set visibility here. wait until we can do occlusion culling next loop
-                    ob->setVisible(true);
-
                 }
-
-                printf("%i\n", ob->getVisible());
-
             }
         }
 
         if(closest)                             { FRAME_OBJECTS[k]             = DA_OBJECT_LOCATIONS[closest];
                                                   DA_OBJECT_LOCATIONS[closest] = 0; k++;                                }
-
     }
 
 //  - --- - --- - --- - --- -
+
+    
 
     }
 
@@ -133,14 +134,15 @@ DA_NODE::DA_NODE(ushort meshid,
     float fpos[3] = { pos.x, pos.y, pos.z };
     this->id     = obloc;
 
-    DA_grid_findpos  (this->gridpos,     fpos              );
-    DA_grid_regObject(gridpos, cellinfo, obloc, isDynamic());                                                           }
+    DA_grid_findpos  (cellinfo.worldpos, fpos );
+    DA_grid_regObject(&cellinfo,         obloc);                                                                        }
 
 DA_NODE::~DA_NODE()                             {
 
-    DA_grid_unregObject(cellinfo, isDynamic());
-    if(cellinfo[2])                             { DA_NODE* other     = SCENE_OBJECTS[cellinfo[1]];
-                                                  other->cellinfo[0] = cellinfo[0];                                     }
+    int ret[2] = { 0, 1 };
+    DA_grid_unregObject(&cellinfo, ret);
+    if(ret[1])                                  { DA_NODE* other        = SCENE_OBJECTS[ret[0]];
+                                                  other->cellinfo.index = this->cellinfo.index;                         }
 
     delete this->transform;
     unsub_mesh (SIN_meshbucket_findloc(this->mesh->id));
@@ -238,11 +240,12 @@ bool DA_NODE::distCheck(DA_NODE* other,
 
 void DA_NODE::onCellExit()                      {
 
-    DA_grid_unregObject(cellinfo, isDynamic());
-    if(cellinfo[2])                             { DA_NODE* other     = SCENE_OBJECTS[cellinfo[1]];
-                                                  other->cellinfo[0] = cellinfo[0];                                     }
+    int ret[2] = { 0, 1 };
+    DA_grid_unregObject(&cellinfo, ret);
+    if(ret[1])                                  { DA_NODE* other        = SCENE_OBJECTS[ret[0]];
+                                                  other->cellinfo.index = this->cellinfo.index;                         }
 
-    DA_grid_regObject  (gridpos,  cellinfo, this->id, isDynamic());                                                     }
+    DA_grid_regObject  (&cellinfo, this->id);                                                                           }
 
 void DA_NODE::move      (glm::vec3 mvec,
                          bool local)            {
@@ -250,20 +253,27 @@ void DA_NODE::move      (glm::vec3 mvec,
     worldPosition() += mvec;
 
     float fpos[3] = { transform->position.x, transform->position.y, transform->position.z };
-    DA_grid_findpos(gridpos, fpos);
 
-    if (  (gridpos[0] != cellinfo[1])
-       || (gridpos[1] != cellinfo[2])  )        { onCellExit();                                                         }
+    int prev_x = cellinfo.worldpos[0];
+    int prev_y = cellinfo.worldpos[1];
+
+    DA_grid_findpos (cellinfo.worldpos, fpos);
+
+    if (  (cellinfo.worldpos[0] != prev_x)
+       || (cellinfo.worldpos[1] != prev_y))     { onCellExit();                                                         }
 
     needsUpdate      = true;                                                                                            }
 
-void DA_NODE::draw() {
+void DA_NODE::prePhysUpdate()                   {
 
     if(needsUpdate)                             { model       = transform->getModel();
                                                   nmat        = transform->getNormal(model);
                                                   needsUpdate = false;
 
-                                                  buildBounds();                                                        }
+                                                  buildBounds(model);                                                   }
+                                                                                                                        }
+
+void DA_NODE::draw() {
 
     if(doRender)
     {

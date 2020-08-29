@@ -53,14 +53,14 @@ float flipiff(float v1, int boo)        { return v1 * (1 - (2 * (boo != 0)) );  
 
 int   clampi(int v,
              int start,
-             int end)                   { if (v < start) { v = start; }
-                                          else if (v > end) { v = end; }
+             int end)                   { if      (v < start) { v = start; }
+                                          else if (v > end  ) { v = end;   }
                                           return v;                                                         }
 
 float clampf(float v,
              float start,
-             float end)                 { if (v < start) { v = start; }
-                                          else if (v > end) { v = end; }
+             float end)                 { if      (v < start) { v = start; }
+                                          else if (v > end  ) { v = end;   }
                                           return v;                                                         }
 
 //  - --- - --- - --- - --- -

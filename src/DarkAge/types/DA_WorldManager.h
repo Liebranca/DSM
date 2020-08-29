@@ -1,8 +1,7 @@
 #ifndef __DARKAGE_WORLDMANAGER_H__
 #define __DARKAGE_WORLDMANAGER_H__
 
-#include "ZJC_CommonTypes.h"
-#include <vector>
+#include "../DA_CommonTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,10 +9,12 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-#define __DA_MAX_OBJECTS_PER_CELL__ 128
-#define   DA_CELL_SIZE              8
+#define    __DA_MAX_OBJECTS_PER_CELL__ 128
+#define      DA_CELL_SIZE              8
 
-struct DA_CELL {
+static cuint DA_CELL_HALF            = DA_CELL_SIZE / 2;
+
+typedef struct DA_GRIDCELL {
 
     int    worldpos[2];
     int    inFrustum;
@@ -21,8 +22,10 @@ struct DA_CELL {
     uint   edge;
     uchar  num_objects;
     ushort shuffle_loc;
+
     ushort oblocs[__DA_MAX_OBJECTS_PER_CELL__];
-};
+
+} DA_CELL;
 
 typedef struct DA_CELL_LOOKUP {
 
@@ -38,17 +41,18 @@ void DA_grid_end           ();
 void DA_grid_modWorldOffset(int mvec[2]);
 void DA_grid_calcRugPull   (int mvec[2]);
 
-void DA_grid_regObject     (int pos[2], int ipos[3], ushort obloc, int is_dynamic);
-void DA_grid_unregObject   (int ipos[3], int is_dynamic);
-void DA_grid_fetchOblocs   (int origin[2], int* cell_positions, uint* cellCounter, uint* obCounter, ushort* locations);
-void DA_grid_cullCell      (int pos[2], int is_culled);
-int  DA_grid_getInFrustum  (int pos[2]);
+void DA_grid_regObject     (DANCI* nci, ushort obloc);
+void DA_grid_unregObject   (DANCI* nci, int    ret[2]);
+void DA_grid_fetchOblocs   (int origin[2], DAGCI* camcells, uint* cellCounter, uint* obCounter, ushort* locations);
+void DA_grid_setInFrustum  (uint gridpos[2], int cellInFrustum);
+int  DA_grid_getInFrustum  (uint gridpos[2]);
 
 void DA_grid_setSimRadius  (uint radius);
 uint DA_grid_getFrustumFac ();
 
 void DA_grid_findpos       (int dest[2], float pos[3]);
-void DA_grid_getsurround   (DACL* cellLookup, int pos[2]);
+void DA_grid_findabspos    (uint dest[2], int pos[2]);
+void DA_grid_getsurround   (DACL* cellLookup, uint gridpos[2]);
 
 void DA_debug_drawgrid     (int pos[2]);
 void DA_debug_drawgrid_sur (DACL* cellLookup);

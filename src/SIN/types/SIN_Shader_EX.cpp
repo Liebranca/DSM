@@ -29,6 +29,10 @@ void shader_update_camera (glm::mat4* viewprojection,
     glUniform3fv(__program->uniforms[SIN_CAMFWD_U], 1, &((*camfwd)[0]));
     glUniform3fv(__program->uniforms[SIN_CAMPOS_U], 1, &((*campos)[0]));                                                }
 
+void shader_update_viewproj
+                (glm::mat4* viewprojection)     { glUniformMatrix4fv(__program->uniforms[SIN_PROJECTION_U], 1,
+                                                  GL_FALSE, &((*viewprojection)[0][0]));                                }
+
 void shader_update_ambient(glm::vec4* ambient_color)
                                                 { glUniform4fv(__program->uniforms[SIN_AMBIENT_U],
                                                                1, &((*ambient_color)[0]) );                             }

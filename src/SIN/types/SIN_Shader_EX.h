@@ -17,6 +17,9 @@ void shader_useProgram        ();
 void shader_update_model      (glm::mat4* model);
 void shader_update_nmat       (glm::mat3* nmat);
 void shader_update_camera     (glm::mat4* viewprojection, glm::vec3* camfwd, glm::vec3* campos);
+
+void shader_update_viewproj   (glm::mat4* viewprojection);
+
 void shader_update_ambient    (glm::vec4* ambient_color);
 
 //  - --- - --- - --- - --- -

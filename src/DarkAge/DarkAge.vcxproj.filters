@@ -30,7 +30,7 @@
     <ClCompile Include="types\DA_GameObject.cpp">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="types\DA_WorldManager.cpp">
+    <ClCompile Include="types\DA_WorldManager.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
   </ItemGroup>
@@ -46,6 +46,9 @@
     </ClInclude>
     <ClInclude Include="types\DA_WorldManager.h">
       <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="DA_CommonTypes.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

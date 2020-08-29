@@ -1,13 +1,14 @@
 #ifndef __DARKAGE_GAMEOBJECT_H__
 #define __DARKAGE_GAMEOBJECT_H__
 
-#include "ZJC_CommonTypes.h"
 #include "spatial/ZJC_Transform.h"
 #include "spatial/ZJC_Time.h"
 
 #include "types/SIN_Mesh.h"
 #include "GAOL_Constants.h"
 #include "GAOL_Bounds.h"
+
+#include "../DA_CommonTypes.h"
 
 #include <vector>
 
@@ -30,13 +31,19 @@ class DA_NODE {
 
 //  - --- - --- - --- - --- -
 
+        friend void DA_objects_update();
+        friend void DA_objects_init  ();
+        friend void DA_objects_end   ();
+
+//  - --- - --- - --- - --- -
+
         int        isDynamic    ()              { return this->physMode  == GAOL_PHYSMODE_DYNAMIC;                      }
         int        isStatic     ()              { return this->physMode  == GAOL_PHYSMODE_STATIC;                       }
         glm::mat4  getModel     (bool ig)       { return transform->getModel(ig);                                       }
         glm::mat4  getNormal    ()              { return transform->getNormal(this->model);                             }
         void       setParent    (DA_NODE* other){ this->transform->setParent(other->transform);                         }
         glm::vec3& worldPosition()              { return this->transform->position;                                     }
-        void       buildBounds  ()              { this->bounds->genBox(this->model);                                    }
+        void       buildBounds  (glm::mat4 m)   { this->bounds->genBox(m);                                              }
         bool       isOnGround   ()              { return this->ground != nullptr;                                       }
         bool       allowJump    ()              { return this->isOnGround() && !this->isJumping;                        }
         bool       isMapNode    ()              { return (this->nodeFlags & 1);                                         }
@@ -54,9 +61,8 @@ class DA_NODE {
         bool       pointInside  (glm::vec3 p)   { return this->bounds->box->pointInside(p);                             }
         void       standingOn   (DA_NODE* other){ this->ground = other;                                                 }
         void       clampToSurf  ()              { this->worldPosition().y = ground->bounds->box->faces[1].centroid.y;   }
-        int*       getGridpos   ()              { return this->gridpos;                                                 }
-        void       setVisible   (bool x)        { this->visible = x;                                                    }
-        bool       getVisible  ()               { return this->visible;                                                 }
+        uint*      getGridpos   ()              { return cellinfo.gridpos;                                              }
+        int*       getCellpos   ()              { return cellinfo.worldpos;                                             }
 
 //  - --- - --- - --- - --- -
 
@@ -104,16 +110,21 @@ class DA_NODE {
 
         bool       commands[5]  = { false, false, false, false, false };
 
-        int        gridpos [2]  = { 1, -1     };
-        int        cellinfo[3]  = { 0,  1, -1 };
+        DANCI      cellinfo     = { 0, 0, 0, 0, 0 };
+
+//  - --- - --- - --- - --- -
+
+    private:
+
+        void       prePhysUpdate();
 
 };
 
 //  - --- - --- - --- - --- -
 
-void     DA_objects_init  ();
-void     DA_objects_end   ();
-void     DA_objects_update();
+void DA_objects_update();
+void DA_objects_init  ();
+void DA_objects_end   ();
 
 extern std::vector<DA_NODE*> SCENE_OBJECTS;
 

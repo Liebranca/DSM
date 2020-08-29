@@ -193,6 +193,33 @@ bool GAOL_COLLISION_BOX::cageIsect
 
     return false;                                                                                                       }
 
+bool GAOL_COLLISION_BOX::rayToBox
+                    (RAYDATA ray)               {
+
+    if(ray.hitObject)                           { if(pointInside(ray.point)) { return true; }                           }
+    return false;                                                                                                       }
+
+bool GAOL_COLLISION_BOX::cageIsect_opt
+                    (COLFACE* other)            {
+
+    if     (rayToBox(other->rayIsectPoint(&faces[2].edges[1]))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&faces[3].edges[1]))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&faces[4].edges[1]))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&faces[5].edges[1]))) { return true; }
+
+    else if(rayToBox(other->rayIsectPoint(&faces[0].edges[0]))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&faces[0].edges[1]))) { return true; }
+
+    else if(rayToBox(other->rayIsectPoint(&faces[1].edges[0]))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&faces[1].edges[1]))) { return true; }
+
+    else if(rayToBox(other->rayIsectPoint(&COLLINE(faces[0].edges[1].p2, faces[0].p4)))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&COLLINE(faces[0].p4, faces[0].edges[0].p1)))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&COLLINE(faces[1].edges[1].p2, faces[1].p4)))) { return true; }
+    else if(rayToBox(other->rayIsectPoint(&COLLINE(faces[1].p4, faces[1].edges[0].p1)))) { return true; }
+
+    return false;                                                                                                       }
+
 bool GAOL_COLLISION_BOX::lineInside
                         (COLLINE* ray)          {
 
