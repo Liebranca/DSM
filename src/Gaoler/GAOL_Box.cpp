@@ -26,10 +26,14 @@ GAOL_COLLISION_BOX::GAOL_COLLISION_BOX
 
     area[1] = faces[2].edges[1].length;
 
-    points[0] = co[0]; points[1] = co[1];
-    points[2] = co[2]; points[3] = co[3];
-    points[4] = co[4]; points[5] = co[5];
-    points[6] = co[6]; points[7] = co[7];                                                                               }
+    origin     =  { co[0] + co[1] + co[2] + co[3]
+                  + co[4] + co[5] + co[6] + co[7] };
+
+    origin    *= 0.125f;
+    points[0]  = co[0]; points[1] = co[1];
+    points[2]  = co[2]; points[3] = co[3];
+    points[4]  = co[4]; points[5] = co[5];
+    points[6]  = co[6]; points[7] = co[7];                                                                              }
 
 //  - --- - --- - --- - --- -
 

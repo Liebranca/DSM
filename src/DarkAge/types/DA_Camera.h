@@ -5,6 +5,7 @@
 #include "glm/gtx/transform.hpp"
 
 #include "GAOL_Face.h"
+#include "GAOL_Sphere.h"
 
 #include "../DA_CommonTypes.h"
 
@@ -28,11 +29,11 @@ class DA_CAMERA {
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
-        void drawBounds(glm::vec3 bounds[8]);
 
         void onAreaChange  ();
         void cellCulling   (uint num_cells);
         void resetCulling  ();
+        int  sphInFrustum  (COLSPHERE* sph);
         bool rectInFrustum (glm::vec3  bounds[8]);
         bool pointInFrustum(glm::vec3 point);
 
@@ -42,6 +43,7 @@ class DA_CAMERA {
         float getPitch()                        { return pitch;                                                         }
         glm::vec3& getFwd()                     { return fwd;                                                           }
         glm::vec3& getPos()                     { return pos;                                                           }
+        glm::vec3& getUp()                      { return up;                                                            }
         glm::vec3 getFwdCast(float dist = 3.5f) { return pos + (fwd * dist);                                            }
         void snapTo(glm::vec3 newpos)           { this->altpos = this->pos;
                                                   this->pos = newpos;                                                   }
@@ -51,6 +53,10 @@ class DA_CAMERA {
         uint*   getGridpos()                    { return this->curcell.gridpos;                                         }
         int*    getCellpos()                    { return this->curcell.worldpos;                                        }
         DAGCI*  getCellPositions()              { return this->nearcells;                                               }
+
+        float   getFarW()                       { return this->wFar;                                                    }
+        float   getFarH()                       { return this->hFar;                                                    }
+        float   getFarZ()                       { return this->zFar;                                                    }
 
     private:
 
@@ -77,7 +83,7 @@ class DA_CAMERA {
         float     pitch           = 0;
         float     yaw             = 0;
 
-        DAGCI     curcell         = { 0, 0, 0, 0 };
+        DAGCI     curcell         = { 0 };
         DAGCI*    nearcells       = 0;
         uint      prevframe_cells = 0;
 
@@ -87,8 +93,6 @@ extern DA_CAMERA* actcam;
 extern glm::mat4  actcam_viewproj;
 extern glm::vec3  actcam_fwd;
 extern glm::vec3  actcam_pos;
-
-void caminit();
 
 //  - --- - --- - --- - --- -
 

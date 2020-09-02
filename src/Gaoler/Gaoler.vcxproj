@@ -25,11 +25,13 @@
     <ClInclude Include="GAOL_Constants.h" />
     <ClInclude Include="GAOL_Face.h" />
     <ClInclude Include="GAOL_Line.h" />
+    <ClInclude Include="GAOL_Sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GAOL_Bounds.cpp" />
     <ClCompile Include="GAOL_Box.cpp" />
     <ClCompile Include="GAOL_Face.cpp" />
+    <ClCompile Include="GAOL_Sphere.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

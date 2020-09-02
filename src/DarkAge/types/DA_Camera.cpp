@@ -1,11 +1,10 @@
 #include "DA_Camera.h"
 #include "DA_WorldManager.h"
+#include "DA_Occluder.h"
 
 #include "lyutils/ZJC_Evil.h"
 #include "lymath/ZJC_GOPS.h"
 #include "spatial/ZJC_Transform.h"
-
-#include "GAOL_Box.h"
 
 #include "shaders/SIN_BoundShader.h"
 #include "types/SIN_Shader.h"
@@ -13,20 +12,10 @@
 
 #include <stdio.h>
 
-DA_CAMERA* actcam              = NULL;
-glm::mat4  actcam_viewproj     = IDENTITY;
-glm::vec3  actcam_fwd          = { 0,0,0 };
-glm::vec3  actcam_pos          = { 0,0,0 };
-
-static Program* boundShader    = NULL;
-static ushort   boundShaderLoc = 0;
-
-//  - --- - --- - --- - --- -
-
-void caminit()                                  { boundShader     = build_shader(2, SIN_BoundShader_source_v,
-                                                                                    SIN_BoundShader_source_p   );
-
-                                                  boundShaderLoc  = SIN_shdbucket_findloc(2);                           }
+DA_CAMERA*       actcam          = NULL;
+glm::mat4        actcam_viewproj = IDENTITY;
+glm::vec3        actcam_fwd      = { 0,0,0 };
+glm::vec3        actcam_pos      = { 0,0,0 };
 
 //  - --- - --- - --- - --- -
 
@@ -44,7 +33,7 @@ DA_CAMERA::DA_CAMERA(const glm::vec3& pos,
 
     float fpos[3] = { pos.x, pos.y, pos.z };
 
-    this->hNear   = 2 * tan(fov / 2) * zFar;
+    this->hNear   = 2 * tan(fov / 2) * zNear;
     this->wNear   = this->hNear * aspect;
     this->hFar    = 2 * tan(fov / 2) * zFar;
     this->wFar    = hFar * aspect;
@@ -82,49 +71,6 @@ void DA_CAMERA::getFrustum()                    {
     planes[4]       = COLFACE(ntl,ntr,nbr);
     planes[5]       = COLFACE(ftr,ftl,fbl);                                                                             }
 
-void DA_CAMERA::drawBounds(glm::vec3 bounds[8]) {
-
-    glBegin(GL_LINES);
-
-        glVertex3f(bounds[0].x, bounds[0].y, bounds[0].z);
-        glVertex3f(bounds[4].x, bounds[4].y, bounds[4].z);
-
-        glVertex3f(bounds[4].x, bounds[4].y, bounds[4].z);
-        glVertex3f(bounds[7].x, bounds[7].y, bounds[7].z);
-
-        glVertex3f(bounds[7].x, bounds[7].y, bounds[7].z);
-        glVertex3f(bounds[3].x, bounds[3].y, bounds[3].z);
-
-        glVertex3f(bounds[3].x, bounds[3].y, bounds[3].z);
-        glVertex3f(bounds[0].x, bounds[0].y, bounds[0].z);
-
-        glVertex3f(bounds[1].x, bounds[1].y, bounds[1].z);
-        glVertex3f(bounds[5].x, bounds[5].y, bounds[5].z);
-
-        glVertex3f(bounds[5].x, bounds[5].y, bounds[5].z);
-        glVertex3f(bounds[6].x, bounds[6].y, bounds[6].z);
-
-        glVertex3f(bounds[6].x, bounds[6].y, bounds[6].z);
-        glVertex3f(bounds[2].x, bounds[2].y, bounds[2].z);
-
-        glVertex3f(bounds[2].x, bounds[2].y, bounds[2].z);
-        glVertex3f(bounds[1].x, bounds[1].y, bounds[1].z);
-
-        glVertex3f(bounds[5].x, bounds[5].y, bounds[5].z);
-        glVertex3f(bounds[4].x, bounds[4].y, bounds[4].z);
-
-        glVertex3f(bounds[6].x, bounds[6].y, bounds[6].z);
-        glVertex3f(bounds[7].x, bounds[7].y, bounds[7].z);
-
-        glVertex3f(bounds[2].x, bounds[2].y, bounds[2].z);
-        glVertex3f(bounds[3].x, bounds[3].y, bounds[3].z);
-
-        glVertex3f(bounds[1].x, bounds[1].y, bounds[1].z);
-        glVertex3f(bounds[0].x, bounds[0].y, bounds[0].z);
-
-    glEnd();
-    }
-
 //  - --- - --- - --- - --- -
 
 void DA_CAMERA::onAreaChange()                  {
@@ -134,35 +80,32 @@ void DA_CAMERA::onAreaChange()                  {
 
 void DA_CAMERA::cellCulling(uint num_cells)     {
 
-    cint h = DA_CELL_SIZE;
-    cint w = DA_CELL_SIZE / 2;
-
-    shader_chkProgram(boundShaderLoc);
-    shader_update_viewproj(&actcam_viewproj);
+    cint h                    = DA_CELL_HALF;
+    cint w                    = DA_CELL_HALF;
 
     for(uint i = 0; i < num_cells; i++)
     {
 
         int ox = (nearcells[i].worldpos[0] * DA_CELL_SIZE);
         int oy = (nearcells[i].worldpos[1] * DA_CELL_SIZE);
+        int oz = (nearcells[i].worldpos[2] * DA_CELL_SIZE);
+        glm::vec3 origin(ox, oy, oz);
+        COLSPHERE boundsphere(origin, DA_CELL_SIZE + DA_CELL_QUAT);
 
-        glm::vec3 origin(ox, 0, oy);
+        int cellInFrustum = boundsphere.boxIsect(planes);
 
-        glm::vec3 cellbounds[8] = { origin + glm::vec3(  w, -h, -w), origin + glm::vec3(  w,  h, -w),
-                                    origin + glm::vec3(  w,  h,  w), origin + glm::vec3(  w, -h,  w),
-                                    origin + glm::vec3( -w, -h, -w), origin + glm::vec3( -w,  h, -w),
-                                    origin + glm::vec3( -w,  h,  w), origin + glm::vec3( -w, -h,  w) };
-
-        int cellInFrustum = (int) rectInFrustum(cellbounds);
-
-        if(!cellInFrustum)
+        if(cellInFrustum < 0)
         {
-            COLBOX cellbox(cellbounds);
-            for(uint j = 0; j < 6; j++)         { cellInFrustum = cellbox.cageIsect_opt(&planes[i]);
-                                                  if(cellInFrustum) { break; }                                          }
+
+            glm::vec3 cellbounds[8] = { origin + glm::vec3(  w, -h, -w), origin + glm::vec3(  w,  h, -w),
+                                        origin + glm::vec3(  w,  h,  w), origin + glm::vec3(  w, -h,  w),
+                                        origin + glm::vec3( -w, -h, -w), origin + glm::vec3( -w,  h, -w),
+                                        origin + glm::vec3( -w,  h,  w), origin + glm::vec3( -w, -h,  w) };
+
+            cellInFrustum = (int) rectInFrustum(cellbounds);
+
         }
 
-        drawBounds(cellbounds);
         DA_grid_setInFrustum(nearcells[i].gridpos, cellInFrustum);
     }
 
@@ -171,10 +114,12 @@ void DA_CAMERA::cellCulling(uint num_cells)     {
 void DA_CAMERA::resetCulling()                  { for(uint i = 0; i < prevframe_cells; i++)
                                                 { DA_grid_setInFrustum(nearcells[i].gridpos, 0); }                      }
 
+int  DA_CAMERA::sphInFrustum (COLSPHERE* sph)   { return sph->boxIsect(planes);                                         }
+
 bool DA_CAMERA::rectInFrustum(
                     glm::vec3 bounds[8])        {
 
-    for (uint i = 0; i < 6; i++)                { if (this->pointInFrustum(bounds[i]))
+    for (uint i = 0; i < 8; i++)                { if (this->pointInFrustum(bounds[i]))
                                                 { return true; }                                                        }
 
     return false;                                                                                                       }
@@ -182,7 +127,7 @@ bool DA_CAMERA::rectInFrustum(
 bool DA_CAMERA::pointInFrustum(
                     glm::vec3 point)            {
 
-    for (uint i = 0; i < 6; i++)                { if ( (dot(planes[i].normal, point)+planes[i].d) < 0)
+    for (uint i = 0; i < 6; i++)                { if ( planes[i].pointTest(point) < 0)
                                                 { return false; }                                                       }
 
     return true;                                                                                                        }
@@ -192,8 +137,7 @@ bool DA_CAMERA::pointInFrustum(
 void DA_CAMERA::move(glm::vec3 mvec,
                      bool local)                {
 
-    update = true;
-
+    update             = true;
     glm::vec3 displace = { 0,0,0 };
 
     if (local)
@@ -220,7 +164,6 @@ void DA_CAMERA::move(glm::vec3 mvec,
 void DA_CAMERA::rotate(glm::vec3 rvec)          {
 
     update = true;
-
     pitch += rvec.y; yaw += rvec.x;
 
     if      (pitch < -1.49f)                    { pitch = -1.49f;                                                       }
@@ -228,9 +171,9 @@ void DA_CAMERA::rotate(glm::vec3 rvec)          {
 
     glm::vec3 hAxis = glm::normalize(glm::cross(yAxis, fwd));
 
-    fwd.x           = sin(yaw) * cos(pitch);
+    fwd.x           = sin(yaw  ) * cos(pitch);
+    fwd.z           = cos(yaw  ) * cos(pitch);
     fwd.y           = sin(pitch);
-    fwd.z           = cos(yaw) * cos(pitch);
 
     fwd             = glm::normalize(fwd);
     up              = glm::normalize(glm::cross(fwd, hAxis));                                                           }

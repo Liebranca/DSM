@@ -33,6 +33,9 @@
     <ClInclude Include="GAOL_Bounds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GAOL_Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GAOL_Face.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GAOL_Bounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GAOL_Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

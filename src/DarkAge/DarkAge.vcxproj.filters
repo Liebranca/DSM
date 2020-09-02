@@ -33,6 +33,9 @@
     <ClCompile Include="types\DA_WorldManager.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
+    <ClCompile Include="types\DA_Occluder.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DarkAge.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="DA_CommonTypes.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="types\DA_Occluder.h">
+      <Filter>Header Files\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,9 @@
 #include "GAOL_Bounds.h"
+
 #include "lyutils/ZJC_Evil.h"
+#include "lymath/ZJC_GOPS.h"
+
+#include "GAOL_Constants.h"
 
 #define GAOL_MAX_BOUNDS 512
 
@@ -31,12 +35,14 @@ GAOL_COLLISION_BOUNDS::GAOL_COLLISION_BOUNDS
 void GAOL_COLLISION_BOUNDS::genBox
                             (glm::mat4& model)  {
 
-    delete box;
+    if(box)    { delete box;    }
+    if(sphere) { delete sphere; }
 
-    glm::vec3 co[8]  =  { glm::vec3(model * points[0]), glm::vec3(model * points[1]),
-                          glm::vec3(model * points[2]), glm::vec3(model * points[3]),
-                          glm::vec3(model * points[4]), glm::vec3(model * points[5]),
-                          glm::vec3(model * points[6]), glm::vec3(model * points[7]) };
+    glm::vec3 co[8]      =  { glm::vec3(model * points[0]), glm::vec3(model * points[1]),
+                              glm::vec3(model * points[2]), glm::vec3(model * points[3]),
+                              glm::vec3(model * points[4]), glm::vec3(model * points[5]),
+                              glm::vec3(model * points[6]), glm::vec3(model * points[7]) };
 
-    box = new COLBOX(co);                                                                                               }
+    box         = new COLBOX   (co);
+    sphere      = new COLSPHERE(box->origin, maxf(box->area[0], box->area[1]) + GAOL_COLMARGIN);                        }
 

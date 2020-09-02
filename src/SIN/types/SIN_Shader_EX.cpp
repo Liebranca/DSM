@@ -37,5 +37,8 @@ void shader_update_ambient(glm::vec4* ambient_color)
                                                 { glUniform4fv(__program->uniforms[SIN_AMBIENT_U],
                                                                1, &((*ambient_color)[0]) );                             }
 
+void shader_update_campos(glm::vec3* campos)
+                                                { glUniform3fv(__program->uniforms[SIN_CAMPOS_U], 1, &((*campos)[0]));  }
+
 //  - --- - --- - --- - --- -
 

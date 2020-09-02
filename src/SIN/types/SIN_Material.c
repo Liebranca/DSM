@@ -40,6 +40,10 @@ int       SIN_matbucket_end   ()                {
 
 //  - --- - --- - --- - --- -
 
+ushort    SIN_getActiveMaterials ()             { return SIN_ACTIVE_MATERIALS;                                          }
+
+//  - --- - --- - --- - --- -
+
 Material* SIN_matbucket_find  (ushort matid)    {
 
     ushort loc = sh_hashloc(SIN_MATHASH, matid);

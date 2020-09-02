@@ -12,14 +12,14 @@ extern "C" {
 typedef struct DA_NODE_CELLINFO {
 
     uint index;
-    uint gridpos [2];
-    int  worldpos[2];
+    uint gridpos [3];
+    int  worldpos[3];
 } DANCI;
 
 typedef struct DA_GRIDCELL_INFO {
 
-    uint gridpos[2];
-    int  worldpos[2];
+    uint gridpos [3];
+    int  worldpos[3];
 } DAGCI;
 
 //  - --- - --- - --- - --- -

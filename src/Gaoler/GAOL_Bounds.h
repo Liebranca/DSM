@@ -2,6 +2,7 @@
 #define __GAOL_BOUNDS_H__
 
 #include "GAOL_Box.h"
+#include "GAOL_Sphere.h"
 #include "ZJC_CommonTypes.h"
 
 #ifdef __cplusplus
@@ -12,11 +13,12 @@ extern "C" {
 
 typedef struct GAOL_COLLISION_BOUNDS            {
 
-    glm::vec4 points[8];
-    COLBOX*   box;
+    glm::vec4  points[8];
+    COLBOX*    box;
+    COLSPHERE* sphere;
 
-    GAOL_COLLISION_BOUNDS()                     { box = new COLBOX();                                                   }
-    ~GAOL_COLLISION_BOUNDS()                    { if(box) { delete box; }                                               }
+    GAOL_COLLISION_BOUNDS()                     { box = new COLBOX(); sphere = new COLSPHERE();                         }
+    ~GAOL_COLLISION_BOUNDS()                    { if(box) { delete box; } if(sphere) { delete sphere; }                 }
 
     GAOL_COLLISION_BOUNDS(glm::vec4 _points[8]);
 

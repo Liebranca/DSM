@@ -32,6 +32,8 @@ Material* SIN_matbucket_find     (ushort matid);
 Material* SIN_matbucket_get      (ushort loc);
 ushort    SIN_matbucket_findloc  (ushort matid);
 
+ushort    SIN_getActiveMaterials ();
+
 #ifdef __cplusplus
 }
 #endif

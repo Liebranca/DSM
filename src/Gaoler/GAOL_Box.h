@@ -14,6 +14,7 @@ typedef struct GAOL_COLLISION_BOX {
 
     COLFACE faces[6];
 
+    glm::vec3 origin;
     glm::vec3 points[8];
     float area[2];
 

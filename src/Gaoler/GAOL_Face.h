@@ -29,9 +29,11 @@ typedef struct GAOL_COLLISION_FACE {
                                                   edges[0] = COLLINE(p1, p2);
                                                   edges[1] = COLLINE(p2, p3);
 
-                                                  p4 = p3 + glm::vec3(p1.x, 0, p1.z);                                   }
+                                                  p4 = glm::vec3(p1.x, p3.y, p1.z);                                     }
 
     ~GAOL_COLLISION_FACE()                      { ;                                                                     }
+
+    float   pointTest (glm::vec3 p)             { return (dot(normal, p) + d);                                          }
 
     COLDATA planeIsect(GAOL_COLLISION_FACE* p);
     bool    edgeIsect (GAOL_COLLISION_FACE* p);

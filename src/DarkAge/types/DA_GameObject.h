@@ -9,12 +9,23 @@
 #include "GAOL_Bounds.h"
 
 #include "../DA_CommonTypes.h"
+#include "DA_Occluder.h"
 
 #include <vector>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//  - --- - --- - --- - --- -
+
+#define DA_NF_INTERACTABLE  0x01
+#define DA_NF_FXORPARTICLE  0x02
+#define DA_NF_LIGHTSOURCE   0x04
+#define DA_NF_OCCLUDER      0x08
+#define DA_NF_CHARACTER     0x10
+#define DA_NF_ANIMATED      0x20
+#define DA_NF_HASPROPS      0x40
 
 //  - --- - --- - --- - --- -
 
@@ -37,6 +48,7 @@ class DA_NODE {
 
 //  - --- - --- - --- - --- -
 
+        int        isOccluder   ()              { return this->nodeFlags  & DA_NF_OCCLUDER;                             }
         int        isDynamic    ()              { return this->physMode  == GAOL_PHYSMODE_DYNAMIC;                      }
         int        isStatic     ()              { return this->physMode  == GAOL_PHYSMODE_STATIC;                       }
         glm::mat4  getModel     (bool ig)       { return transform->getModel(ig);                                       }
@@ -77,40 +89,41 @@ class DA_NODE {
 
     protected:
 
-        ushort     id;
+        ushort       id;
 
-        T3D*       transform;
-        COLBOUNDS* bounds;
-        M3D*       mesh;
+        T3D*         transform;
+        COLBOUNDS*   bounds;
+        M3D*         mesh;
+        DA_OCCLUDER* occlu;
 
-        DA_NODE*   target;
-        DA_NODE*   ground;
+        DA_NODE*     target;
+        DA_NODE*     ground;
 
-        glm::mat4  model;
-        glm::mat3  nmat;
+        glm::mat4    model;
+        glm::mat3    nmat;
 
-        glm::vec3  accel        = { 0,0,0 };
-        glm::vec3  angvel       = { 0,0,0 };
-        glm::vec3  vel          = { 0,0,0 };
+        glm::vec3    accel        = { 0,0,0 };
+        glm::vec3    angvel       = { 0,0,0 };
+        glm::vec3    vel          = { 0,0,0 };
 
-        float      speedmult    = 10.0f;
-        float      weight       = 1.0f;
-        bool       isJumping    = false;
-        bool       hasAccel     = false;
-        bool       hasRot       = false;
+        float        speedmult    = 10.0f;
+        float        weight       = 1.0f;
+        bool         isJumping    = false;
+        bool         hasAccel     = false;
+        bool         hasRot       = false;
 
-        uint       nodeFlags    = 0;
-        uint       physMode     = 0;
-        uint       momentum     = 0;
-        uint       max_momentum = 200;
+        uint         nodeFlags    = 0;
+        uint         physMode     = 0;
+        uint         momentum     = 0;
+        uint         max_momentum = 200;
 
-        bool       visible      = false;
-        bool       doRender     = true;
-        bool       needsUpdate  = true;
+        bool         visible      = false;
+        bool         doRender     = true;
+        bool         needsUpdate  = true;
 
-        bool       commands[5]  = { false, false, false, false, false };
+        bool         commands[5]  = { false, false, false, false, false };
 
-        DANCI      cellinfo     = { 0, 0, 0, 0, 0 };
+        DANCI        cellinfo     = { 0 };
 
 //  - --- - --- - --- - --- -
 

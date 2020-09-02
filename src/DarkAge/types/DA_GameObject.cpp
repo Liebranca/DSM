@@ -7,20 +7,27 @@
 #include "lymath/ZJC_VOPS.h"
 #include "lyarr/ZJC_Stack.h"
 
+#include "types/SIN_Material.h"
+#include "types/SIN_Texture.h"
+#include "types/SIN_Shader.h"
 #include "types/SIN_Shader_EX.h"
+
+#include "types/SIN_MeshBatch.h"
 
 #define                DA_MAX_OBJECTS              1024
 
 static sStack*         DA_OBJ_SLOTSTACK          = NULL;
 static ushort          DA_ACTIVE_OBJECTS         = 0;
+static ushort          DA_ACTIVE_OCCLUDERS       = 0;
 
 static uint            DA_OBJECT_UPDATE_NUMOBJS  = 0;
 static uint            DA_OBJECT_UPDATE_NUMCELLS = 0;
 
 static ushort          DA_OBJECT_LOCATIONS[DA_MAX_OBJECTS];
 
-std::vector<DA_NODE*>  SCENE_OBJECTS(DA_MAX_OBJECTS, 0);
-std::vector<ushort>    FRAME_OBJECTS(DA_MAX_OBJECTS, 0);
+std::vector<DA_NODE*>  SCENE_OBJECTS  (DA_MAX_OBJECTS, 0);
+std::vector<ushort>    FRAME_OBJECTS  (DA_MAX_OBJECTS, 0);
+std::vector<ushort>    SCENE_OCCLUDERS(DA_MAX_OBJECTS, 0);
 
 //  - --- - --- - --- - --- -
 
@@ -39,8 +46,9 @@ void DA_objects_end()                           {
 
 void DA_objects_update()                        {
 
-    DA_OBJECT_UPDATE_NUMOBJS = 0;
-    DA_OBJECT_UPDATE_NUMCELLS   = 0;
+    DA_OBJECT_UPDATE_NUMOBJS  = 0;
+    DA_OBJECT_UPDATE_NUMCELLS = 0;
+    DA_ACTIVE_OCCLUDERS       = 0;
 
     actcam->resetCulling();
 
@@ -65,31 +73,132 @@ void DA_objects_update()                        {
         {
             if(DA_OBJECT_LOCATIONS[j])
             {
+
                 DA_NODE* ob = SCENE_OBJECTS[DA_OBJECT_LOCATIONS[j]];
-                ob->prePhysUpdate();
+                if(ob->needsUpdate) { ob->prePhysUpdate(); }
 
-                if(DA_grid_getInFrustum(ob->cellinfo.gridpos))
-                {
-
-                    // TODO: dont set visibility here. wait until we do occlusion culling next pass
-                    ob->visible = true;
-
-                    new_dist    = glm::distance (actcam_pos, ob->transform->position);
-                    if(new_dist < dist)         { dist = new_dist; closest = j;                                         }
-
-                }
+                new_dist    = glm::distance(actcam_pos, ob->transform->position);
+                if(new_dist < dist)             { dist = new_dist; closest = j+1;                                       }
             }
         }
 
-        if(closest)                             { FRAME_OBJECTS[k]             = DA_OBJECT_LOCATIONS[closest];
-                                                  DA_OBJECT_LOCATIONS[closest] = 0; k++;                                }
+        if(closest)                             { FRAME_OBJECTS[k]               = DA_OBJECT_LOCATIONS[closest-1];
+                                                  DA_OBJECT_LOCATIONS[closest-1] = 0; k++;                              }
     }
 
 //  - --- - --- - --- - --- -
 
-    
+    ushort   total_materials = SIN_getActiveMaterials();
+    int** render_bucket   = (int**) evil_malloc(total_materials+1, sizeof(int*));
+    for(uint i = 0; i < total_materials; i++) { render_bucket[i] = (int*) evil_malloc(k+1, sizeof(int)); }
 
+    render_bucket[total_materials] = (int*) evil_malloc(total_materials, sizeof(int));
+    for(uint i = 0; i < total_materials; i++) { render_bucket[total_materials][i] = -1;                  }
+
+    for(uint i = 0; i < k; i++)
+    {
+
+        DA_NODE* ob = SCENE_OBJECTS[FRAME_OBJECTS[i]];
+
+//  - --- - --- - --- - --- -
+
+        if(DA_grid_getInFrustum(ob->cellinfo.gridpos))
+        {
+            if(actcam->sphInFrustum(ob->bounds->sphere))
+            {
+
+                int eyechk = 1;
+
+                for(uint occlu_id = 0; occlu_id < DA_ACTIVE_OCCLUDERS; occlu_id++)
+                {
+                    DA_OCCLUDER* occlu = SCENE_OBJECTS[occlu_id]->occlu;
+                    eyechk             = occlu->sphTest(ob->bounds->sphere);
+
+                    if(eyechk < 0) { eyechk = occlu->getVisible(ob->bounds->box->points); }
+                    if(!eyechk)    { break;                                               }
+                }
+
+//  - --- - --- - --- - --- -
+
+                if(eyechk)
+                {
+
+                    ob->visible = true;
+
+                    uint mat_index = 0;
+                    for(uint j = 0; j < total_materials; j++)
+                    {
+                        if     (render_bucket[total_materials][j] < 0)
+                        { render_bucket[total_materials][j] = ob->mesh->matloc; mat_index = j; break;   }
+
+                        else if(render_bucket[total_materials][j] == ob->mesh->matloc)
+                        { mat_index = j; break;                                                         }
+                    }
+
+                    uint draw_index = render_bucket[mat_index][0];
+
+                    render_bucket[mat_index][draw_index + 1]  = ob->id;
+                    render_bucket[mat_index][0]              += 1;
+
+                    if(ob->isOccluder())
+                    {
+                        ob->occlu->getFrustum  ( actcam_fwd,
+                                                 actcam_pos,
+                                                 actcam->getUp(),
+                                                 actcam->getFarZ(),
+                                                 actcam->getFarH(),
+                                                 actcam->getFarW()  );
+
+                        SCENE_OCCLUDERS[DA_ACTIVE_OCCLUDERS] = ob->id;
+                        DA_ACTIVE_OCCLUDERS++;
+                    }
+                }
+            }
+        }
     }
+
+//  - --- - --- - --- - --- -
+
+    if(actcam->getUpdate())                     { actcam_viewproj = actcam->getViewProjection();
+                                                  actcam_fwd      = actcam->getFwd();
+                                                  actcam_pos      = actcam->getPos();
+
+                                                  actcam->getFrustum();                                                 }
+
+    for(uint mat_index = 0; mat_index < total_materials; mat_index++)
+    {
+
+        Material* mate = NULL;
+
+        for(int draw_index = 1; draw_index < render_bucket[mat_index][0] + 1; draw_index++)
+        {
+            DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
+
+            if(draw_index == 1)
+            {
+                mate = SIN_matbucket_get(ob->mesh->matloc);
+                shader_chkProgram       (mate->shdloc    );
+
+                bind_tex_to_slot(mate->texloc[0],          0);
+                bind_tex_to_slot(mate->texloc[1],          1);
+                bind_tex_to_slot(mate->texloc[2],          2);
+
+                bind_tex_to_slot(SIN_texbucket_findloc(4), 3);
+                bind_tex_to_slot(SIN_texbucket_findloc(5), 4);
+
+                shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
+
+            }
+            chkbatch(ob->mesh->drawLoc); ob->draw();
+        }
+    }
+
+    actcam->endUpdate();
+
+    for(uint i = 0; i < k; i++) { WARD_EVIL_MFREE(render_bucket[i]); }
+
+    WARD_EVIL_MFREE(render_bucket[total_materials]);
+    WARD_EVIL_MFREE(render_bucket                 );                                                                    }
 
 //  - --- - --- - --- - --- -
 
@@ -256,22 +365,23 @@ void DA_NODE::move      (glm::vec3 mvec,
 
     int prev_x = cellinfo.worldpos[0];
     int prev_y = cellinfo.worldpos[1];
+    int prev_z = cellinfo.worldpos[2];
 
     DA_grid_findpos (cellinfo.worldpos, fpos);
 
     if (  (cellinfo.worldpos[0] != prev_x)
-       || (cellinfo.worldpos[1] != prev_y))     { onCellExit();                                                         }
+       || (cellinfo.worldpos[1] != prev_y)
+       || (cellinfo.worldpos[2] != prev_z)  )   { onCellExit();                                                         }
 
-    needsUpdate      = true;                                                                                            }
+    needsUpdate = true;                                                                                                 }
 
-void DA_NODE::prePhysUpdate()                   {
-
-    if(needsUpdate)                             { model       = transform->getModel();
+void DA_NODE::prePhysUpdate()                   { model       = transform->getModel();
                                                   nmat        = transform->getNormal(model);
                                                   needsUpdate = false;
 
-                                                  buildBounds(model);                                                   }
-                                                                                                                        }
+                                                  buildBounds(model);
+
+                                                  if(isOccluder()) { occlu->setBox(bounds->box); }                      }
 
 void DA_NODE::draw() {
 

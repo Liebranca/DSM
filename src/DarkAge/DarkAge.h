@@ -4,6 +4,7 @@
 #include "types/DA_WorldManager.h"
 #include "types/DA_GameObject.h"
 #include "types/DA_Camera.h"
+#include "types/DA_Occluder.h"
 
 #ifdef __cplusplus
 extern "C" {

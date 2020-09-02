@@ -14,6 +14,7 @@
 
 static M3DB    SIN_emptybatch       = {0};
 static ushort  SIN_ACTIVE_BATCHES   = 0;
+static ushort  __curBatchLoc        = 0;
 
 static sStack* SIN_BATCH_SLOTSTACK  = NULL;
 
@@ -50,6 +51,9 @@ int  SIN_Batcher_end()                          {
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
+
+void  chkbatch     (ushort loc)                 { if(loc+1 != __curBatchLoc)
+                                                { __curBatchLoc = loc+1; SIN_bindMeshBatch(loc); }                      }
 
 void  SIN_bindMeshBatch(ushort loc)             { glBindVertexArray((SIN_meshbatches + loc)->VAO);                      }
 
