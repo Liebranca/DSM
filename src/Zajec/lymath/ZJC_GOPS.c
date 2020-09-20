@@ -1,4 +1,7 @@
 #include "ZJC_GOPS.h"
+
+#include "../lyutils/ZJC_Evil.h"
+
 #include <stdio.h>
 #include <math.h>
 
@@ -49,6 +52,8 @@ float submaxf(float v1, float v2)       { return minf(v1, v2) - maxf(v1, v2);   
 int   flipifi(int v1, int boo)          { return v1 * (1 - (2 * (boo != 0)) );                              }
 float flipiff(float v1, int boo)        { return v1 * (1 - (2 * (boo != 0)) );                              }
 
+float fround(float x)                   { int y = (int)(x * 100 + .5f); return (float)(y * 0.01f);          }
+
 //  - --- - --- - --- - --- -
 
 int   clampi(int v,
@@ -81,54 +86,63 @@ float approadf(float v1,
 
 //  - --- - --- - --- - --- -
 
-fvRange* build_fvRange(uint mag,
-                      float step)       { 
+void     build_fvRange(fvRange* fvr,
+                       uint     mag,
+                       float    step)   {
 
-    fvRange* fvr = (fvRange*) evil_malloc(1, sizeof(fvRange));
+    fvr->mag  = mag;
+    fvr->step = (float ) fabs(step);
+    fvr->buff = (float*) evil_malloc(mag, sizeof(float));
 
-    fvr->mag    = mag;
-    fvr->step   = step;
-    fvr->values = build_fArray(mag);
+    if(step < 0)                        { step = -step;
 
-    for(uint i = 0; i < mag; i++)       { *(fvr->values->buff+i) = (i*step);                                }
+                                          for(int i = (int)(-(int)(mag) / 2); i < (int)(mag / 2); i++)
+                                        { fvr->buff[i + (mag / 2)] = (i*step); }                              }
 
-    return fvr;                                                                                             }
+    else                                { for(uint i = 0; i < mag; i++)
+                                        { fvr->buff[i] = (i*step); }                                        }
+                                                                                                            }
 
-void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->values->buff); WARD_EVIL_MFREE(fvr);         }
+void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->buff);                                       }
 
-uint32_t fvRange_take_closest(
+uint fvRange_take_closest(
                           fvRange* fvr,
                           float v)      {
+
+    if (v >= fvr->buff[fvr->mag-1])     { return fvr->mag-1;                                                }
+    if (v <= fvr->buff[0]         )     { return 0;                                                         }
 
     float s = fvr->step * 0.5f;
     float dist = 999.0f;
     float newdist;
     uint closest = 0;
 
-    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, *(fvr->values->buff+i), s);
+    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, fvr->buff[i], s);
                                           if ( newdist < dist ) { dist = newdist; closest = i; }            }
 
     return closest;
 }
 
 uchar fvRange_take_closest_1b(fvRange* fvr,
-                              float v)          {
+                              float v)  {
 
-    if (v >= fvr->values->buff[fvr->mag-1])     { return (uchar)fvr->mag-1;                                             }
-    if (v <= fvr->values->buff[0]         )     { return (uchar)0;                                                      }
+    if (v >= fvr->buff[fvr->mag-1])     { return (uchar)fvr->mag-1;                                         }
+    if (v <= fvr->buff[0]         )     { return (uchar)0;                                                  }
 
-    if (fvr->mag >= 256)                        { fprintf(stderr,
-                                                  "fvRange_take_closest_1b rejects float scales outside the range(0, 256)\n");
+    if (fvr->mag > 256)                 { fprintf(stderr,
 
-                                                  return 0;                                                             }
+                                                  "fvRange_take_closest_1b rejects float scales outside\
+                                                   the index range(0, 256)\n"                               );
+
+                                          return 0;                                                         }
 
     float s = fvr->step * 0.5f;
     float dist = 999.0f;
     float newdist;
     uint closest = 0;
 
-    for (uint i = 0; i < fvr->mag; i++)         { newdist = approadf(v, *(fvr->values->buff+i), s);
-                                                  if ( newdist < dist ) { dist = newdist; closest = i; }                }
+    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, fvr->buff[i], s);
+                                          if ( newdist < dist ) { dist = newdist; closest = i; }            }
 
-    return closest;                                                                                                     }
+    return closest;                                                                                         }
 

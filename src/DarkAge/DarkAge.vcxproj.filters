@@ -19,6 +19,12 @@
     <Filter Include="Source Files\types">
       <UniqueIdentifier>{71ccac8f-bd13-47b3-98e5-14a9c46142b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\loader">
+      <UniqueIdentifier>{e8a6c1f4-ee4d-4561-808e-804ab783de6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\loader">
+      <UniqueIdentifier>{de7c52c6-7ff3-4512-8680-3aeca3388d4b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DarkAge.cpp">
@@ -35,6 +41,15 @@
     </ClCompile>
     <ClCompile Include="types\DA_Occluder.cpp">
       <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="loader\DA_Resource.c">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="loader\DA_ShaderLoad.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="loader\DA_SceneLoad.cpp">
+      <Filter>Source Files\loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +70,15 @@
     </ClInclude>
     <ClInclude Include="types\DA_Occluder.h">
       <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="loader\DA_Resource.h">
+      <Filter>Header Files\loader</Filter>
+    </ClInclude>
+    <ClInclude Include="loader\DA_ShaderLoad.h">
+      <Filter>Header Files\loader</Filter>
+    </ClInclude>
+    <ClInclude Include="loader\DA_SceneLoad.h">
+      <Filter>Header Files\loader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

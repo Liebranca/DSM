@@ -141,24 +141,24 @@ M3D*    build_mesh          (ushort id,
         for(uint i = 0, j = 0; i < mesh->vertCount; i++, j += 14)
         {
 
-            vertex_data[j+0 ] = frac8_tofloat((verts + i)->co[0]);
-            vertex_data[j+1 ] = frac8_tofloat((verts + i)->co[1]);
-            vertex_data[j+2 ] = frac8_tofloat((verts + i)->co[2]);
+            vertex_data[j+0 ] = frac_tofloat((verts + i)->co[0]);
+            vertex_data[j+1 ] = frac_tofloat((verts + i)->co[1]);
+            vertex_data[j+2 ] = frac_tofloat((verts + i)->co[2]);
 
-            vertex_data[j+3 ] = frac8_tofloat((verts + i)->normal[0]);
-            vertex_data[j+4 ] = frac8_tofloat((verts + i)->normal[1]);
-            vertex_data[j+5 ] = frac8_tofloat((verts + i)->normal[2]);
+            vertex_data[j+3 ] = frac_tofloat((verts + i)->normal[0]);
+            vertex_data[j+4 ] = frac_tofloat((verts + i)->normal[1]);
+            vertex_data[j+5 ] = frac_tofloat((verts + i)->normal[2]);
 
-            vertex_data[j+6 ] = frac8_tofloat((verts + i)->tangent[0]);
-            vertex_data[j+7 ] = frac8_tofloat((verts + i)->tangent[1]);
-            vertex_data[j+8 ] = frac8_tofloat((verts + i)->tangent[2]);
+            vertex_data[j+6 ] = frac_tofloat((verts + i)->tangent[0]);
+            vertex_data[j+7 ] = frac_tofloat((verts + i)->tangent[1]);
+            vertex_data[j+8 ] = frac_tofloat((verts + i)->tangent[2]);
 
-            vertex_data[j+9 ] = frac8_tofloat((verts + i)->bitangent[0]);
-            vertex_data[j+10] = frac8_tofloat((verts + i)->bitangent[1]);
-            vertex_data[j+11] = frac8_tofloat((verts + i)->bitangent[2]);
+            vertex_data[j+9 ] = frac_tofloat((verts + i)->bitangent[0]);
+            vertex_data[j+10] = frac_tofloat((verts + i)->bitangent[1]);
+            vertex_data[j+11] = frac_tofloat((verts + i)->bitangent[2]);
 
-            vertex_data[j+12] = frac8_tofloat((verts + i)->uv[0]);
-            vertex_data[j+13] = frac8_tofloat((verts + i)->uv[1]);
+            vertex_data[j+12] = ufrac_tofloat((verts + i)->uv[0]);
+            vertex_data[j+13] = ufrac_tofloat((verts + i)->uv[1]);
         }
 
 //  - --- - --- - --- - --- -

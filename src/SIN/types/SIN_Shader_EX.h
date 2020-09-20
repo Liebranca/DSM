@@ -10,7 +10,7 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-void shader_chkProgram        (ushort loc);
+int  shader_chkProgram        (ushort loc);
 void shader_setProgram        (ushort loc);
 void shader_useProgram        ();
 

@@ -32,12 +32,12 @@ int chmang_init         (cchar* title,
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 3);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 3);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 2);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
 
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  32);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     chmang.curwin   = 0;

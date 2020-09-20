@@ -54,11 +54,11 @@
     <ClCompile Include="types\SIN_Shader.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
-    <ClCompile Include="SIN.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shaders\SIN_BoundShader.cpp">
       <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SIN.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="shaders\SIN_BoundShader.h">
       <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SIN_Constants.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

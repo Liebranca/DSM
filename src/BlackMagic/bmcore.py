@@ -2,12 +2,13 @@ from . import bmpath, set_bm_ars
 from .bmutils   import meshfrac
 from .crkwriter import writecrk
 from .jojwriter import writejoj
+from .ssxwriter import writessx
 
 #   ---     ---     ---     ---     ---
 
 isrunning   = False;
 
-writerlist  = ["writecrk", "writejoj", "meshfrac"];
+writerlist  = ["writecrk", "writejoj", "writessx", "meshfrac"];
 setterlist  = ["setpath", "setname", "setarch", "setmode", "setoffs", "settexm"];
 systemlist  = ["quit", "help"];
 

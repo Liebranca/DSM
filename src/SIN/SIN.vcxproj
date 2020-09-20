@@ -168,6 +168,7 @@
     <ClInclude Include="shaders\SIN_DefaultShader.h" />
     <ClInclude Include="shaders\SIN_BoundShader.h" />
     <ClInclude Include="SIN.h" />
+    <ClInclude Include="SIN_Constants.h" />
     <ClInclude Include="types\SIN_Material.h" />
     <ClInclude Include="types\SIN_Mesh.h" />
     <ClInclude Include="types\SIN_MeshBatch.h" />
@@ -178,7 +179,7 @@
   <ItemGroup>
     <ClCompile Include="shaders\SIN_BoundShader.cpp" />
     <ClCompile Include="shaders\SIN_DefaultShader.cpp" />
-    <ClCompile Include="SIN.c" />
+    <ClCompile Include="SIN.cpp" />
     <ClCompile Include="types\SIN_Material.c" />
     <ClCompile Include="types\SIN_Mesh.c" />
     <ClCompile Include="types\SIN_MeshBatch.c" />

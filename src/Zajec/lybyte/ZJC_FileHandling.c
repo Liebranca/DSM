@@ -3,6 +3,7 @@
 #include <io.h>
 
 #include "ZJC_FileHandling.h"
+#include "ZJC_BitPacker.h"
 
 #include "../lymath/ZJC_GOPS.h"
 #include "../lyutils/ZJC_Evil.h"
@@ -33,6 +34,7 @@ cushort         MAXSTRIDE       =                 0xFFFF;
 
 cchar           CRKSIGN[8]      =               { 0x4c, 0x59, 0x45, 0x42, 0x24, 0x43, 0x52, 0x4b                        };
 cchar           JOJSIGN[8]      =               { 0x4c, 0x59, 0x45, 0x42, 0x24, 0x4a, 0x4f, 0x4a                        };
+cchar           SSXSIGN[8]      =               { 0x4c, 0x59, 0x45, 0x42, 0x24, 0x53, 0x53, 0x58                        };
 
 cchar           FBGM[16]        =               { 0x46, 0x43, 0x4b, 0x42, 0x21, 0x54, 0x43, 0x48,
                                                   0x45, 0x53, 0x47, 0x45, 0x54, 0x24, 0x24, 0x24                        };
@@ -60,7 +62,8 @@ int openbin(cchar* filename,
 
     int readmode = (mode == "rb+") || (mode == "rb");
 
-    if( readmode && (curfile == NULL) )         { curfile = fopen(filename, "wb"); isnew = -1;                          }
+    if      ( readmode && (curfile == NULL) )   { curfile = fopen(filename, "wb"); isnew = -1;                          }
+    else if ( mode == "wb+"                 )   { isnew = 1;                                                            }
 
     WARD_EVIL_FOPEN(curfile,  filename);
 
@@ -84,7 +87,7 @@ struct DSM_ARCHIVE_FORMAT {
 
     ushort   fileCount;
     uint32_t size;
-    uint32_t offsets[256];
+    uint32_t offsets[ZJC_DAFSIZE];
     uchar*   data;
 
 };
@@ -101,24 +104,30 @@ typedef struct MESH_FILE_3D                     {
     VP3D_8*  verts;
     ushort*  indices;
 
-} CrkFile;
+} CRK;
 
-typedef struct IMAGE_FILE_8BIT_RGB              {
+typedef struct IMAGE_FILE_24BIT_YUV             {
 
     uint    size;
     ushort  height;
     ushort  width;
 
-    ushort* pixels;
+    H8PACK  luma;
+    H8PACK  chroma_u;
+    H8PACK  chroma_v;
 
-} JojFile;
+} JOJ;
 
-void del_CrkFile(CrkFile* crk)                  {
+void del_CrkFile(CRK* crk)                      {
 
     WARD_EVIL_MFREE(crk->bounds);
     WARD_EVIL_MFREE(crk->verts);
     WARD_EVIL_MFREE(crk->indices);                                                                                      }
-void del_JojFile(JojFile* joj)                  { WARD_EVIL_MFREE(joj->pixels);                                         }
+
+void del_JojFile(JOJ* joj)                      { zh8_delPacker(&joj->chroma_v); zh8_delPacker(&joj->chroma_u);
+                                                  zh8_delPacker(&joj->luma    );                                        }
+
+void del_SsxFile(SSX* ssx)                      { WARD_EVIL_MFREE(ssx->objects);                                        }
 //  - --- - --- - --- - --- -
 
 int openarch(cchar*        filename,
@@ -133,15 +142,18 @@ int openarch(cchar*        filename,
     daf->size = 8 + 2 + 4 + 1024;
 
     isnew = openbin(filename, readmode, shutit);
-    WARD_EVIL_WRAP(errorstate, (isnew > -1) ? isnew : errorstate);
 
-    if(isnew || (mode == DAF_WRITE
-    && mode != DAF_READ) )                      { for(uint i = 1; i < 256; i++) { daf->offsets[i] = 0; }
+    // LYEB: I've changed how new files are detected and now I don't remember why I needed this line.
+    //       it breaks DAF file creation so I'm commenting it out until my memory is refreshed.
+    //
+    // WARD_EVIL_WRAP(errorstate, (isnew > -1) ? isnew : errorstate);
 
-                                                  EVIL_FWRITE(cchar,    8,   archtype,        filename);
-                                                  EVIL_FWRITE(ushort,   1,   &daf->fileCount, filename);
-                                                  EVIL_FWRITE(uint32_t, 1,   &daf->size,      filename);
-                                                  EVIL_FWRITE(uint32_t, 256, daf->offsets,    filename);
+    if(isnew)                                   { for(uint i = 1; i < ZJC_DAFSIZE; i++) { daf->offsets[i] = 0; }
+
+                                                  EVIL_FWRITE(cchar,    8,           archtype,        filename);
+                                                  EVIL_FWRITE(ushort,   1,           &daf->fileCount, filename);
+                                                  EVIL_FWRITE(uint32_t, 1,           &daf->size,      filename);
+                                                  EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, daf->offsets,    filename);
                                                   fseek(curfile, 0, SEEK_CUR);                                          }
 
 //  - --- - --- - --- - --- -
@@ -158,12 +170,13 @@ int openarch(cchar*        filename,
         fread(sign, sizeof(char), 8, curfile);
 
         for(uint i = 0; i < 8; i++)             { if(sign[i] != archtype[i])
-                                                { terminator(0x67, filename); return ERROR; }                           }
+                                                { terminator(67, filename); return ERROR; }                             }
 
-        fread(&daf->fileCount, sizeof(ushort), 1, curfile);
-        fread(&daf->size,      sizeof(uint32_t), 1,   curfile);
-        fread(daf->offsets,    sizeof(uint32_t), 256, curfile);
+        fread(&daf->fileCount, sizeof(ushort),   1,           curfile);
+        fread(&daf->size,      sizeof(uint32_t), 1,           curfile);
+        fread(daf->offsets,    sizeof(uint32_t), ZJC_DAFSIZE, curfile);
 
+        daf->data         = NULL;
         uint32_t datasize = daf->size - DAF_HSIZE;
 
         if((mode == DAF_UPDATE)
@@ -175,8 +188,8 @@ int openarch(cchar*        filename,
 
 //  - --- - --- - --- - --- -
 
-int read_crkdump(cchar*     filename,
-                 CrkFile*    crk,
+int read_crkdump(cchar*      filename,
+                 CRK*        crk,
                  float*      bounds,
                  float*      verts)             {
 
@@ -187,12 +200,12 @@ int read_crkdump(cchar*     filename,
     ushort sizes[2] = {0, 0};
     fread(sizes, sizeof(ushort), 2, curfile);
 
-    crk->vertCount = sizes[0];
+    crk->vertCount  = sizes[0];
     crk->indexCount = sizes[1];
 
-    EVIL_FREAD(float,  24,                  bounds);
-    EVIL_FREAD(float,  crk->vertCount * 14,  verts);
-    EVIL_FREAD(ushort, crk->indexCount * 3, crk->indices);
+    EVIL_FREAD(float,  24,                   bounds      );
+    EVIL_FREAD(float,  crk->vertCount  * 14, verts       );
+    EVIL_FREAD(ushort, crk->indexCount * 3,  crk->indices);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
@@ -217,9 +230,7 @@ int read_crkdump(cchar*     filename,
 //  - --- - --- - --- - --- -
 
 int read_jojdump(cchar*   filename,
-                 JojFile* joj,
-                 ushort*  colbuff,
-                 float*   pixels)               {
+                 JOJ*     joj)                  {
 
     int errorstate = 0;
     WARD_EVIL_WRAP(errorstate, openbin(filename, "rb", 0));
@@ -227,42 +238,116 @@ int read_jojdump(cchar*   filename,
     fread(&joj->width,  sizeof(ushort), 1, curfile);
     fread(&joj->height, sizeof(ushort), 1, curfile);
 
+    float* pixels;
     EVIL_FREAD(float, joj->height * joj->width * 4, pixels);
 
     WARD_EVIL_WRAP(errorstate, closebin(filename, 0));
 
-    uint curcol      = 0;
-    uint lastcol     = 199;
-    uint colcount    = 0;
+    JOJPIX curcol           = { 0 };
 
-    uint dim         = joj->width * joj->height;
-    uint j           = 0;
+    uint dim                = joj->width * joj->height;
 
-    colbuff             = (ushort*) evil_malloc(dim, sizeof(ushort));
+    joj->luma.dictsize      = 0;
+    joj->luma.usize         = dim;
 
-    0xc6eb;
+    joj->chroma_u.dictsize  = 0;
+    joj->chroma_u.usize     = dim;
+
+    joj->chroma_v.dictsize  = 0;
+    joj->chroma_v.usize     = dim;
+
+    uchar*  protoluma       = (uchar* ) evil_malloc(dim, sizeof(uchar ));
+    uchar*  protochroma_u   = (uchar* ) evil_malloc(dim, sizeof(uchar ));
+    uchar*  protochroma_v   = (uchar* ) evil_malloc(dim, sizeof(uchar ));
+
+    uint*   lumadict        = (uint*  ) evil_malloc(256, sizeof(uint  ));
+    uint*   chroma_udict    = (uint*  ) evil_malloc(256, sizeof(uint  ));
+    uint*   chroma_vdict    = (uint*  ) evil_malloc(256, sizeof(uint  ));
+
+    ushort* lumacounter     = (ushort*) evil_malloc(256, sizeof(ushort));
+    ushort* chroma_ucounter = (ushort*) evil_malloc(256, sizeof(ushort));
+    ushort* chroma_vcounter = (ushort*) evil_malloc(256, sizeof(ushort));
+
+//  - --- - --- - --- - --- -
 
     for(uint i = 0; i < dim * 4; i+=4)
     {
 
-        curcol = color_to_joj16(pixels[i+0],
-                                pixels[i+1],
-                                pixels[i+2]);
+        curcol        = rgb_to_joj(pixels[i+0],
+                                   pixels[i+1],
+                                   pixels[i+2]);
 
-        if  ( (curcol != lastcol)
-            ||(colcount == 7) )                 { colbuff[j] = curcol + (colcount << 13);
-                                                  j++; colcount = 0;                                                    }
+        protoluma[(uint)(i/4)] = curcol.luma;
 
-        else                                    { colcount++;                                                           }
+        if  (!lumacounter[curcol.luma])         { lumadict[joj->luma.dictsize] = curcol.luma + (1 << 16);
+                                                  joj->luma.dictsize++; lumacounter[curcol.luma] = joj->luma.dictsize;  }
 
-        lastcol = curcol;
+        else                                    { ushort prev = ( lumadict[lumacounter[curcol.luma] - 1]
+                                                                & 0xFFFF0000) >> 16;
+
+                                                  lumadict[lumacounter[curcol.luma] - 1] = curcol.luma
+                                                                                         + ((prev + 1) << 16);          }
+
+//  - --- - --- - --- - --- -
+
+        protochroma_u[(uint)(i/4)] = curcol.chroma_u;
+
+        if  (!chroma_ucounter[curcol.chroma_u]) { chroma_udict[joj->chroma_u.dictsize] = curcol.chroma_u + (1 << 16);
+                                                  joj->chroma_u.dictsize++;
+
+                                                  chroma_ucounter[curcol.chroma_u] = joj->chroma_u.dictsize;  }
+
+        else                                    { ushort prev = ( chroma_udict[chroma_ucounter[curcol.chroma_u] - 1]
+                                                                & 0xFFFF0000) >> 16;
+
+                                                  chroma_udict[chroma_ucounter[curcol.chroma_u] - 1] = curcol.chroma_u
+                                                                                                     +((prev + 1)
+                                                                                                     << 16      );      }
+
+//  - --- - --- - --- - --- -
+
+        protochroma_v[(uint)(i/4)] = curcol.chroma_v;
+
+        if  (!chroma_vcounter[curcol.chroma_v]) { chroma_vdict[joj->chroma_v.dictsize] = curcol.chroma_v + (1 << 16);
+                                                  joj->chroma_v.dictsize++;
+
+                                                  chroma_vcounter[curcol.chroma_v] = joj->chroma_v.dictsize;  }
+
+        else                                    { ushort prev = ( chroma_vdict[chroma_vcounter[curcol.chroma_v] - 1]
+                                                                & 0xFFFF0000) >> 16;
+
+                                                  chroma_vdict[chroma_vcounter[curcol.chroma_v] - 1] = curcol.chroma_v
+                                                                                                     +((prev + 1)
+                                                                                                     << 16      );      }
 
     }
 
-    joj->size   = j;
-    joj->pixels = (ushort*) evil_malloc(j, sizeof(ushort));
+//  - --- - --- - --- - --- -
 
-    for(uint i = 0; i < j; i++)                 { joj->pixels[i] = colbuff[i];                                          }
+    WARD_EVIL_MFREE(chroma_vcounter);
+    WARD_EVIL_MFREE(chroma_ucounter);
+    WARD_EVIL_MFREE(lumacounter    );
+
+    zh8_pack(&joj->luma,     lumadict,     protoluma    );
+    zh8_pack(&joj->chroma_u, chroma_udict, protochroma_u);
+    zh8_pack(&joj->chroma_v, chroma_vdict, protochroma_v);
+
+    WARD_EVIL_MFREE(chroma_vdict);
+    WARD_EVIL_MFREE(chroma_udict);
+    WARD_EVIL_MFREE(lumadict);
+
+    WARD_EVIL_MFREE(protochroma_v);
+    WARD_EVIL_MFREE(protochroma_u);
+    WARD_EVIL_MFREE(protoluma);
+
+    WARD_EVIL_MFREE(pixels);
+
+//  - --- - --- - --- - --- -
+
+    joj->size  =  8                     + 30;
+    joj->size += joj->luma.dictsize     + joj->luma.datasize;
+    joj->size += joj->chroma_u.dictsize + joj->chroma_u.datasize;
+    joj->size += joj->chroma_v.dictsize + joj->chroma_v.datasize;
 
     WARD_EVIL_WRAP(errorstate, remove(filename));
     printf("Deleted file <%s>\n", filename);
@@ -271,7 +356,7 @@ int read_jojdump(cchar*   filename,
 
 //  - --- - --- - --- - --- -
 
-int crk_to_daf(CrkFile*    crk,
+int crk_to_daf(CRK*   crk,
                cchar* filename)                 {
 
     ushort sizes[2] = { crk->vertCount, crk->indexCount};
@@ -285,25 +370,54 @@ int crk_to_daf(CrkFile*    crk,
 
     return 0;                                                                                                           }
 
-int joj_to_daf(JojFile*    joj,
+int joj_to_daf(JOJ*   joj,
                cchar* filename)                 {
 
-    ushort sizes[2] = { joj->width, joj->height};
+    ushort sizes[2]    = { joj->width, joj->height};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(ushort, 2,         sizes,       filename);
-    EVIL_FWRITE(uint,   1,         &joj->size,  filename);
-    EVIL_FWRITE(ushort, joj->size, joj->pixels, filename);
+    EVIL_FWRITE(ushort, 2, sizes,      filename);
+    EVIL_FWRITE(uint,   1, &joj->size, filename);
+
+//  - --- - --- - --- - --- -
+
+    uint   lumaint [2] = { joj->luma.datasize,     joj->luma.usize                };
+
+    EVIL_FWRITE(ushort, 1,                         &joj->luma.dictsize,   filename);
+    EVIL_FWRITE(uint,   2,                         lumaint,               filename);
+    EVIL_FWRITE(uchar,  joj->luma.dictsize,        joj->luma.dict,        filename);
+    EVIL_FWRITE(uchar,  joj->luma.datasize,        joj->luma.data,        filename);
+
+//  - --- - --- - --- - --- -
+
+    uint   chruint [2] = { joj->chroma_u.datasize, joj->chroma_u.usize                };
+
+    EVIL_FWRITE(ushort, 1,                         &joj->chroma_u.dictsize,   filename);
+    EVIL_FWRITE(uint,   2,                         chruint,                   filename);
+    EVIL_FWRITE(uchar,  joj->chroma_u.dictsize,    joj->chroma_u.dict,        filename);
+    EVIL_FWRITE(uchar,  joj->chroma_u.datasize,    joj->chroma_u.data,        filename);
+
+//  - --- - --- - --- - --- -
+
+    uint   chrvint [2] = { joj->chroma_v.datasize, joj->chroma_v.usize                };
+
+    EVIL_FWRITE(ushort, 1,                         &joj->chroma_v.dictsize,   filename);
+    EVIL_FWRITE(uint,   2,                         chrvint,                   filename);
+    EVIL_FWRITE(uchar,  joj->chroma_v.dictsize,    joj->chroma_v.dict,        filename);
+    EVIL_FWRITE(uchar,  joj->chroma_v.datasize,    joj->chroma_v.data,        filename);
+
+//  - --- - --- - --- - --- -
+
     fseek(curfile, 0, SEEK_CUR);
 
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
 
-int writecrk_daf(CrkFile*    crk,
-                 DAF*        daf,
-                 uint8_t     mode,
-                 uint8_t     offset,
+int writecrk_daf(CRK*       crk,
+                 DAF*       daf,
+                 uint8_t    mode,
+                 uint8_t    offset,
                  cchar*     filename)           {
 
     int evilstate = 0;
@@ -318,7 +432,7 @@ int writecrk_daf(CrkFile*    crk,
                                            0        ));
     }
 
-    if      (daf->fileCount == 256
+    if      (daf->fileCount == ZJC_DAFSIZE
             && mode != DAF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
                                                   return 0;                                                             }
 
@@ -362,10 +476,10 @@ int writecrk_daf(CrkFile*    crk,
         EVIL_FWRITE(uint32_t, 1, &newoffset,       filename);
     }
 
-    else if (mode == DAF_UPDATE && offset < 256)
+    else if (mode == DAF_UPDATE && offset < ZJC_DAFSIZE)
     {
 
-        int isLastChunk = offset == 255 || offset == (daf->fileCount - 1);
+        int isLastChunk = offset == (ZJC_DAFSIZE - 1) || offset == (daf->fileCount - 1);
 
         uint32_t chunk_start = daf->offsets[offset];
         uint32_t newsize, byteshift, old_end;
@@ -415,7 +529,7 @@ int writecrk_daf(CrkFile*    crk,
             fseek(curfile, 10, SEEK_CUR);
             fseek(curfile, 0, SEEK_CUR);
             EVIL_FWRITE(uint32_t, 1,   &newsize,     filename);
-            EVIL_FWRITE(uint32_t, 256, daf->offsets, filename);
+            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, daf->offsets, filename);
             fseek(curfile, 0, SEEK_CUR);
         }
 
@@ -429,10 +543,10 @@ int writecrk_daf(CrkFile*    crk,
 
 //  - --- - --- - --- - --- -
 
-int writejoj_daf(JojFile*    joj,
-                 DAF*        daf,
-                 uint8_t     mode,
-                 uint8_t     offset,
+int writejoj_daf(JOJ*       joj,
+                 DAF*       daf,
+                 uint8_t    mode,
+                 uint8_t    offset,
                  cchar*     filename)           {
 
     int evilstate = 0;
@@ -447,11 +561,9 @@ int writejoj_daf(JojFile*    joj,
                                            0        ));
     }
 
-    if      (daf->fileCount == 256
+    if      (daf->fileCount == ZJC_DAFSIZE
             && mode != DAF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
                                                   return 0;                                                             }
-
-    uint32_t joj_realsize = 4 + 4 + (joj->size * 2);
 
     if      (mode == DAF_WRITE)
     {
@@ -462,7 +574,7 @@ int writejoj_daf(JojFile*    joj,
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize_offset[2] = { daf->size + joj_realsize, DAF_HSIZE };
+        uint32_t newsize_offset[2] = { daf->size + joj->size, DAF_HSIZE };
 
         EVIL_FWRITE(ushort,   1, &daf->fileCount, filename);
         EVIL_FWRITE(uint32_t, 2, newsize_offset,  filename);
@@ -479,7 +591,7 @@ int writejoj_daf(JojFile*    joj,
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize   = daf->size + joj_realsize;
+        uint32_t newsize   = daf->size + joj->size;
         uint32_t newoffset = daf->size;
 
         uint16_t offset_stride = (daf->fileCount) * 4;
@@ -494,17 +606,17 @@ int writejoj_daf(JojFile*    joj,
         EVIL_FWRITE(uint32_t, 1, &newoffset,       filename);
     }
 
-    else if (mode == DAF_UPDATE && offset < 256)
+    else if (mode == DAF_UPDATE && offset < ZJC_DAFSIZE)
     {
 
-        int isLastChunk = offset == 255 || offset == (daf->fileCount - 1);
+        int isLastChunk = offset == (ZJC_DAFSIZE - 1) || offset == (daf->fileCount - 1);
 
         uint32_t chunk_start = daf->offsets[offset];
         uint32_t newsize, byteshift, old_end;
 
         if(isLastChunk)
         {
-            newsize   = chunk_start + joj_realsize;
+            newsize   = chunk_start + joj->size;
             old_end   = daf->size;
             byteshift = newsize - old_end;
 
@@ -524,10 +636,10 @@ int writejoj_daf(JojFile*    joj,
         {
             uint32_t chunk_end;
 
-            chunk_end = chunk_start + joj_realsize;
+            chunk_end = chunk_start + joj->size;
             old_end   = daf->offsets[offset+1];
             byteshift = chunk_end - old_end;
-            newsize   = (daf->size - (old_end - chunk_start)) + joj_realsize;
+            newsize   = (daf->size - (old_end - chunk_start)) + joj->size;
 
             fseek(curfile, 0,           SEEK_CUR);
             fseek(curfile, chunk_start, SEEK_CUR);
@@ -547,7 +659,7 @@ int writejoj_daf(JojFile*    joj,
             fseek(curfile, 10, SEEK_CUR);
             fseek(curfile, 0, SEEK_CUR);
             EVIL_FWRITE(uint32_t, 1,   &newsize,     filename);
-            EVIL_FWRITE(uint32_t, 256, daf->offsets, filename);
+            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, daf->offsets, filename);
             fseek(curfile, 0, SEEK_CUR);
         }
 
@@ -559,6 +671,27 @@ int writejoj_daf(JojFile*    joj,
     return 0;
                                                                                                                         }
 
+//  - --- - --- - --- - --- -
+
+int readssx(SSX* ssx, cchar* filename)          {
+
+    int evilstate = 0;
+    WARD_EVIL_WRAP(evilstate, openbin(filename, "rb", 0));
+
+    char sign[8];
+    fread(sign, sizeof(cchar), 8, curfile);
+
+    GETLOC;
+    for(uint i = 0; i < 8; i++)                 { if(sign[i] != SSXSIGN[i])
+                                                { terminator(67, filename); return ERROR; }                             }
+
+    evil_poplocreg();
+
+    fread(&ssx->count, sizeof(ushort), 1, curfile);
+    EVIL_FREAD(SSO, ssx->count, ssx->objects);
+
+    WARD_EVIL_WRAP(evilstate, closebin(filename, 0));
+    return 0;                                                                                                           }
 //  - --- - --- - --- - --- -
 
 int popirf(DAF*    daf,
@@ -579,10 +712,10 @@ int popirf(DAF*    daf,
     if      (!daf->fileCount)                   { printf("Archive <%s> is empty; deletion aborted.\n", filename);
                                                   return 0;                                                             }
 
-    else if (offset < 256)
+    else if (offset < ZJC_DAFSIZE)
     {
 
-        int isLastChunk = offset == 255 || offset == (daf->fileCount - 1);
+        int isLastChunk = offset == (ZJC_DAFSIZE - 1) || offset == (daf->fileCount - 1);
 
         uint32_t chunk_start = daf->offsets[offset];
         uint32_t byteshift, newsize;
@@ -599,7 +732,7 @@ int popirf(DAF*    daf,
             fseek(curfile, 0, SEEK_CUR);
             EVIL_FWRITE(uint32_t, 1,   &daf->fileCount, filename);
             EVIL_FWRITE(uint32_t, 1,   &newsize,        filename);
-            EVIL_FWRITE(uint32_t, 256, daf->offsets,    filename);
+            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, daf->offsets,    filename);
             fseek(curfile, 0, SEEK_CUR);
         }
 
@@ -628,7 +761,7 @@ int popirf(DAF*    daf,
             fseek(curfile, 0, SEEK_CUR);
             EVIL_FWRITE(uint32_t, 1,   &daf->fileCount, filename);
             EVIL_FWRITE(uint32_t, 1,   &newsize,        filename);
-            EVIL_FWRITE(uint32_t, 256, daf->offsets,    filename);
+            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, daf->offsets,    filename);
             fseek(curfile, 0, SEEK_CUR);
         }
 
@@ -646,8 +779,8 @@ int writecrk(cchar* filename,
 
     int evilstate =    0;
 
-    DAF daf     =     {0};
-    CrkFile crk =     {0};
+    DAF daf       =    {0};
+    CRK crk       =    {0};
 
     float* bounds =    NULL;
     float* verts  =    NULL;
@@ -655,7 +788,7 @@ int writecrk(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
     uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
 
-    zjc_convertor_init(BUILD_FRAC8);
+    zjc_convertor_init(BUILD_FRAC);
     evilstate = read_crkdump(filename, &crk, bounds, verts);
 
     zjc_convertor_end();
@@ -680,21 +813,16 @@ int writejoj(cchar* filename,
     int evilstate     = 0;
 
     DAF     daf       = {0};
-    JojFile joj       = {0};
-
-    ushort* colbuff   = NULL;
-    float*  pixels    = NULL;
+    JOJ     joj       = {0};
 
     uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
     uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
 
-    zjc_convertor_init(BUILD_JOJ16);
-    evilstate = read_jojdump(filename, &joj, colbuff, pixels);
+    zjc_convertor_init(BUILD_JOJ);
+
+    evilstate = read_jojdump(filename, &joj);
 
     zjc_convertor_end();
-
-    WARD_EVIL_MFREE(colbuff);
-    WARD_EVIL_MFREE(pixels);
 
     if(!evilstate)                              { evilstate = writejoj_daf(&joj, &daf, nummode, numoffset, archive);    }
     if(nummode == DAF_UPDATE || DAF_DELETE)     { WARD_EVIL_MFREE(daf.data);                                            }
@@ -765,7 +893,11 @@ int    extractjoj (DAF*     daf,
                    uint*    size,
                    ushort*  width,
                    ushort*  height,
-                   ushort** pixels)            {
+                   float** pixels)              {
+
+    H8PACK luma     = { 0 };
+    H8PACK chroma_u = { 0 };
+    H8PACK chroma_v = { 0 };
 
     rewind(curfile);
     fseek(curfile, 0, SEEK_CUR);
@@ -776,7 +908,58 @@ int    extractjoj (DAF*     daf,
     fread(height,  sizeof(ushort),  1, curfile);
     fread(size,    sizeof(uint),    1, curfile);
 
-    EVIL_FREAD(ushort, *size, *pixels);
+    uint dim = (*width) * (*height);
+
+//  - --- - --- - --- - --- -
+
+    fread(&luma.dictsize, sizeof(ushort), 1, curfile);
+    fread(&luma.datasize, sizeof(uint ),  1, curfile);
+    fread(&luma.usize,    sizeof(uint ),  1, curfile);
+
+    EVIL_FREAD(uchar, luma.dictsize, luma.dict       );
+    EVIL_FREAD(uchar, luma.datasize, luma.data       );
+
+    uchar* luma_unpacked = zh8_unpack(&luma);
+
+//  - --- - --- - --- - --- -
+
+    fread(&chroma_u.dictsize, sizeof(ushort), 1, curfile);
+    fread(&chroma_u.datasize, sizeof(uint ),  1, curfile);
+    fread(&chroma_u.usize,    sizeof(uint ),  1, curfile);
+
+    EVIL_FREAD(uchar, chroma_u.dictsize, chroma_u.dict       );
+    EVIL_FREAD(uchar, chroma_u.datasize, chroma_u.data       );
+
+    uchar* chroma_u_unpacked = zh8_unpack(&chroma_u);
+
+//  - --- - --- - --- - --- -
+
+    fread(&chroma_v.dictsize, sizeof(ushort), 1, curfile);
+    fread(&chroma_v.datasize, sizeof(uint ),  1, curfile);
+    fread(&chroma_v.usize,    sizeof(uint ),  1, curfile);
+
+    EVIL_FREAD(uchar, chroma_v.dictsize, chroma_v.dict       );
+    EVIL_FREAD(uchar, chroma_v.datasize, chroma_v.data       );
+
+    uchar* chroma_v_unpacked = zh8_unpack(&chroma_v);
+
+//  - --- - --- - --- - --- -
+
+    *pixels = (float*) evil_malloc(dim * 3, sizeof(float));
+
+    for(uint i = 0, j = 0; i < dim; i++)
+    {
+        JOJPIX pix = { chroma_u_unpacked[i], chroma_v_unpacked[i], luma_unpacked[i] };
+        joj_to_rgb( (*pixels)+j, &pix ); j += 3;
+    }
+
+    WARD_EVIL_MFREE(chroma_v_unpacked);
+    WARD_EVIL_MFREE(chroma_u_unpacked);
+    WARD_EVIL_MFREE(luma_unpacked    );
+
+    zh8_delPacker(&chroma_v);
+    zh8_delPacker(&chroma_u);
+    zh8_delPacker(&luma    );
 
     return 0;                                                                                                           }
 

@@ -176,20 +176,20 @@ void DA_objects_update()                        {
 
             if(draw_index == 1)
             {
-                mate = SIN_matbucket_get(ob->mesh->matloc);
-                shader_chkProgram       (mate->shdloc    );
+                mate           = SIN_matbucket_get(ob->mesh->matloc);
+                int shaderSwap = shader_chkProgram(mate->shdloc    );
 
-                bind_tex_to_slot(mate->texloc[0],          0);
-                bind_tex_to_slot(mate->texloc[1],          1);
-                bind_tex_to_slot(mate->texloc[2],          2);
+                if(shaderSwap || actcam->getUpdate())
+                {
+                    shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
+                }
 
-                bind_tex_to_slot(SIN_texbucket_findloc(4), 3);
-                bind_tex_to_slot(SIN_texbucket_findloc(5), 4);
-
-                shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
-
+                for(uchar t = 0; t < mate->num_textures; t++)
+                { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
             }
+
             chkbatch(ob->mesh->drawLoc); ob->draw();
+
         }
     }
 
@@ -218,9 +218,9 @@ DA_NODE::DA_NODE(ushort meshid,
 
         for(int i = 0; i < 8; i++)
         {
-            points[i] = { frac8_tofloat(mesh->bounds[i].co[0]),
-                          frac8_tofloat(mesh->bounds[i].co[0]),
-                          frac8_tofloat(mesh->bounds[i].co[0]),
+            points[i] = { frac_tofloat(mesh->bounds[i].co[0]),
+                          frac_tofloat(mesh->bounds[i].co[0]),
+                          frac_tofloat(mesh->bounds[i].co[0]),
 
                           1                                             };
 

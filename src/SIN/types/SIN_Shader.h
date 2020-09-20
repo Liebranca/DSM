@@ -1,11 +1,11 @@
 #ifndef __SIN_SHADER_H__
 #define __SIN_SHADER_H__
 
-#include "../Zajec/ZJC_CommonTypes.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "../Zajec/ZJC_CommonTypes.h"
 
 #define __SIN_MAX_SHADERS_PER_PROGRAM__ 2
 

@@ -1,12 +1,12 @@
-original_mesh = None
-
-#   ---     ---     ---     ---     ---
-
-from mathutils import Matrix, Vector
 from math import degrees, sqrt
 import bmesh, itertools
 
 from .bmutils import *
+
+#   ---     ---     ---     ---     ---
+
+original_mesh = None
+obj_proplist  = ["obarc", "obarci"]
 
 #   ---     ---     ---     ---     ---
 
@@ -61,6 +61,25 @@ def writecrk(ob_name):
 
     elif not isinstance(mesh, bpy.types.Mesh):
         raise STAHP ("Selected object has no mesh data -- export failed.")
+
+    for propname in obj_proplist:
+        if propname not in ob.game.properties: raise STAHP ("Missing object property %s"%propname);
+
+    archive     = ob.game.properties["obarc"].value;
+    writeoffset = "0x%X"%ob.game.properties["obarci"].value;
+
+    if os.path.exists(filepath + "\\" + archive  + ".daf"):
+
+        with open(filepath + "\\" + archive  + ".daf", "rb") as f:
+            f.seek(8);
+
+            x        = f.read(2);
+            fcounter = x[0] + (x[1] << 8);
+
+            if fcounter <= int(writeoffset, 16): writemode = '0x01';
+            else:                                writemode = '0x02';
+
+    else:                                        writemode = '0x00';
 
 #   ---     ---     ---     ---     ---
 
@@ -157,12 +176,12 @@ def writecrk(ob_name):
                 n                       = sumdic[(vert.co[0], vert.co[1], vert.co[2])]
 
                 vertBuff[svi+0 :svi+4 ] = ftb( vert.co[0]*sf);
-                vertBuff[svi+4 :svi+8 ] = ftb( vert.co[2]*sf);
-                vertBuff[svi+8 :svi+12] = ftb(-vert.co[1]*sf);
+                vertBuff[svi+4 :svi+8 ] = ftb(-vert.co[2]*sf);
+                vertBuff[svi+8 :svi+12] = ftb( vert.co[1]*sf);
 
                 vertBuff[svi+12:svi+16] = ftb( n[0]*sf);
-                vertBuff[svi+16:svi+20] = ftb( n[2]*sf);
-                vertBuff[svi+20:svi+24] = ftb(-n[1]*sf);
+                vertBuff[svi+16:svi+20] = ftb(-n[2]*sf);
+                vertBuff[svi+20:svi+24] = ftb( n[1]*sf);
 
                 vertBuff[svi+48:svi+52] = ftb(uv[loop_index].uv[0]);
                 vertBuff[svi+52:svi+56] = ftb(uv[loop_index].uv[1]);

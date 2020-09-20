@@ -32,7 +32,7 @@ int      SIN_texbucket_end     ();
 int      SIN_tex_extract_from  (cchar* filename);
 int      SIN_tex_extract_end   (cchar* filename);
 
-Texture* build_texture         (ushort id, uchar offset, int flags);
+Texture* build_texture         (ushort id, uchar offset);
 
 Texture* SIN_texbucket_get     (ushort loc);
 Texture* SIN_texbucket_find    (ushort id);

@@ -6,14 +6,14 @@ extern "C" {
 #endif
 
 #include "../Zajec/ZJC_CommonTypes.h"
+#include "../SIN_Constants.h"
 
 //  - --- - --- - --- - --- -
-
-#define SIN_MATERIAL_MAX_TEXTURES 4
 
 typedef struct SIN_MATERIAL {
 
     ushort id;
+    uchar  num_textures;
 
     ushort shdloc;
     ushort texloc[SIN_MATERIAL_MAX_TEXTURES];
@@ -27,7 +27,7 @@ int       SIN_matbucket_init     ();
 int       SIN_matbucket_end      ();
 void      unsub_material         (ushort loc);
 
-Material* build_material         (ushort matid, ushort texid[3], ushort shdid);
+Material* build_material         (ushort matid, cushort texid[SIN_MATERIAL_MAX_TEXTURES], ushort shdid);
 Material* SIN_matbucket_find     (ushort matid);
 Material* SIN_matbucket_get      (ushort loc);
 ushort    SIN_matbucket_findloc  (ushort matid);

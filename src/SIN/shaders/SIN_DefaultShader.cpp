@@ -14,6 +14,7 @@ out vec2     texCoords;
 out vec3     CamPos0;
 out vec4     fragPos;
 out mat3     TBN;
+out float    fogFac;
 
 uniform mat4 Model;
 uniform mat4 ViewProjection;
@@ -38,6 +39,9 @@ void main()
     fragPos            = vec4(worldPosition.xyz, 1);
     CamPos0            = CamPos;
 
+    float distance = length(gl_Position.xyz);
+    fogFac = clamp( exp(-pow((distance*0.035), 2.5)), 0.0, 1.0 );
+
 }
 )glsl"
 };
@@ -52,12 +56,12 @@ in float  fogFac;
 in vec3   CamPos0;
 in mat3   TBN;
 
+uniform sampler2D shineRough;
+uniform sampler2D shineSoft;
+
 uniform sampler2D DiffuseMap;
 uniform sampler2D ShadingInfo;
 uniform sampler2D NormalMap;
-
-uniform sampler2D shineRough;
-uniform sampler2D shineSoft;
 
 uniform vec4   Ambient;
 //uniform vec3 SunFwd;
@@ -71,45 +75,67 @@ vec2 voodoo_UV(vec3 u, vec3 n)
     return vec2(r.x/m + 0.5, r.y/m + 0.5);
 }
 
+vec3 vec_overlay(vec3 a, vec3 b)
+{
+
+    vec3 blend = vec3(0,0,0);
+
+    blend.r    = a.r < 0.5 ? (2.0 * a.r * b.r) : (1.0 - 2.0 * (1.0 - a.r) * (1.0 - b.r));
+    blend.g    = a.g < 0.5 ? (2.0 * a.g * b.g) : (1.0 - 2.0 * (1.0 - a.g) * (1.0 - b.g));
+    blend.b    = a.b < 0.5 ? (2.0 * a.b * b.b) : (1.0 - 2.0 * (1.0 - a.b) * (1.0 - b.b));
+
+    return blend;
+}
+
 void main()
 {
 
-    vec3 ambient     = vec3(Ambient.x, Ambient.y, Ambient.z) * Ambient.w;
+    vec3 skyColor    = vec3(Ambient.x, Ambient.y, Ambient.z);
+    vec3 ambient     = skyColor * Ambient.w;
 
     vec3 lightDir    = normalize(CamPos0 - fragPos.xyz);
 
     vec3 diffuse     = texture2D(DiffuseMap,  texCoords).rgb;
     vec3 shadinginfo = texture2D(ShadingInfo, texCoords).rgb;
     vec3 normalmap   = texture2D(NormalMap,   texCoords).rgb;
-    normalmap        = normalmap * 2.0 - 1.0;
 
+    normalmap        = (normalmap * 2.0) - 1.0;    
     vec3 normal      = normalize(TBN * normalmap);
-    vec3 softnormal  = normalize(TBN[2] + (normalmap * 0.35));
+
+    normalmap.rg    *= 0.35;
+    vec3 softnormal  = normalize(TBN * normalize(normalmap));
 
     float ao         = shadinginfo.r;
-    float softness   = 1 - shadinginfo.g;
+    float cavity     = shadinginfo.g;
+    float softness   = 1 - cavity;
     float metallic   = shadinginfo.b;
 
-    float eyeshd     = clamp(dot(-CamFwd, softnormal), 0.18, 1.49);
-    eyeshd           = smoothstep(0.00, 0.23, eyeshd);
+    float specfac    = clamp(dot(reflect(lightDir, -softnormal), CamFwd), 0.0, 1.0);
+    vec3 specular    = (diffuse * specfac) * (0.5 * softness);
 
-    float specfac    = clamp(dot(reflect(-lightDir, normal), CamFwd), 0.0, 1.49);
-    vec3 specular    = (diffuse * specfac * softness);
+    vec3 refshine    = vec3(0,0,0);
 
-    float diff       = clamp(dot(lightDir, normal), 0.06, 1.49);
-    diffuse         += (softness * 0.25);
-    diffuse         *= diff * ao * eyeshd;
+    if(ao < 0.8) { ao *= 0.90; }
 
-    vec2 refUV       = voodoo_UV(CamFwd, softnormal);
+    if(metallic)
+    {
+        vec2 refUV       = voodoo_UV(CamFwd, softnormal);
 
-    vec3 rougshine   = texture2D(shineRough, refUV).rgb * 0.75;
-    vec3 softshine   = texture2D(shineSoft, refUV).rgb  * 0.75;
+        vec3 rougshine   = texture2D(shineRough, refUV).rgb * 0.75;
+        vec3 softshine   = texture2D(shineSoft, refUV).rgb  * 0.75;
 
-    vec3 refshine    = mix(rougshine, softshine, softness) * metallic;
+        refshine         = mix(rougshine, softshine, softness) * metallic;
+        refshine         = vec_overlay(refshine, diffuse);
+    }
 
-    vec3 composite   = ambient + diffuse + specular + refshine;
+    float diff       = smoothstep(0.01, 0.35, dot(lightDir, normal));
+    diff             = clamp(diff, 0.5, 1.0);
+    diffuse          = clamp(diffuse * diff * ao, 0.06, 1.0) + (cavity*0.5);
 
-    gl_FragColor = vec4(composite, 1);
+    vec3 composite   = clamp(ambient + diffuse + specular + refshine, 0.06, 1.49);
+    composite        = mix(skyColor, composite, fogFac);
+
+    gl_FragColor     = vec4(composite, 1);
 
 }
 )glsl"

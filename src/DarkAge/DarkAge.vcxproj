@@ -168,6 +168,9 @@
   <ItemGroup>
     <ClInclude Include="DarkAge.h" />
     <ClInclude Include="DA_CommonTypes.h" />
+    <ClInclude Include="loader\DA_Resource.h" />
+    <ClInclude Include="loader\DA_SceneLoad.h" />
+    <ClInclude Include="loader\DA_ShaderLoad.h" />
     <ClInclude Include="types\DA_Camera.h" />
     <ClInclude Include="types\DA_GameObject.h" />
     <ClInclude Include="types\DA_Occluder.h" />
@@ -175,6 +178,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DarkAge.cpp" />
+    <ClCompile Include="loader\DA_Resource.c" />
+    <ClCompile Include="loader\DA_SceneLoad.cpp" />
+    <ClCompile Include="loader\DA_ShaderLoad.cpp" />
     <ClCompile Include="types\DA_Camera.cpp" />
     <ClCompile Include="types\DA_GameObject.cpp" />
     <ClCompile Include="types\DA_Occluder.cpp" />

@@ -6,14 +6,12 @@ f8_size   = 128;
 f8_step   = 1/32;
 f8_maxval = (128 - 1) * f8_step;
 
-f8_range     = [i * f8_step for i in range(f8_size)];
+f8_range  = [i * f8_step for i in range(f8_size)];
 
-f4_size   = 16;
-f4_step   = 0.0625;
-f4_maxval = 1.0;
+uf8_size  = 256;
+uf8_step = 0.00390625;
 
-f4_range     = [i * f4_step for i in range(f4_size)];
-f4_range[15] = f4_maxval;
+uf8_range = [i * uf8_step for i in range(uf8_size)];
 
 # - --- - -- - --- -
 
@@ -46,9 +44,11 @@ def ftf8(x):
 
     return take_closest(abs(x), f8_range, f8_step) * (1 - (sign * 2));
 
-def ftf4(x):
-    if abs(x) >= f4_maxval: return f4_maxval;
-    return take_closest(abs(x), f4_range, f4_step);
+def ftuf8(x):
+    if   x >= 1.0: return 1.0;
+    elif x <= 0.0: return 0.0;
+
+    return take_closest(x, uf8_range, uf8_step);
 
 # - --- - -- - --- -
 
@@ -71,5 +71,5 @@ def meshfrac(ob_name):
     uv = me.uv_layers.active.data;
     for face in me.polygons:
             for loop_index in face.loop_indices:
-                uv[loop_index].uv[0] = ftf4(uv[loop_index].uv[0]);
-                uv[loop_index].uv[1] = ftf4(uv[loop_index].uv[1]);
+                uv[loop_index].uv[0] = ftuf8(uv[loop_index].uv[0]);
+                uv[loop_index].uv[1] = ftuf8(uv[loop_index].uv[1]);

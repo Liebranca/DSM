@@ -12,8 +12,8 @@ ushort   __curShdLoc = 0;
 void shader_setProgram (ushort loc)             { __program = SIN_shdbucket_get(loc); __curShdLoc = loc+1;              }
 void shader_useProgram ()                       { glUseProgram(__program->location);                                    }
 
-void shader_chkProgram (ushort loc)             {
-    if (loc+1 != __curShdLoc)                   { shader_setProgram(loc); shader_useProgram(); }                        }
+int  shader_chkProgram (ushort loc)             {
+    if (loc+1 != __curShdLoc)                   { shader_setProgram(loc); shader_useProgram(); return 1; } return 0;    }
 
 void shader_update_model  (glm::mat4* model)    { glUniformMatrix4fv(__program->uniforms[SIN_TRANSFORM_U],
                                                                      1, GL_FALSE, &((*model)[0][0]));                   }

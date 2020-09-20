@@ -9,6 +9,8 @@ def texchk(tex, slotname = "Diffuse"):
 
 JOJ_MAX_SIZE = 1024;
 
+tex_proplist = ["texarc", "texarci", "texmode"]
+
 def writejoj(ob_name):
 
     from . import bmpath, filepath, filename, archive, writeoffset, writemode, texmode
@@ -27,6 +29,27 @@ def writejoj(ob_name):
     mat = ob.active_material;
     if not mat:
         raise STAHP ("No active material! *.JOJ conversion failed.");
+
+    for propname in tex_proplist:
+        if propname not in ob.game.properties: raise STAHP ("Missing object property %s"%propname);
+
+    archive     = ob.game.properties["texarc"].value;
+    writeoffset = "0x%X"%ob.game.properties["texarci"].value;
+    texmode     = ob.game.properties["texmode"].value;
+    fcounter    = 0;
+
+    if os.path.exists(filepath + "\\" + archive  + ".daf"):
+
+        with open(filepath + "\\" + archive  + ".daf", "rb") as f:
+            f.seek(8);
+
+            x        = f.read(2);
+            fcounter = x[0] + (x[1] << 8);
+
+            if fcounter <= int(writeoffset, 16): writemode = '0x01';
+            else:                                writemode = '0x02';
+
+    else:                                        writemode = '0x00';
 
     mat.active_texture_index = 0;
     tex = mat.active_texture;
@@ -97,14 +120,17 @@ def writejoj(ob_name):
               + filepath + "\\" + filename + ".joj"  + " "
               + filepath + "\\" + archive  + ".daf"  + " "
               + writemode                            + " "
-              + writeoffset                        );
+              + writeoffset                        );    
 
     if texmode != 3:
+
         if texmode != 2:
 
-            if eval(writemode) == 0: writemode = "1";
-            writeoffset = str(eval(writeoffset)+1);
+            if int(writemode, 16) < 2: fcounter += 1;
 
+            writeoffset  = str(eval(writeoffset)+1);
+            if fcounter <= int(writeoffset, 16): writemode = '0x01';
+            else:                                writemode = '0x02';
 
             os.system(  bmpath   + "\\BlackMagic.exe" + " "  + "joj" + " "
             
@@ -112,6 +138,12 @@ def writejoj(ob_name):
                       + filepath + "\\" + archive  + ".daf"  + " "
                       + writemode                            + " "
                       + writeoffset                        );
+
+            if int(writemode, 16) < 2: fcounter += 1;
+            writeoffset = str(eval(writeoffset)+1);
+
+            if fcounter <= int(writeoffset, 16): writemode = '0x01';
+            else:                                writemode = '0x02';
 
             os.system(  bmpath   + "\\BlackMagic.exe" + " "  + "joj" + " "
             
@@ -122,8 +154,11 @@ def writejoj(ob_name):
 
         if texmode != 0:
 
-            if eval(writemode) == 0: writemode = "1";
-            writeoffset = str(eval(writeoffset)+1);
+            if int(writemode, 16) < 2: fcounter += 1;
+
+            writeoffset  = str(eval(writeoffset)+1);
+            if fcounter <= int(writeoffset, 16): writemode = '0x01';
+            else:                                writemode = '0x02';
 
             os.system(  bmpath   + "\\BlackMagic.exe" + " "  + "joj" + " "
         

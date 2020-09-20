@@ -74,9 +74,10 @@ Material* SIN_matbucket_get      (ushort loc)   {
 
 //  - --- - --- - --- - --- -
 
-Material* build_material      (ushort matid,
-                               ushort texid[3],
-                               ushort shdid)    {
+Material* build_material      (ushort  matid,
+                               cushort texid[SIN_MATERIAL_MAX_TEXTURES],
+
+                               ushort  shdid)   {
 
     Material* material = SIN_matbucket_find(matid);
 
@@ -96,7 +97,8 @@ Material* build_material      (ushort matid,
         material->id     = matid;
         for(uint i = 0;
             i < SIN_MATERIAL_MAX_TEXTURES; i++) { if(texid[i])
-                                                { material->texloc[i] = SIN_texbucket_findloc(texid[i]); }
+                                                { material->texloc[i] = SIN_texbucket_findloc(texid[i]);
+                                                  material->num_textures++;                                             }
 
                                                   else
                                                 { material->texloc[i] = 0; }                                            }

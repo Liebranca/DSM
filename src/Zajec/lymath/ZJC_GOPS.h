@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../lyarr/ZJC_DynArray.h"
+#include "../ZJC_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
@@ -36,6 +36,8 @@ float submaxf(float v1, float v2);
 int   flipifi(int v1, int boo);
 float flipiff(float v1, int boo);
 
+float fround(float x);
+
 //  - --- - --- - --- - --- -
 
 int   clampi(int v, int start, int end);
@@ -51,16 +53,16 @@ float approadf(float v1, float v2, float m);
 
 typedef struct fvRange {
 
-    uint32_t mag;
-    float    step;
-    fArray*  values;
+    uint   mag;
+    float  step;
+    float* buff;
 
 } fvRange;
 
-fvRange* build_fvRange(uint mag, float step);
-void     del_fvRange(fvRange* fvr);
+void     build_fvRange(fvRange* fvr, uint mag, float step);
+void     del_fvRange  (fvRange* fvr);
 
-uint32_t fvRange_take_closest(fvRange* fvr, float v);
+uint     fvRange_take_closest(fvRange* fvr, float v);
 uchar    fvRange_take_closest_1b(fvRange* fvr, float v);
 
 //  - --- - --- - --- - --- -

@@ -4,13 +4,13 @@
 #include "lyarr/ZJC_Stack.h"
 #include "lyutils/ZJC_Evil.h"
 
+#include "../SIN_Constants.h"
+
 #include "GL/glew.h"
 
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
-
-#define SIN_MAX_SHADERS              64
 
 static Program  SIN_emptyshd       = {0};
 static ushort   SIN_ACTIVE_SHADERS = 0;
@@ -176,11 +176,12 @@ Program* build_shader(ushort id,
         int env1Loc    = glGetUniformLocation(program->location, "shineRough");
         int env2Loc    = glGetUniformLocation(program->location, "shineSoft");
 
-        glUniform1i(diffuseLoc, 0);
-        glUniform1i(infoLoc,    1);
-        glUniform1i(normalLoc,  2);
-        glUniform1i(env1Loc,    3);
-        glUniform1i(env2Loc,    4);
+        glUniform1i(env1Loc,    0);
+        glUniform1i(env2Loc,    1);
+
+        glUniform1i(diffuseLoc, SIN_TEXID_BASE + 0);
+        glUniform1i(infoLoc,    SIN_TEXID_BASE + 1);
+        glUniform1i(normalLoc,  SIN_TEXID_BASE + 2);
 
         SIN_ACTIVE_SHADERS++;
 

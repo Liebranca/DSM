@@ -1,11 +1,11 @@
 #ifndef __DARKAGE_WORLDMANAGER_H__
 #define __DARKAGE_WORLDMANAGER_H__
 
-#include "../DA_CommonTypes.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "../DA_CommonTypes.h"
 
 //  - --- - --- - --- - --- -
 
