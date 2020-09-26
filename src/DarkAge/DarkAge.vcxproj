@@ -173,6 +173,7 @@
     <ClInclude Include="loader\DA_ShaderLoad.h" />
     <ClInclude Include="types\DA_Camera.h" />
     <ClInclude Include="types\DA_GameObject.h" />
+    <ClInclude Include="types\DA_Lamp.h" />
     <ClInclude Include="types\DA_Occluder.h" />
     <ClInclude Include="types\DA_WorldManager.h" />
   </ItemGroup>
@@ -183,6 +184,7 @@
     <ClCompile Include="loader\DA_ShaderLoad.cpp" />
     <ClCompile Include="types\DA_Camera.cpp" />
     <ClCompile Include="types\DA_GameObject.cpp" />
+    <ClCompile Include="types\DA_Lamp.cpp" />
     <ClCompile Include="types\DA_Occluder.cpp" />
     <ClCompile Include="types\DA_WorldManager.c" />
   </ItemGroup>

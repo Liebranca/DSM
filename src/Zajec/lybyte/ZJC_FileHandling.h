@@ -16,8 +16,9 @@ typedef struct IMAGE_FILE_24BIT_YUV JOJ;
 
 typedef struct SCENE_OBJECT                     {
 
-    ushort resinfo[2];
-    float  transform[10];
+    ushort resinfo[3];
+
+    float* fvalues;
 
 } SSO;
 
@@ -34,11 +35,11 @@ int    writejoj         (cchar* filename, cchar* archive, char* mode, char* offs
 int    extraction_start (cchar* filename, uchar archtype, DAF** daf);
 int    extraction_end   (cchar* filename, DAF** daf);
 
-int    extractcrk       (DAF* daf, uchar offset, ushort* vertCount,
+int    extractcrk       (DAF* daf, uchar offset, ushort* matid, ushort* vertCount,
                          ushort* indexCount, pVP3D_8** bounds,
                          VP3D_8** verts, ushort** indices);
 
-int    extractjoj       (DAF* daf, uchar offset, uint* size, ushort* width, ushort* height, float** pixels);
+int    extractjoj       (DAF* daf, uchar offset, uchar* flags, uint* size, ushort* width, ushort* height, float** pixels);
 
 int    readssx          (SSX* ssx, cchar* filename);
 void   del_SsxFile      (SSX* ssx);

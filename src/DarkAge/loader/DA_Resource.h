@@ -27,7 +27,6 @@ typedef struct DA_ASSETLOAD_HANDLE {
     cushort num_meshes;
     cushort mesh_idbase;
     cuchar  mesh_offset;
-    cushort mesh_mat_ids[ZJC_DAFSIZE];
 
     int    loaded;
 

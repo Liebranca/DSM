@@ -9,9 +9,6 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-#define SIN_TEXFLAGS_NORMALMAP 1
-#define SIN_TEXFLAGS_CUBEMAP   2
-
 typedef struct SIN_TEXTURE {
 
     ushort id;

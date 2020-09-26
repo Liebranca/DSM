@@ -5,19 +5,20 @@
 extern "C" {
 #endif
 
+#include "../ZJC_CommonTypes.h"
+
 //      - --- - --- - --- - --- -
 
 void   clock_init           ();
 void   clock_frameStart     ();
 void   clock_frameEnd       ();
 int    clock_getSleep       ();
+uint   clock_getSleepTime   ();
 float  clock_fBy            (float f);
-float  clock_getCurr        ();
 float  clock_getScale       ();
 void   clock_setScale       (float newScale);
 void   clock_setFramecap    (int newcap);
 float  clock_getDelta       ();
-float  clock_secondLength   ();
 
 //  - --- - --- - --- - --- -
 

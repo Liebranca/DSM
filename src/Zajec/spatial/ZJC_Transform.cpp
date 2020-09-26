@@ -6,7 +6,7 @@
 
 //  - --- - --- - --- - --- -
 
-glm::mat4 TRANSFORM3D::getModel
+glm::mat4 T3D::getModel
                         (bool ignoreParent)     {
 
     glm::mat4 parentMatrix;
@@ -19,12 +19,12 @@ glm::mat4 TRANSFORM3D::getModel
 
     return parentMatrix * (wPosMatrix * wRotMatrix * wScaleMatrix);                                                     }
 
-glm::mat3 TRANSFORM3D::getNormal
+glm::mat3 T3D::getNormal
                         (glm::mat4& model)      { return glm::inverseTranspose(model);                                  }
 
 //  - --- - --- - --- - --- -
 
-bool TRANSFORM3D::faceTo(glm::vec3 v,
+bool T3D::faceTo(glm::vec3 v,
                  float elapsed,
                  float rfac,
                  bool fullRot)                  {
@@ -53,7 +53,7 @@ bool TRANSFORM3D::faceTo(glm::vec3 v,
 
 //  - --- - --- - --- - --- -
 
-void TRANSFORM3D::rotate(glm::quat delta)       {
+void T3D::rotate(glm::quat delta)       {
 
     this->orientation = glm::normalize(glm::cross(orientation, delta));
 

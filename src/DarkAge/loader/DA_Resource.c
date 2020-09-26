@@ -53,9 +53,7 @@ void DA_LOAD_RESOURCE(RESOURCE* res,
 
         SIN_mesh_extract_from(mesh_archive);
         for(uint i = 0;
-            i < res->num_meshes; i++)           { build_mesh( res->mesh_idbase + i,
-                                                  res->mesh_mat_ids[i],
-                                                  res->mesh_offset + i  );                                              }
+            i < res->num_meshes; i++)           { build_mesh( res->mesh_idbase + i, res->mesh_offset + i  );            }
 
         SIN_mesh_extract_end(mesh_archive);
         WARD_EVIL_MFREE     (mesh_archive);

@@ -22,6 +22,8 @@ static sHash*   SIN_TEXHASH         = NULL;
 
 static Texture* SIN_texbucket       = NULL;
 
+#define SIN_TEXFLAGS_SMOOTHMAP        1
+
 //  - --- - --- - --- - --- -
 
 int SIN_texbucket_init ()                       {
@@ -110,17 +112,23 @@ Texture* build_texture(ushort id,
         tex                 = SIN_texbucket+loc;
 
         tex->id           = id;
-        uint  size        = 0;
+        uint   size       = 0;
+        uchar  flags      = 0;
         float* pixels     = NULL;
 
         extractjoj(TEX_ARCHIVE,
                    offset,
+                   &flags,
                    &size,
                    &tex->width,
                    &tex->height,
                    &pixels);
 
 //  - --- - --- - --- - --- -
+
+        GLfloat texfilter = GL_NEAREST;
+
+        if(flags & SIN_TEXFLAGS_SMOOTHMAP) { texfilter = GL_LINEAR; }
 
         glGenTextures(1, &tex->location);
         glBindTexture(GL_TEXTURE_2D, tex->location);
@@ -129,7 +137,7 @@ Texture* build_texture(ushort id,
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
                      GL_RGB, GL_FLOAT, pixels);

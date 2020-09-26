@@ -99,6 +99,7 @@ typedef struct MESH_FILE_3D                     {
     ushort   size;
     ushort   vertCount;
     ushort   indexCount;
+    ushort   matid;
 
     pVP3D_8* bounds;
     VP3D_8*  verts;
@@ -109,6 +110,7 @@ typedef struct MESH_FILE_3D                     {
 typedef struct IMAGE_FILE_24BIT_YUV             {
 
     uint    size;
+    uchar   flags;
     ushort  height;
     ushort  width;
 
@@ -127,7 +129,11 @@ void del_CrkFile(CRK* crk)                      {
 void del_JojFile(JOJ* joj)                      { zh8_delPacker(&joj->chroma_v); zh8_delPacker(&joj->chroma_u);
                                                   zh8_delPacker(&joj->luma    );                                        }
 
-void del_SsxFile(SSX* ssx)                      { WARD_EVIL_MFREE(ssx->objects);                                        }
+void del_SsxFile(SSX* ssx)                      {
+
+    for(ushort i = 0; i < ssx->count; i++)      { WARD_EVIL_MFREE(ssx->objects[i].fvalues);                             }
+    WARD_EVIL_MFREE(ssx->objects);                                                                                      }
+
 //  - --- - --- - --- - --- -
 
 int openarch(cchar*        filename,
@@ -203,6 +209,8 @@ int read_crkdump(cchar*      filename,
     crk->vertCount  = sizes[0];
     crk->indexCount = sizes[1];
 
+    fread(&crk->matid, sizeof(ushort), 1, curfile);
+
     EVIL_FREAD(float,  24,                   bounds      );
     EVIL_FREAD(float,  crk->vertCount  * 14, verts       );
     EVIL_FREAD(ushort, crk->indexCount * 3,  crk->indices);
@@ -211,7 +219,7 @@ int read_crkdump(cchar*      filename,
 
 //  - --- - --- - --- - --- -
 
-    crk->size   = 4 + (8 * 3) + (crk->vertCount * 14) + (crk->indexCount * 2);
+    crk->size   = 6 + (8 * 3) + (crk->vertCount * 14) + (crk->indexCount * 3 * 2);
     crk->bounds = (pVP3D_8*) evil_malloc(8,      sizeof(pVP3D_8));
     crk->verts  = (VP3D_8*)  evil_malloc(*sizes, sizeof(VP3D_8) );
 
@@ -237,6 +245,7 @@ int read_jojdump(cchar*   filename,
 
     fread(&joj->width,  sizeof(ushort), 1, curfile);
     fread(&joj->height, sizeof(ushort), 1, curfile);
+    fread(&joj->flags,  sizeof(uchar),  1, curfile);
 
     float* pixels;
     EVIL_FREAD(float, joj->height * joj->width * 4, pixels);
@@ -344,7 +353,7 @@ int read_jojdump(cchar*   filename,
 
 //  - --- - --- - --- - --- -
 
-    joj->size  =  8                     + 30;
+    joj->size  =  9                     + 30;
     joj->size += joj->luma.dictsize     + joj->luma.datasize;
     joj->size += joj->chroma_u.dictsize + joj->chroma_u.datasize;
     joj->size += joj->chroma_v.dictsize + joj->chroma_v.datasize;
@@ -359,10 +368,10 @@ int read_jojdump(cchar*   filename,
 int crk_to_daf(CRK*   crk,
                cchar* filename)                 {
 
-    ushort sizes[2] = { crk->vertCount, crk->indexCount};
+    ushort usvalues[3] = { crk->vertCount, crk->indexCount, crk->matid};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(ushort,  2,                   sizes,        filename);
+    EVIL_FWRITE(ushort,  3,                   usvalues,     filename);
     EVIL_FWRITE(pVP3D_8, 8,                   crk->bounds,  filename);
     EVIL_FWRITE(VP3D_8,  crk->vertCount,      crk->verts,   filename);
     EVIL_FWRITE(ushort,  crk->indexCount * 3, crk->indices, filename);
@@ -376,8 +385,9 @@ int joj_to_daf(JOJ*   joj,
     ushort sizes[2]    = { joj->width, joj->height};
 
     fseek(curfile, 0, SEEK_CUR);
-    EVIL_FWRITE(ushort, 2, sizes,      filename);
-    EVIL_FWRITE(uint,   1, &joj->size, filename);
+    EVIL_FWRITE(ushort, 2, sizes,       filename);
+    EVIL_FWRITE(uchar,  1, &joj->flags, filename);
+    EVIL_FWRITE(uint,   1, &joj->size,  filename);
 
 //  - --- - --- - --- - --- -
 
@@ -688,7 +698,22 @@ int readssx(SSX* ssx, cchar* filename)          {
     evil_poplocreg();
 
     fread(&ssx->count, sizeof(ushort), 1, curfile);
-    EVIL_FREAD(SSO, ssx->count, ssx->objects);
+
+    ssx->objects = (SSO*) evil_malloc(ssx->count, sizeof(SSO));
+
+    for(ushort i = 0; i < ssx->count; i++)
+    {
+
+        fread(&ssx->objects[i].resinfo, sizeof(ushort), 3, curfile);
+
+        ushort flags  = ssx->objects[i].resinfo[2];
+        uchar  fcount = 10;
+
+        if(flags & 0x0004) { fcount += 12; }
+
+        EVIL_FREAD(float, fcount, ssx->objects[i].fvalues);
+
+    }
 
     WARD_EVIL_WRAP(evilstate, closebin(filename, 0));
     return 0;                                                                                                           }
@@ -868,6 +893,7 @@ int    extraction_end   (cchar* filename,
 
 int extractcrk (DAF*     daf,
                 uchar    offset,
+                ushort*  matid,
                 ushort*  vertCount,
                 ushort*  indexCount,
                 pVP3D_8** bounds,
@@ -881,6 +907,7 @@ int extractcrk (DAF*     daf,
 
     fread(vertCount,  sizeof(ushort), 1, curfile);
     fread(indexCount, sizeof(ushort), 1, curfile);
+    fread(matid,      sizeof(ushort), 1, curfile);
 
     EVIL_FREAD(pVP3D_8, 8,               *bounds);
     EVIL_FREAD(VP3D_8,  *vertCount,      *verts);
@@ -890,6 +917,7 @@ int extractcrk (DAF*     daf,
 
 int    extractjoj (DAF*     daf,
                    uchar    offset,
+                   uchar*   flags,
                    uint*    size,
                    ushort*  width,
                    ushort*  height,
@@ -906,6 +934,7 @@ int    extractjoj (DAF*     daf,
 
     fread(width,   sizeof(ushort),  1, curfile);
     fread(height,  sizeof(ushort),  1, curfile);
+    fread(flags,   sizeof(uchar),   1, curfile);
     fread(size,    sizeof(uint),    1, curfile);
 
     uint dim = (*width) * (*height);

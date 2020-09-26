@@ -51,6 +51,9 @@
     <ClCompile Include="loader\DA_SceneLoad.cpp">
       <Filter>Source Files\loader</Filter>
     </ClCompile>
+    <ClCompile Include="types\DA_Lamp.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DarkAge.h">
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="loader\DA_SceneLoad.h">
       <Filter>Header Files\loader</Filter>
+    </ClInclude>
+    <ClInclude Include="types\DA_Lamp.h">
+      <Filter>Header Files\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

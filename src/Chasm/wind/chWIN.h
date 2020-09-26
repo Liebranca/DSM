@@ -5,7 +5,11 @@
 extern "C" {
 #endif
 
-#include "SDL/SDL.h"
+#include "chRAT.h"
+#include "chKEYB.h"
+#include "chJOY.h"
+
+#define       CHASM_NUM_JOYS   4
 
 //  - --- - --- - --- - --- -
 
@@ -15,25 +19,13 @@ typedef struct CHASM_WINDOW_HANDLE              {
 
     int           isClosed;
     int           isOnTop;
-    int           width;
-    int           height;
 
-    int           h_width;
-    int           h_height;
-    int           q_width;
-    int           q_height;
+    ipair         size;
+    ipair         hsize;
 
-    int           pkeys;
-    int           helkeys;
-
-    int           mouseIgnore;
-    int           mouseActive;
-    int           mousePos_x;
-    int           mousePos_y;
-
-    float         mouseRel_x;
-    float         mouseRel_y;
-    float         mouseSens;
+    short         keys;
+    chRAT         mouse;
+    chJOY         joys[CHASM_NUM_JOYS];
 
     SDL_Window*   window;
     SDL_GLContext context;
@@ -42,6 +34,8 @@ typedef struct CHASM_WINDOW_HANDLE              {
 
 //  - --- - --- - --- - --- -
 
+void        openJoy(chWH* whandle, int i);
+
 chWH        build_whandle   (const char title[], int height, int width);
 int         del_whandle     (chWH* whandle);
 void        swapBuffers     (chWH* whandle);
@@ -49,7 +43,6 @@ void        hideCursor      ();
 void        showCursor      ();
 int         getIsClosed     (chWH* whandle);
 void        pollEvents      (chWH* whandle);
-void        onMouseMotion   (chWH* whandle);
 
 //  - --- - --- - --- - --- -
 

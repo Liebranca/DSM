@@ -4,10 +4,10 @@
 
 static unsigned char INITFLAGS   = 0;
 
-glm::vec4       ambientColor(0.875f, 0.5f, 0.0f, 1.0f);
+glm::vec4       ambientColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 float           ambientMult      = 1.00f;
-float           ambientIntensity = 0.025f;
+float           ambientIntensity = 0.05f;
 
 //  - --- - --- - --- - --- -
 

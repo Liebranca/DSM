@@ -13,12 +13,14 @@ enum { SIN_BATCH_VBO, SIN_BATCH_IBO, SIN_BATCH_NUM_BUFFERS };
 
 typedef struct SIN_MESH_3D_BATCH {
 
-    uint VAO;
-    uint BUFFS[SIN_BATCH_NUM_BUFFERS];
+    uint   VAO;
+    uint   BUFFS[SIN_BATCH_NUM_BUFFERS];
 
-    uint loc;
-    uint vcursor;
-    uint icursor;
+    uint   loc;
+    uint   vcursor;
+    uint   icursor;
+
+    ushort vert_total;
 
 } M3DB;
 

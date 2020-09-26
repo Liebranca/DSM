@@ -11,8 +11,7 @@ int GAOL_COLLISION_SPHERE::boxIsect
 
     for(uint i = 0; i < 6; i++)
     {
-
-        if( planes[i].pointTest(origin) < 0 )  { if(dot(origin - planes[i].centroid, planes[i].normal) < radius)
+        if( planes[i].pointTest(origin) < 0 )  { if(dot(planes[i].centroid - origin, planes[i].normal) < radius)
                                                { return -1; }                                                           }
 
         else                                   { isInside++;                                                            }

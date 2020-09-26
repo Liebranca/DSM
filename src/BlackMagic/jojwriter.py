@@ -31,7 +31,7 @@ def writejoj(ob_name):
         raise STAHP ("No active material! *.JOJ conversion failed.");
 
     for propname in tex_proplist:
-        if propname not in ob.game.properties: raise STAHP ("Missing object property %s"%propname);
+        if propname not in ob.game.properties: raise STAHP ("Object %s missing property %s"%(ob.name, propname));
 
     archive     = ob.game.properties["texarc"].value;
     writeoffset = "0x%X"%ob.game.properties["texarci"].value;
@@ -60,16 +60,20 @@ def writejoj(ob_name):
 
     buff[0:dim] = ftbarr(tex.image.pixels)[0:dim];
     
-    sizes = bytearray(4);
-    sizes[0:2] = tex.image.size[0].to_bytes(2, "little");
-    sizes[2:4] = tex.image.size[1].to_bytes(2, "little");
+    hed      = bytearray(5);
+    hed[0:2] = tex.image.size[0].to_bytes(2, "little");
+    hed[2:4] = tex.image.size[1].to_bytes(2, "little");
+    hed[4:5] = (texmode == 3).to_bytes(1, "little");
 
     with open(filepath + "\\" + filename + ".joj", "wb+") as file:
-        file.write(sizes+buff);
+        file.write(hed+buff);
 
     del buff;
 
     if texmode != 3:
+
+        hed[4:5] = (1).to_bytes(1, "little");
+
         if texmode != 2:
             
             mat.active_texture_index = 1;
@@ -80,7 +84,7 @@ def writejoj(ob_name):
             acmb[0:dim] = ftbarr(tex.image.pixels)[0:dim];
 
             with open(filepath + "\\" + filename + "_a" + ".joj", "wb+") as file:
-                file.write(sizes+acmb);
+                file.write(hed+acmb);
 
             del acmb;
 
@@ -92,7 +96,7 @@ def writejoj(ob_name):
             norb[0:dim] = ftbarr(tex.image.pixels)[0:dim];
 
             with open(filepath + "\\" + filename + "_n" + ".joj", "wb+") as file:
-                file.write(sizes+norb);
+                file.write(hed+norb);
 
             del norb;
 
@@ -106,7 +110,7 @@ def writejoj(ob_name):
             glwb[0:dim] = ftbarr(tex.image.pixels)[0:dim];
 
             with open(filepath + "\\" + filename + "_g" + ".joj", "wb+") as file:
-                file.write(sizes+glwb);
+                file.write(hed+glwb);
 
             del glwb;
 

@@ -39,6 +39,15 @@
     <ClInclude Include="ui\ch_WidgetTools.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
+    <ClInclude Include="wind\chJOY.h">
+      <Filter>Header Files\wind</Filter>
+    </ClInclude>
+    <ClInclude Include="wind\chRAT.h">
+      <Filter>Header Files\wind</Filter>
+    </ClInclude>
+    <ClInclude Include="wind\chKEYB.h">
+      <Filter>Header Files\wind</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wind\chMANG.c">
@@ -49,6 +58,15 @@
     </ClCompile>
     <ClCompile Include="ui\ch_WidgetTools.c">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="wind\chJOY.c">
+      <Filter>Source Files\wind</Filter>
+    </ClCompile>
+    <ClCompile Include="wind\chRAT.c">
+      <Filter>Source Files\wind</Filter>
+    </ClCompile>
+    <ClCompile Include="wind\chKEYB.c">
+      <Filter>Source Files\wind</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

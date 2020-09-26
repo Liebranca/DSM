@@ -6,9 +6,7 @@
 #include "lymath/ZJC_GOPS.h"
 #include "spatial/ZJC_Transform.h"
 
-#include "shaders/SIN_BoundShader.h"
-#include "types/SIN_Shader.h"
-#include "types/SIN_Shader_EX.h"
+#include "../Chasm/wind/chMANG.h"
 
 #include <stdio.h>
 
@@ -53,23 +51,29 @@ void DA_CAMERA::getFrustum()                    {
     glm::vec3 hAxis = glm::normalize(glm::cross(fwd, up));
 
     glm::vec3 fc    = pos + fwd * zFar;
-    glm::vec3 ftl   = fc + (up * (hFar / 2)) - (hAxis * (wFar / 2));
-    glm::vec3 ftr   = fc + (up * (hFar / 2)) + (hAxis * (wFar / 2));
-    glm::vec3 fbl   = fc - (up * (hFar / 2)) - (hAxis * (wFar / 2));
-    glm::vec3 fbr   = fc - (up * (hFar / 2)) + (hAxis * (wFar / 2));
+    glm::vec3 ftl   = fc + (up * (hFar / 2)) + (hAxis * (wFar / 2));
+    glm::vec3 ftr   = fc + (up * (hFar / 2)) - (hAxis * (wFar / 2));
+    glm::vec3 fbl   = fc - (up * (hFar / 2)) + (hAxis * (wFar / 2));
+    glm::vec3 fbr   = fc - (up * (hFar / 2)) - (hAxis * (wFar / 2));
 
     glm::vec3 nc    = pos + fwd * zNear;
-    glm::vec3 ntl   = nc + (up * (hNear / 2)) - (hAxis * (wNear / 2));
-    glm::vec3 ntr   = nc + (up * (hNear / 2)) + (hAxis * (wNear / 2));
-    glm::vec3 nbl   = nc - (up * (hNear / 2)) - (hAxis * (wNear / 2));
-    glm::vec3 nbr   = nc - (up * (hNear / 2)) + (hAxis * (wNear / 2));
+    glm::vec3 ntl   = nc + (up * (hNear / 2)) + (hAxis * (wNear / 2));
+    glm::vec3 ntr   = nc + (up * (hNear / 2)) - (hAxis * (wNear / 2));
+    glm::vec3 nbl   = nc - (up * (hNear / 2)) + (hAxis * (wNear / 2));
+    glm::vec3 nbr   = nc - (up * (hNear / 2)) - (hAxis * (wNear / 2));
 
-    planes[0]       = COLFACE(ntr,ntl,ftl);
-    planes[1]       = COLFACE(nbl,nbr,fbr);
-    planes[2]       = COLFACE(ntl,nbl,fbl);
-    planes[3]       = COLFACE(nbr,ntr,fbr);
-    planes[4]       = COLFACE(ntl,ntr,nbr);
-    planes[5]       = COLFACE(ftr,ftl,fbl);                                                                             }
+    planes[0]       = COLFACE(nbl,nbr,fbr); // bottom
+    planes[1]       = COLFACE(ftl,ntl,ntr); // top
+    planes[2]       = COLFACE(nbl,nbr,ntr); // front
+    planes[3]       = COLFACE(ftl,ftr,fbr); // back
+    planes[4]       = COLFACE(ntr,ftr,fbr); // right
+    planes[5]       = COLFACE(ntl,ftl,fbl); // left
+
+    planes[0].normal = -planes[0].normal;
+    planes[0].d      = -planes[0].d;
+
+    planes[4].normal = -planes[4].normal;
+    planes[4].d      = -planes[4].d;                                                                                    }
 
 //  - --- - --- - --- - --- -
 
@@ -90,20 +94,19 @@ void DA_CAMERA::cellCulling(uint num_cells)     {
         int oy = (nearcells[i].worldpos[1] * DA_CELL_SIZE);
         int oz = (nearcells[i].worldpos[2] * DA_CELL_SIZE);
         glm::vec3 origin(ox, oy, oz);
-        COLSPHERE boundsphere(origin, DA_CELL_SIZE + DA_CELL_QUAT);
+        COLSPHERE boundsphere(origin, DA_CELL_HALF);
 
         int cellInFrustum = boundsphere.boxIsect(planes);
+        int sphIsect = 0;
 
         if(cellInFrustum < 0)
         {
-
             glm::vec3 cellbounds[8] = { origin + glm::vec3(  w, -h, -w), origin + glm::vec3(  w,  h, -w),
                                         origin + glm::vec3(  w,  h,  w), origin + glm::vec3(  w, -h,  w),
                                         origin + glm::vec3( -w, -h, -w), origin + glm::vec3( -w,  h, -w),
                                         origin + glm::vec3( -w,  h,  w), origin + glm::vec3( -w, -h,  w) };
 
-            cellInFrustum = (int) rectInFrustum(cellbounds);
-
+            COLBOX cellbox(cellbounds); cellInFrustum = (int) cageInFrustum(&cellbox);
         }
 
         DA_grid_setInFrustum(nearcells[i].gridpos, cellInFrustum);
@@ -113,6 +116,12 @@ void DA_CAMERA::cellCulling(uint num_cells)     {
 
 void DA_CAMERA::resetCulling()                  { for(uint i = 0; i < prevframe_cells; i++)
                                                 { DA_grid_setInFrustum(nearcells[i].gridpos, 0); }                      }
+
+bool DA_CAMERA::cageInFrustum(COLBOX* box)      {
+
+    for(uchar j = 0; j < 6; j++)                { if(box->cageIsect_opt(planes+j)) { return true; }                     }
+
+    return false;                                                                                                       }
 
 int  DA_CAMERA::sphInFrustum (COLSPHERE* sph)   { return sph->boxIsect(planes);                                         }
 
@@ -177,4 +186,9 @@ void DA_CAMERA::rotate(glm::vec3 rvec)          {
 
     fwd             = glm::normalize(fwd);
     up              = glm::normalize(glm::cross(fwd, hAxis));                                                           }
+
+//  - --- - --- - --- - --- -
+
+void   camlook()                                { fpair motion = getMouseMotion();
+                                                  actcam->rotate({-motion.x, -motion.y, 0.0f}); onMouseMotion();        }
 

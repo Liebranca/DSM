@@ -1,41 +1,38 @@
 #include "ZJC_Time.h"
-#include "../lymath/ZJC_GOPS.h"
 
 #include <stdio.h>
+#include <math.h>
 #include <time.h>
 
 //  - --- - --- - --- - --- -
 float          fBy         = 0.0f;
-const  float   CPS         = 1.0f/CLOCKS_PER_SEC;
+const  float   CPS         = 1.0f / CLOCKS_PER_SEC;
 
-static clock_t begin       = 0;
-static clock_t end         = 0;
-static float   worktime    = 0.0f;
-static float   sleeptime   = 0.0f;
+static clock_t framebegin  = 0;
+static clock_t frameend    = 0;
+
+static float   framedelta  = 0;
 static float   frametime   = 0.0f;
+static float   sleeptime   = 0;
 
-static float   total       = 0;
-static float   curr        = 0.0f;
-static float   scale       = 1.0f;
+static float   timescale   = 1.0f;
 static int     framecap    = 60;
+static int     framecount  = 0;
 
-void   clock_calcSleepTime ()                   { sleeptime = (float) (end - begin) * CPS;                              }
-void   clock_calcWorkTime  ()                   { worktime  = (float) (begin - end) * CPS;                              }
-float  clock_getCurr       ()                   { return curr;                                                          }
-float  clock_getScale      ()                   { return scale;                                                         }
-void   clock_setScale      (float newScale)     { scale = newScale;                                                     }
-void   clock_calcFrametime ()                   { frametime = (float) CLOCKS_PER_SEC / framecap;                        }
+void   clock_calcDelta     ()                   { framedelta += (frameend - framebegin) * CPS;                          }
+float  clock_getScale      ()                   { return timescale;                                                     }
+void   clock_setScale      (float newScale)     { timescale = newScale;                                                 }
+void   clock_calcFrametime ()                   { frametime =  (float) (CLOCKS_PER_SEC / framecap);                     }
 void   clock_setFramecap   (int newcap)         { framecap = newcap; clock_calcFrametime();                             }
-float  clock_calcCurr      ()                   { curr = (float) ((sleeptime + worktime) * scale);
-                                                  return curr;                                                          }
-float  clock_calcTotal     ()                   { total += (float) clock_calcCurr(); return total;                      }
-void   clock_frameStart    ()                   { begin = clock(); clock_calcWorkTime();                                }
-void   clock_frameEnd      ()                   { end   = clock(); clock_calcSleepTime(); clock_calcTotal();            }
-int    clock_getSleep      ()                   { return frametime > sleeptime;                                         }
-float  clock_fBy           (float f)            { return f * curr;                                                      }
+void   clock_frameStart    ()                   { framebegin = clock(); clock_calcDelta();                              }
+void   clock_frameEnd      ()                   { frameend = clock(); clock_calcDelta();                                }
+int    clock_getSleep      ()                   { return framedelta < frametime;                                        }
+void   clock_calcSleepTime ()                   { sleeptime  = frametime - framedelta; framedelta = 0;                  }
+uint   clock_getSleepTime  ()                   { uint sleep = (uint) round(sleeptime); return sleep;                   }
+
+float  clock_fBy           (float f)            { clock_calcSleepTime(); return f * (frametime - sleeptime);            }
 void   clock_init          ()                   { clock_calcFrametime();                                                }
-float  clock_getDelta      ()                   { return frametime - sleeptime;                                         }
-float  clock_secondLength  ()                   { return frametime * framecap;                                          }
+float  clock_getDelta      ()                   { return framedelta;                                                    }
 
 //  - --- - --- - --- - --- -
 

@@ -6,17 +6,17 @@
 
 //  - --- - --- - --- - --- -
 
-static int kFWD       = SDLK_w;
-static int kBCK       = SDLK_s;
-static int kLFT       = SDLK_a;
-static int kRGT       = SDLK_d;
-static int kSPC       = SDLK_SPACE;
-static int kLCTRL     = SDLK_LCTRL;
-static int kUSE       = SDLK_e;
+static int    wrapMargin     = 32;
 
-static int kESC       = SDLK_ESCAPE;
+SDL_Joystick* joyinstances[CHASM_NUM_JOYS];
 
-static int wrapMargin = 32;
+//  - --- - --- - --- - --- -
+
+void        openJoy(chWH* whandle, int i)       {
+
+    joyinstances [i]            = SDL_JoystickOpen      (i              );
+    whandle->joys[i].instanceID = SDL_JoystickInstanceID(joyinstances[i]);
+    whandle->joys[i].plugged    = 1;                                                                                    }
 
 //  - --- - --- - --- - --- -
 
@@ -33,72 +33,50 @@ chWH        build_whandle(const char title[],
                                       height,
                                       SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS );
 
-    whandle.width           = width;
-    whandle.height          = height;
+    whandle.size.x      = width;
+    whandle.size.y      = height;
 
-    whandle.h_width         = width  / 2;
-    whandle.h_height        = height / 2;
+    whandle.hsize.x     = width  / 2;
+    whandle.hsize.y     = height / 2;
 
-    whandle.q_width         = width  / 4;
-    whandle.q_height        = height / 4;
+    whandle.isClosed    = 0;
+    whandle.isOnTop     = 1;
+    whandle.keys        = 0;
 
-    whandle.isClosed        = 0;
-    whandle.isOnTop         = 1;
-    whandle.pkeys           = 0;
-    whandle.helkeys         = 0;
+    whandle.mouse.state = 0;
+    whandle.mouse.abs.x = whandle.hsize.x;
+    whandle.mouse.abs.y = whandle.hsize.y;
 
-    whandle.mouseIgnore     = 0;
-    whandle.mouseActive     = 0;
-    whandle.mousePos_x      = whandle.h_width;
-    whandle.mousePos_y      = whandle.h_height;
-
-    whandle.mouseRel_x      = 0.0f;
-    whandle.mouseRel_y      = 0.0f;
-    whandle.mouseSens       = 2.0f;
+    whandle.mouse.rel.x = 0.0f;
+    whandle.mouse.rel.y = 0.0f;
+    whandle.mouse.sens  = 1.0f;
 
     whandle.id = SDL_GetWindowID(whandle.window);
 
     return whandle;                                                                                                     };
 
-int         del_whandle  (chWH* whandle)        { SDL_DestroyWindow(whandle->window); return 0;                         };
+int         del_whandle  (chWH* whandle)        {
+
+    for(uint i = 0; i < CHASM_NUM_JOYS; i++)
+    {
+        if(joyinstances[i])
+        {
+            if(SDL_JoystickGetAttached(joyinstances[i]))
+            {
+                SDL_JoystickClose(joyinstances[i]);
+            }
+        }
+    }
+
+    SDL_DestroyWindow(whandle->window);
+    return 0;                                                                                                           };
 
 //  - --- - --- - --- - --- -
 
-void onMouseReset        (chWH* whandle)        { whandle->mouseIgnore = 1;
-                                                  whandle->mouseActive = 0;
-                                                  whandle->mouseRel_x  = 0.0f;
-                                                  whandle->mouseRel_y  = 0.0f;                                          }
-
-void onMouseMotion       (chWH* whandle)        { whandle->mouseActive = 0;
-                                                  whandle->mouseRel_x  = 0.0f;
-                                                  whandle->mouseRel_y  = 0.0f;                                          }
-
-void mouseWrap           (chWH* whandle)        {
-
-    onMouseReset(whandle);
-
-    int new_x = whandle->mousePos_x;
-    int new_y = whandle->mousePos_y;
-
-    if      ( whandle->mousePos_x
-            < whandle->h_width
-            - whandle->q_width       )          { new_x = whandle->width - wrapMargin;                                  }
-
-    else if ( whandle->mousePos_x
-            > whandle->h_width
-            + whandle->q_width       )          { new_x = wrapMargin;                                                   }
-
-    if      ( whandle->mousePos_y
-            < whandle->h_height 
-            - whandle->q_height      )          { new_y = whandle->height - wrapMargin;                                 }
-
-    else if ( whandle->mousePos_y
-            > whandle->h_height
-            + whandle->q_height      )          { new_y = wrapMargin;                                                   }
-
-    SDL_WarpMouseInWindow(whandle->window,
-                          whandle->h_width,
-                          whandle->h_height);                                                                           }
+void onMouseReset        (chWH* whandle)        { chRAT_RESET(&whandle->mouse, whandle->hsize);                         }
+void mouseWrap           (chWH* whandle)        { onMouseReset(whandle); SDL_WarpMouseInWindow(whandle->window,
+                                                                                               whandle->hsize.x,
+                                                                                               whandle->hsize.y);       }
 
 //  - --- - --- - --- - --- -
 
@@ -106,6 +84,8 @@ void        swapBuffers  (chWH* whandle)        { SDL_GL_SwapWindow(whandle->win
 void        hideCursor   ()                     { SDL_ShowCursor(SDL_DISABLE);                                          }
 void        showCursor   ()                     { SDL_ShowCursor(SDL_ENABLE);                                           }
 int         getIsClosed  (chWH* whandle)        { return whandle->isClosed;                                             }
+
+int         cursorToWall (chWH* whandle)        { return chRAT_TOWALL(&whandle->mouse, whandle->size);                  }
 
 //  - --- - --- - --- - --- -
 
@@ -117,9 +97,12 @@ void        pollEvents   (chWH* whandle)        {
     SDL_Window* focused = SDL_GetMouseFocus();
     Uint32      wFlags  = SDL_GetWindowFlags(whandle->window);
 
-    if (   (focused != whandle->window)
-       && !(wFlags & (SDL_WINDOW_MINIMIZED))
-       &&  (whandle->isOnTop)              )    { mouseWrap(whandle);                                                   }
+    int wrap_cond = focused != whandle->window;
+    if(wFlags & SDL_WINDOW_FULLSCREEN_DESKTOP) { wrap_cond = cursorToWall(whandle); }
+
+    if(  (wrap_cond                    )
+    &&  !(wFlags & SDL_WINDOW_MINIMIZED)
+    &&   (whandle->isOnTop             ))       { mouseWrap(whandle);                                                   }
 
     while (SDL_PollEvent(&event))
     {
@@ -160,25 +143,44 @@ void        pollEvents   (chWH* whandle)        {
             }
         }
 
+        case SDL_JOYBUTTONDOWN:
+        {
+            for(int i = 0; i < CHASM_NUM_JOYS; i++)
+            {
+                if(whandle->joys[i].plugged)
+                {
+                    if(event.jbutton.which == whandle->joys[i].instanceID)
+                    { chJOY_SETBUTTON(&whandle->joys[i], event.jbutton.button); }
+                }
+            }
+
+            break;
+        }
+
+        case SDL_JOYAXISMOTION:
+        {
+            for(int i = 0; i < CHASM_NUM_JOYS; i++)
+            {
+                if(whandle->joys[i].plugged)
+                {
+                    if(event.jaxis.which == whandle->joys[i].instanceID)
+                    { chJOY_SETAXES(&whandle->joys[i], event.jaxis); }
+                }
+            }
+
+            break;
+        }
+
         case SDL_KEYDOWN:
         {
             k = event.key.keysym.sym;
 
-            if      (k == kESC)                 { whandle->isClosed = 1;                                                }
-            if      (k == kFWD &&
-                   !(whandle->pkeys &  1))      { whandle->pkeys   += 1;                                                }
-            else if (k == kBCK &&
-                   !(whandle->pkeys &  2))      { whandle->pkeys   += 2;                                                }
-            if      (k == kLFT &&
-                   !(whandle->pkeys &  4))      { whandle->pkeys   += 4;                                                }
-            else if (k == kRGT &&
-                   !(whandle->pkeys &  8))      { whandle->pkeys   += 8;                                                }
-            if      (k == kSPC &&
-                   !(whandle->pkeys & 16))      { whandle->pkeys   += 16;                                               }
-            else if (k == kLCTRL &&
-                   !(whandle->pkeys & 32))      { whandle->pkeys   += 32;                                               }
-            if      (k == kUSE &&
-                   !(whandle->pkeys & 64))      { whandle->pkeys   += 64;                                               }
+            if(k == SDLK_ESCAPE)                { whandle->isClosed = 1; break;                                         }
+
+            for(uchar i = 0; i < 16; i++)
+            {
+                if(k == CH_KEYB_KCODES[i])      { chKEYB_SETKEY(&whandle->keys, i);                                     }
+            }
 
             break;
         }
@@ -187,16 +189,10 @@ void        pollEvents   (chWH* whandle)        {
         {
             k = event.key.keysym.sym;
 
-            if      (k == kFWD)                 { whandle->pkeys   -= 1;                                                }
-            else if (k == kBCK)                 { whandle->pkeys   -= 2;                                                }
-
-            if      (k == kLFT)                 { whandle->pkeys   -= 4;                                                }
-            else if (k == kRGT)                 { whandle->pkeys   -= 8;                                                }
-
-            if      (k == kSPC)                 { whandle->pkeys   -= 16;                                               }
-            else if (k == kLCTRL)               { whandle->pkeys   -= 32;                                               }
-
-            if      (k == kUSE)                 { whandle->pkeys   -= 64;                                               }
+            for(uchar i = 0; i < 16; i++)
+            {
+                if(k == CH_KEYB_KCODES[i])      { chKEYB_CLRKEY(&whandle->keys, i);                                     }
+            }
 
             break;
         }
@@ -206,14 +202,10 @@ void        pollEvents   (chWH* whandle)        {
 
             if(whandle->isOnTop)
             {
-                if (!whandle->mouseIgnore)      { whandle->mousePos_x = event.motion.x;
-                                                  whandle->mousePos_y = event.motion.y;
-                                                  whandle->mouseRel_x = (float)(event.motion.xrel * whandle->mouseSens);
-                                                  whandle->mouseRel_y = (float)(event.motion.yrel * whandle->mouseSens);
+                if(!chRAT_ISIGGY(
+                   &whandle->mouse))            { chRAT_RUN(&whandle->mouse, &event.motion);                            }
 
-                                                  whandle->mouseActive = 1;                                             }
-
-                else                            { whandle->mouseIgnore = 0;                                             }
+                else                            { chRAT_UNIGGY(&whandle->mouse);                                        }
             }
 
             break;

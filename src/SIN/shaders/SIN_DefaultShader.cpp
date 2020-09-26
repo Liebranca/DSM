@@ -110,12 +110,12 @@ void main()
     float softness   = 1 - cavity;
     float metallic   = shadinginfo.b;
 
-    float specfac    = clamp(dot(reflect(lightDir, -softnormal), CamFwd), 0.0, 1.0);
+    float specfac    = clamp(dot(reflect(lightDir, -normal), CamFwd), 0.0, 1.0);
     vec3 specular    = (diffuse * specfac) * (0.5 * softness);
 
     vec3 refshine    = vec3(0,0,0);
 
-    if(ao < 0.8) { ao *= 0.90; }
+    // if(ao < 0.8) { ao *= 0.90; }
 
     if(metallic)
     {
@@ -128,8 +128,8 @@ void main()
         refshine         = vec_overlay(refshine, diffuse);
     }
 
-    float diff       = smoothstep(0.01, 0.35, dot(lightDir, normal));
-    diff             = clamp(diff, 0.5, 1.0);
+    float diff       = smoothstep(0.06, 0.8, dot(lightDir, softnormal));
+    diff             = clamp(diff, 0.75, 1.0);
     diffuse          = clamp(diffuse * diff * ao, 0.06, 1.0) + (cavity*0.5);
 
     vec3 composite   = clamp(ambient + diffuse + specular + refshine, 0.06, 1.49);

@@ -6,6 +6,7 @@
 
 #include "GAOL_Face.h"
 #include "GAOL_Sphere.h"
+#include "GAOL_Box.h"
 
 #include "../DA_CommonTypes.h"
 
@@ -25,7 +26,7 @@ class DA_CAMERA {
 
         virtual ~DA_CAMERA();
 
-        glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos+fwd, yAxis);                }
+        glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos + fwd, yAxis);              }
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
@@ -35,7 +36,8 @@ class DA_CAMERA {
         void resetCulling  ();
         int  sphInFrustum  (COLSPHERE* sph);
         bool rectInFrustum (glm::vec3  bounds[8]);
-        bool pointInFrustum(glm::vec3 point);
+        bool pointInFrustum(glm::vec3  point);
+        bool cageInFrustum (COLBOX*    box);
 
         void move(glm::vec3 mvec, bool local = false);
         void rotate(glm::vec3 rvec);
@@ -93,6 +95,8 @@ extern DA_CAMERA* actcam;
 extern glm::mat4  actcam_viewproj;
 extern glm::vec3  actcam_fwd;
 extern glm::vec3  actcam_pos;
+
+void   camlook();
 
 //  - --- - --- - --- - --- -
 

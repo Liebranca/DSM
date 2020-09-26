@@ -6,7 +6,7 @@ from .bmutils import *
 #   ---     ---     ---     ---     ---
 
 original_mesh = None
-obj_proplist  = ["obarc", "obarci"]
+obj_proplist  = ["obarc", "obarci", "matid"]
 
 #   ---     ---     ---     ---     ---
 
@@ -53,7 +53,7 @@ def writecrk(ob_name):
     else: ob = bpy.data.objects[ob_name];
 
     context = bpy.context
-    original_object = ob = context.object
+    original_object = ob;
     mesh = ob.data
 
     if not ob:
@@ -63,7 +63,7 @@ def writecrk(ob_name):
         raise STAHP ("Selected object has no mesh data -- export failed.")
 
     for propname in obj_proplist:
-        if propname not in ob.game.properties: raise STAHP ("Missing object property %s"%propname);
+        if propname not in ob.game.properties: raise STAHP ("Object %s missing property %s"%(ob.name, propname));
 
     archive     = ob.game.properties["obarc"].value;
     writeoffset = "0x%X"%ob.game.properties["obarci"].value;
@@ -144,11 +144,12 @@ def writecrk(ob_name):
         sf = 1/1 if "actors" in obkls else 1/1;
 
         gaolerSize             = 96;
-        header                 = bytearray(4 + gaolerSize);
+        header                 = bytearray(6 + gaolerSize);
 
         header[0:2]            = numVerts.to_bytes(2, "little");
         header[2:4]            = numIndices.to_bytes(2, "little");
-        ii                     = 4;
+        header[4:6]            = (ob.game.properties["matid"].value).to_bytes(2, "little");
+        ii                     = 6;
 
         l = []; i = 0;
         for v in ob.bound_box:
@@ -201,12 +202,12 @@ def writecrk(ob_name):
                 svi                     =  vi * stride;
 
                 vertBuff[svi+24:svi+28] = ftb( loop.tangent[0]*sf);
-                vertBuff[svi+28:svi+32] = ftb( loop.tangent[2]*sf);
-                vertBuff[svi+32:svi+36] = ftb(-loop.tangent[1]*sf);
+                vertBuff[svi+28:svi+32] = ftb(-loop.tangent[2]*sf);
+                vertBuff[svi+32:svi+36] = ftb( loop.tangent[1]*sf);
 
                 vertBuff[svi+36:svi+40] = ftb( loop.bitangent[0]*sf);
-                vertBuff[svi+40:svi+44] = ftb( loop.bitangent[2]*sf);
-                vertBuff[svi+44:svi+48] = ftb(-loop.bitangent[1]*sf);
+                vertBuff[svi+40:svi+44] = ftb(-loop.bitangent[2]*sf);
+                vertBuff[svi+44:svi+48] = ftb( loop.bitangent[1]*sf);
 
 #   ---     ---     ---     ---     ---
 
@@ -264,3 +265,14 @@ def writecrk(ob_name):
         del header;
         del vertBuff;
         del indexBuff;
+
+def masscrk():
+
+    print("Writing selected objects to DAF$CRK. Hold on.")
+
+    d = {ob.name:ob.game.properties["obarci"].value for ob in bpy.context.selected_objects}
+    d = sorted(d.items(), key=lambda x : x[1], reverse = False);
+
+    for obname, meshid in d:
+        print(meshid);
+        writecrk(obname);

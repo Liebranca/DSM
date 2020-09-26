@@ -102,7 +102,6 @@ M3D* SIN_meshbucket_get  (ushort loc)           {
 //  - --- - --- - --- - --- -
 
 M3D*    build_mesh          (ushort id,
-                             ushort matid,
                              uchar  offset)     {
 
     M3D* mesh = SIN_meshbucket_find(id);
@@ -121,18 +120,21 @@ M3D*    build_mesh          (ushort id,
         mesh            = SIN_meshbucket+loc;
 
         mesh->id        = id;
-        mesh->matloc    = SIN_matbucket_findloc(matid);
 
         VP3D_8* verts   = NULL;
         ushort* indices = NULL;
+        ushort  matid   = 0;
 
         extractcrk(MESH_ARCHIVE,
                    offset,
+                   &matid,
                    &mesh->vertCount,
                    &mesh->indexCount,
                    &mesh->bounds,
                    &verts,
                    &indices);
+
+        mesh->matloc    = SIN_matbucket_findloc(matid);
 
 //  - --- - --- - --- - --- -
 
@@ -185,7 +187,7 @@ M3D*    build_mesh          (ushort id,
 //  - --- - --- - --- - --- -
 
 void    draw_mesh             (M3D*   mesh)     { glDrawElements(GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
-                                                                 (void*) (mesh->drawOffset * sizeof(uint)) );           }
+                                                                 (void*) (mesh->drawOffset));                           }
 
 void     del_mesh            (M3D*   mesh,
                               ushort loc)       {

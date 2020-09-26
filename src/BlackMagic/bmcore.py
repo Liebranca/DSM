@@ -1,6 +1,6 @@
 from . import bmpath, set_bm_ars
 from .bmutils   import meshfrac
-from .crkwriter import writecrk
+from .crkwriter import writecrk, masscrk
 from .jojwriter import writejoj
 from .ssxwriter import writessx
 
@@ -9,6 +9,7 @@ from .ssxwriter import writessx
 isrunning   = False;
 
 writerlist  = ["writecrk", "writejoj", "writessx", "meshfrac"];
+commlist    = ["masscrk"]
 setterlist  = ["setpath", "setname", "setarch", "setmode", "setoffs", "settexm"];
 systemlist  = ["quit", "help"];
 
@@ -32,6 +33,7 @@ def bm_quit():
 def bm_help():
     print("\nUsage: <command> <argument>\n");
     print("Command list:\n%s"%(    "  -Exporters: "   + ", ".join(writerlist)
+                                 + "\n  -Commands : " + ", ".join(commlist)
                                  + "\n  -Setters  : " + ", ".join(setterlist)
                                  + "\n  -Utility  : " + ", ".join(systemlist) + "\n"  ));
 
@@ -94,6 +96,9 @@ def read_input(s):
 
     if comm in writerlist:
         eval(comm + "('" + arg + "')");
+
+    elif comm in commlist:
+        eval(comm + "()")
 
     elif comm in setterlist:
 

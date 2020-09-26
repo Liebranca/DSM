@@ -165,12 +165,18 @@
   <ItemGroup>
     <ClInclude Include="Chasm.h" />
     <ClInclude Include="ui\ch_WidgetTools.h" />
+    <ClInclude Include="wind\chJOY.h" />
+    <ClInclude Include="wind\chKEYB.h" />
     <ClInclude Include="wind\chMANG.h" />
+    <ClInclude Include="wind\chRAT.h" />
     <ClInclude Include="wind\chWIN.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ui\ch_WidgetTools.c" />
+    <ClCompile Include="wind\chJOY.c" />
+    <ClCompile Include="wind\chKEYB.c" />
     <ClCompile Include="wind\chMANG.c" />
+    <ClCompile Include="wind\chRAT.c" />
     <ClCompile Include="wind\chWIN.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -19,13 +19,14 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-#define DA_NF_INTERACTABLE  0x01
-#define DA_NF_FXORPARTICLE  0x02
-#define DA_NF_LIGHTSOURCE   0x04
-#define DA_NF_OCCLUDER      0x08
-#define DA_NF_CHARACTER     0x10
-#define DA_NF_ANIMATED      0x20
-#define DA_NF_HASPROPS      0x40
+#define DA_NF_INTERACTABLE  0x0001
+#define DA_NF_FXORPARTICLE  0x0002
+#define DA_NF_LIGHTSOURCE   0x0004
+#define DA_NF_OCCLUDER      0x0008
+#define DA_NF_DESTRUCTIBLE  0x0010
+#define DA_NF_ANIMATED      0x0020
+#define DA_NF_HASPROPS      0x0040
+#define DA_NF_CHARACTER     0x0080
 
 //  - --- - --- - --- - --- -
 
@@ -33,7 +34,7 @@ class DA_NODE {
 
     public:
 
-        DA_NODE         (ushort meshid,
+        DA_NODE         (ushort meshid, uint flags,
                          glm::vec3 pos   = {0,0,0},
                          glm::quat rot   = {1,0,0,0},
                          glm::vec3 scale = {1,1,1});
@@ -138,6 +139,8 @@ class DA_NODE {
 void DA_objects_update();
 void DA_objects_init  ();
 void DA_objects_end   ();
+
+//  - --- - --- - --- - --- -
 
 extern std::vector<DA_NODE*> SCENE_OBJECTS;
 

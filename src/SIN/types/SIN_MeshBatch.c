@@ -21,7 +21,7 @@ static sStack* SIN_BATCH_SLOTSTACK  = NULL;
 static M3DB*   SIN_meshbatches      = NULL;
 
 #define SIN_BATCH_VBOSIZE SIN_BATCH_MAXVERTS * SIN_BATCH_VERTSIZE
-#define SIN_BATCH_IBOSIZE SIN_BATCH_MAXVERTS * sizeof(ushort)
+#define SIN_BATCH_IBOSIZE SIN_BATCH_MAXVERTS * sizeof(uint)
 
 //  - --- - --- - --- - --- -
 
@@ -55,7 +55,8 @@ int  SIN_Batcher_end()                          {
 void  chkbatch     (ushort loc)                 { if(loc+1 != __curBatchLoc)
                                                 { __curBatchLoc = loc+1; SIN_bindMeshBatch(loc); }                      }
 
-void  SIN_bindMeshBatch(ushort loc)             { glBindVertexArray((SIN_meshbatches + loc)->VAO);                      }
+void  SIN_bindMeshBatch(ushort loc)             { glBindVertexArray((SIN_meshbatches + loc)->VAO);
+                                                  SIN_active_meshbatch = SIN_meshbatches + loc;                         }
 
 //  - --- - --- - --- - --- -
 
@@ -93,19 +94,19 @@ M3DB* SIN_genMeshBatch()                        {
     glBufferData(GL_ARRAY_BUFFER, SIN_BATCH_VBOSIZE, NULL, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*) 0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*) (3 * sizeof(float)));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*) (6 * sizeof(float)));
 
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(9 * sizeof(float)));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*) (9 * sizeof(float)));
 
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, SIN_BATCH_VERTSIZE, (void*) (12 * sizeof(float)));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batch->BUFFS[SIN_BATCH_IBO]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, SIN_BATCH_IBOSIZE, NULL, GL_STATIC_DRAW);
@@ -138,21 +139,23 @@ void  SIN_meshbatch_upload(ushort  numVerts,
                            float*  vertex_data,
                            ushort* indices)     {
 
-    uint  vsize = numVerts   * sizeof(float)  * 14;
-    uint  isize = numIndices * sizeof(ushort) * 3;
+    uint  vsize = numVerts   * sizeof(float) * 14;
+    uint  isize = numIndices * sizeof(uint)  * 3;
 
-    for(uint i = 0;
-        i < (uint)(numIndices * 3); i++ )       { indices[i] += SIN_active_meshbatch->icursor;                          }
+    for(ushort i = 0;
+        i < numIndices * 3; i++ )               { indices[i] += SIN_active_meshbatch->vert_total;                      }
+
+    SIN_active_meshbatch->vert_total += numVerts;
 
     glBindVertexArray(SIN_active_meshbatch->VAO);
 
     glBindBuffer     (GL_ARRAY_BUFFER, SIN_active_meshbatch->BUFFS[SIN_BATCH_VBO]);
-    glBufferSubData  (GL_ARRAY_BUFFER, SIN_active_meshbatch->vcursor, vsize, vertex_data);
+    glBufferSubData  (GL_ARRAY_BUFFER, SIN_active_meshbatch->vcursor, vsize, (void*) vertex_data);
 
     glBindBuffer     (GL_ELEMENT_ARRAY_BUFFER, SIN_active_meshbatch->BUFFS[SIN_BATCH_IBO]);
-    glBufferSubData  (GL_ELEMENT_ARRAY_BUFFER, SIN_active_meshbatch->icursor, isize, indices);
+    glBufferSubData  (GL_ELEMENT_ARRAY_BUFFER, SIN_active_meshbatch->icursor, isize, (void*) indices);
 
-    glBindVertexArray(0);
+    // glBindVertexArray(0);
 
     SIN_active_meshbatch->vcursor += vsize;
     SIN_active_meshbatch->icursor += isize;                                                                             }

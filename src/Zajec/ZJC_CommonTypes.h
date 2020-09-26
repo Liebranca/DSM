@@ -22,8 +22,17 @@ typedef const unsigned  short   cushort;
 typedef const unsigned  int     cuint;
 typedef const unsigned  long    culong;
 
+//  - --- - --- - --- - --- -
+
+typedef struct ZJC_FLOAT_PAIR   { float x; float y; } fpair;
+typedef struct ZJC_INT_PAIR     { int x;   int   y; } ipair;
+
+//  - --- - --- - --- - --- -
+
 long hexstr_tolong (char* v);
 long chexstr_tolong(cchar* v);
+
+//  - --- - --- - --- - --- -
 
 #ifdef __cplusplus
 }

@@ -73,7 +73,6 @@ void DA_objects_update()                        {
         {
             if(DA_OBJECT_LOCATIONS[j])
             {
-
                 DA_NODE* ob = SCENE_OBJECTS[DA_OBJECT_LOCATIONS[j]];
                 if(ob->needsUpdate) { ob->prePhysUpdate(); }
 
@@ -195,14 +194,13 @@ void DA_objects_update()                        {
 
     actcam->endUpdate();
 
-    for(uint i = 0; i < k; i++) { WARD_EVIL_MFREE(render_bucket[i]); }
-
-    WARD_EVIL_MFREE(render_bucket[total_materials]);
-    WARD_EVIL_MFREE(render_bucket                 );                                                                    }
+    for(ushort i = 0; i < total_materials+1; i++) { WARD_EVIL_MFREE(render_bucket[i]); }
+    WARD_EVIL_MFREE(render_bucket);                                                                                     }
 
 //  - --- - --- - --- - --- -
 
 DA_NODE::DA_NODE(ushort meshid,
+                 uint   flags,
                  glm::vec3 pos,
                  glm::quat rot,
                  glm::vec3 scale)               {
@@ -210,6 +208,8 @@ DA_NODE::DA_NODE(ushort meshid,
     transform       = new T3D(pos, rot, scale);
     mesh            = SIN_meshbucket_find(meshid);
     ushort meshloc  = SIN_meshbucket_findloc(meshid);
+
+    this->nodeFlags = flags;
 
     if(mesh->bounds != NULL)
     {
@@ -406,3 +406,6 @@ void DA_NODE::draw() {
             visible = false;
         }
     }                                                                                                                   }
+
+//  - --- - --- - --- - --- -
+

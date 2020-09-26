@@ -9,10 +9,10 @@ extern "C" {
 #include "GL/glew.h"
 #include "ZJC_CommonTypes.h"
 
-#define  CHASM_KEY_FWD 1
-#define  CHASM_KEY_BCK 2
-#define  CHASM_KEY_LFT 4
-#define  CHASM_KEY_RGT 8
+//  - --- - --- - --- - --- -
+
+#define   __CH_JOYMOVEAX__  rgt_stick
+#define   __CH_JOYLOOKAX__  lft_stick
 
 //  - --- - --- - --- - --- -
 
@@ -28,13 +28,12 @@ typedef struct CHASM_WINDOW_MANAGER             {
 
 //  - --- - --- - --- - --- -
 
-int   chmang_init           (cchar* title, uint width, uint height);
+int   chmang_init           (cchar* title, int fullscreen);
 int   chmang_end            ();
 
 int   chmang_winOpen        ();
 void  chmang_frameStart     ();
 void  chmang_frameEnd       ();
-
 void  chmang_wait           ();
 
 int   chmang_buildwin       (cchar* title, uint width, uint height);
@@ -42,7 +41,15 @@ int   chmang_buildwin       (cchar* title, uint width, uint height);
 chWH* chmang_curwin         ();
 chWH* chmang_getwin         (Uint8 i);
 
-int   getKeyPress           (int keys);
+void  getKeyPress           (short* keys);
+void  getMotionKeys         (fpair* moveaxis);
+
+uint  getWinWidth           ();
+uint  getWinHeight          ();
+
+int   mouseActive           ();
+void  onMouseMotion         ();
+fpair getMouseMotion        ();
 
 //  - --- - --- - --- - --- -
 
