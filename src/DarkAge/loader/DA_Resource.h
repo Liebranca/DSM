@@ -12,7 +12,7 @@ extern "C" {
 
 typedef struct DA_ASSETLOAD_HANDLE {
 
-    cchar* tex_archive;
+    cchar*  tex_archive;
     cushort num_textures;
     cushort tex_idbase;
     cuchar  tex_offset;
@@ -22,8 +22,9 @@ typedef struct DA_ASSETLOAD_HANDLE {
     cushort mat_texture_idbase;
     cushort mat_num_textures[ZJC_DAFSIZE];
     cushort mat_shader_ids[ZJC_DAFSIZE];
+    cuchar  mat_opaque[ZJC_DAFSIZE];
 
-    cchar* mesh_archive;
+    cchar*  mesh_archive;
     cushort num_meshes;
     cushort mesh_idbase;
     cuchar  mesh_offset;

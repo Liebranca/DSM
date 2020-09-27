@@ -14,6 +14,8 @@
 static Material SIN_emptymat          = {0};
 static ushort   SIN_ACTIVE_MATERIALS  = 0;
 
+static ushort   SIN_OPAQUE_MATERIALS  = 0;
+
 static sStack*  SIN_MAT_SLOTSTACK     = NULL;
 static sHash*   SIN_MATHASH           = NULL;
 
@@ -40,7 +42,8 @@ int       SIN_matbucket_end   ()                {
 
 //  - --- - --- - --- - --- -
 
-ushort    SIN_getActiveMaterials ()             { return SIN_ACTIVE_MATERIALS;                                          }
+ushort    SIN_getActiveMatCount ()              { return SIN_ACTIVE_MATERIALS;                                          }
+ushort    SIN_getOpaqueMatCount ()              { return SIN_OPAQUE_MATERIALS;                                          }
 
 //  - --- - --- - --- - --- -
 
@@ -75,6 +78,7 @@ Material* SIN_matbucket_get      (ushort loc)   {
 //  - --- - --- - --- - --- -
 
 Material* build_material      (ushort  matid,
+                               uchar   opaque,
                                cushort texid[SIN_MATERIAL_MAX_TEXTURES],
 
                                ushort  shdid)   {
@@ -103,6 +107,7 @@ Material* build_material      (ushort  matid,
                                                   else
                                                 { material->texloc[i] = 0; }                                            }
 
+        material->opaque = opaque;
         material->shdloc = SIN_shdbucket_findloc(shdid);
 
         SIN_ACTIVE_MATERIALS++;

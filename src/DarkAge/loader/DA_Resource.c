@@ -41,7 +41,8 @@ void DA_LOAD_RESOURCE(RESOURCE* res,
                                                   if(k < res->mat_num_textures[i])
                                                 { texids[k] = res->mat_texture_idbase + j; j++; }                       }
 
-                                                  build_material(res->mat_idbase + i, texids, res->mat_shader_ids [i]); }
+                                                  build_material(res->mat_idbase + i, res->mat_opaque[i],
+                                                                 texids, res->mat_shader_ids [i]          );            }
     }
 
 //  - --- - --- - --- - --- -

@@ -7,12 +7,7 @@
 #include "lymath/ZJC_VOPS.h"
 #include "lyarr/ZJC_Stack.h"
 
-#include "types/SIN_Material.h"
-#include "types/SIN_Texture.h"
-#include "types/SIN_Shader.h"
-#include "types/SIN_Shader_EX.h"
-
-#include "types/SIN_MeshBatch.h"
+#include "SIN.h"
 
 #define                DA_MAX_OBJECTS              1024
 
@@ -87,7 +82,10 @@ void DA_objects_update()                        {
 
 //  - --- - --- - --- - --- -
 
-    ushort   total_materials = SIN_getActiveMaterials();
+    ushort   total_materials = SIN_getActiveMatCount();
+    ushort   alpha_offset    = SIN_getOpaqueMatCount();
+    if(!alpha_offset) { alpha_offset = -1; }
+
     int** render_bucket   = (int**) evil_malloc(total_materials+1, sizeof(int*));
     for(uint i = 0; i < total_materials; i++) { render_bucket[i] = (int*) evil_malloc(k+1, sizeof(int)); }
 
@@ -122,10 +120,13 @@ void DA_objects_update()                        {
                 if(eyechk)
                 {
 
-                    ob->visible = true;
+                    ob->visible    = true;
+                    Material* mate = SIN_matbucket_get(ob->mesh->matloc);
+                    uint jstart    = 0;
+                    if(!mate->opaque) { jstart = alpha_offset; }
 
                     uint mat_index = 0;
-                    for(uint j = 0; j < total_materials; j++)
+                    for(uint j = jstart; j < total_materials; j++)
                     {
                         if     (render_bucket[total_materials][j] < 0)
                         { render_bucket[total_materials][j] = ob->mesh->matloc; mat_index = j; break;   }
@@ -169,27 +170,60 @@ void DA_objects_update()                        {
 
         Material* mate = NULL;
 
-        for(int draw_index = 1; draw_index < render_bucket[mat_index][0] + 1; draw_index++)
+        if(mat_index < alpha_offset)
         {
-            DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
+            int istart = 1;
+            int iend   = render_bucket[mat_index][0] + 1;
 
-            if(draw_index == 1)
+            for(int draw_index = istart; draw_index < iend; draw_index++)
             {
-                mate           = SIN_matbucket_get(ob->mesh->matloc);
-                int shaderSwap = shader_chkProgram(mate->shdloc    );
+                DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
 
-                if(shaderSwap || actcam->getUpdate())
+                if(draw_index == istart)
                 {
-                    shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
+                    mate           = SIN_matbucket_get(ob->mesh->matloc);
+                    int shaderSwap = shader_chkProgram(mate->shdloc    );
+
+                    if(shaderSwap || actcam->getUpdate())
+                    {
+                        shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
+                    }
+
+                    for(uchar t = 0; t < mate->num_textures; t++)
+                    { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
                 }
 
-                for(uchar t = 0; t < mate->num_textures; t++)
-                { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
+                chkbatch(ob->mesh->drawLoc); ob->draw();
             }
-
-            chkbatch(ob->mesh->drawLoc); ob->draw();
-
         }
+
+        else
+        {
+            int istart = render_bucket[mat_index][0];
+            int iend   = 0;
+
+            for(int draw_index = istart; draw_index > iend; draw_index--)
+            {
+                DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
+
+                if(draw_index == istart)
+                {
+                    mate           = SIN_matbucket_get(ob->mesh->matloc);
+                    int shaderSwap = shader_chkProgram(mate->shdloc    );
+
+                    if(shaderSwap || actcam->getUpdate())
+                    {
+                        shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
+                    }
+
+                    for(uchar t = 0; t < mate->num_textures; t++)
+                    { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
+                }
+
+                chkbatch(ob->mesh->drawLoc); ob->draw();
+            }
+        }
+
     }
 
     actcam->endUpdate();

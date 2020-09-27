@@ -6,7 +6,7 @@
 
 cint        CH_NUM_BUTTONS  = 12;
 
-const float joyDead         = 0.030f;
+const float joyDead         = 0.03f;
 const float joyDiv          = 1.0f/32768.0f;
 
 //  - --- - --- - --- - --- -

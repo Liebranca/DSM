@@ -48,3 +48,5 @@ void SIN_UPDATE_AMBIENT()                       { glm::vec4 ambient_u( ambientCo
                                                                        ambientColor[2], ambientIntensity );
 
                                                   shader_update_ambient(&ambient_u);                                    }
+
+//  - --- - --- - --- - --- -

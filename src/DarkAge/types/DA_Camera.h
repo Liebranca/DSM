@@ -22,11 +22,11 @@ class DA_CAMERA {
 
     public:
 
-        DA_CAMERA(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar);
+        DA_CAMERA(const glm::vec3& pos, float fov, float width, float height, float zNear, float zFar);
 
         virtual ~DA_CAMERA();
 
-        glm::mat4 getViewProjection() const     { return perspective * glm::lookAt(pos, pos + fwd, yAxis);              }
+        glm::mat4 getViewProjection() const     { return projection * glm::lookAt(pos, pos + fwd, yAxis);               }
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
         void getFrustum();
@@ -38,6 +38,9 @@ class DA_CAMERA {
         bool rectInFrustum (glm::vec3  bounds[8]);
         bool pointInFrustum(glm::vec3  point);
         bool cageInFrustum (COLBOX*    box);
+
+        void projOrtho     (float width, float height);
+        void projPersp     (float width, float height);
 
         void move(glm::vec3 mvec, bool local = false);
         void rotate(glm::vec3 rvec);
@@ -62,7 +65,7 @@ class DA_CAMERA {
 
     private:
 
-        glm::mat4 perspective;
+        glm::mat4 projection;
 
         glm::vec3 pos;
         glm::vec3 fwd;
@@ -84,6 +87,8 @@ class DA_CAMERA {
         bool      update          = true;
         float     pitch           = 0;
         float     yaw             = 0;
+        float     FOV             = 0;
+        float     orthoScale      = 0.025f;
 
         DAGCI     curcell         = { 0 };
         DAGCI*    nearcells       = 0;

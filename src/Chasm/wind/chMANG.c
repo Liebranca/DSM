@@ -84,11 +84,13 @@ int chmang_init         (cchar* title,
         }
     }
 
-    glEnable  (GL_DEPTH_TEST);
-    glEnable  (GL_CULL_FACE );
-    glCullFace(GL_BACK      );
+    glEnable   (GL_DEPTH_TEST                       );
+    glEnable   (GL_CULL_FACE                        );
+    glCullFace (GL_BACK                             );
+    glEnable   (GL_BLEND                            );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    clock_init(             );
+    clock_init(                                     );
 
     return 0;                                                                                                           }
 
@@ -142,19 +144,23 @@ void  getMotionKeys     (fpair* moveaxis)       {
     moveaxis->x = 0.0f;
     moveaxis->y = 0.0f;
 
-    if(chJOY_RSTICK_ISACTI)                     { moveaxis->x -=  curwin->joys[main_joy].__CH_JOYMOVEAX__.x;
+    if(main_joy >= 0)
+    {
+        if(chJOY_RSTICK_ISACTI(
+          &curwin->joys[main_joy]))             { moveaxis->x -=  curwin->joys[main_joy].__CH_JOYMOVEAX__.x;
                                                   moveaxis->y -=  curwin->joys[main_joy].__CH_JOYMOVEAX__.y; return;    }
+    }
 
     if(curwin->keys & (0x2000 + 0x8000))
     {
-        moveaxis->x                               = 1.0f;
+        moveaxis->x                             = 1.0f;
 
         if(curwin->keys & 0x8000)               { moveaxis->x  = -1.0f;                                                 }
     }
 
     if(curwin->keys & (0x1000 + 0x4000))
     {
-        moveaxis->y                               = 1;
+        moveaxis->y                             = 1;
 
         if(curwin->keys & 0x4000)               { moveaxis->y  = -1.0f;                                                 }
     }

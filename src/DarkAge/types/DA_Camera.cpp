@@ -19,11 +19,14 @@ glm::vec3        actcam_pos      = { 0,0,0 };
 
 DA_CAMERA::DA_CAMERA(const glm::vec3& pos,
                      float fov,
-                     float aspect,
+                     float width,
+                     float height,
                      float zNear,
                      float zFar)                {
 
-    perspective = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+    FOV           = fov;
+    float aspect  = width / height;
+    projection    = glm::perspective(glm::radians(FOV), aspect, zNear, zFar);
 
     this->pos     = pos;
     this->zNear   = zNear;
@@ -45,6 +48,17 @@ DA_CAMERA::DA_CAMERA(const glm::vec3& pos,
 DA_CAMERA::~DA_CAMERA()                         { WARD_EVIL_MFREE(nearcells);                                           }
 
 //  - --- - --- - --- - --- -
+
+void DA_CAMERA::projOrtho(float width,
+                          float height)         {
+
+    width *= 0.5f;       height *= 0.5f;
+    width *= orthoScale; height *= orthoScale;
+    projection = glm::ortho(-width, width, -height, height, zNear, zFar);                                               }
+
+void DA_CAMERA::projPersp(float width,
+                          float height)         { projection = glm::perspective(glm::radians(FOV), width/height,
+                                                                                zNear, zFar                      );     }
 
 void DA_CAMERA::getFrustum()                    {
 
