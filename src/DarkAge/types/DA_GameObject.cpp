@@ -7,13 +7,12 @@
 #include "lymath/ZJC_VOPS.h"
 #include "lyarr/ZJC_Stack.h"
 
-#include "SIN.h"
+#include "types/SIN_Shader_EX.h"
 
 #define                DA_MAX_OBJECTS              1024
 
 static sStack*         DA_OBJ_SLOTSTACK          = NULL;
 static ushort          DA_ACTIVE_OBJECTS         = 0;
-static ushort          DA_ACTIVE_OCCLUDERS       = 0;
 
 static uint            DA_OBJECT_UPDATE_NUMOBJS  = 0;
 static uint            DA_OBJECT_UPDATE_NUMCELLS = 0;
@@ -23,6 +22,7 @@ static ushort          DA_OBJECT_LOCATIONS[DA_MAX_OBJECTS];
 std::vector<DA_NODE*>  SCENE_OBJECTS  (DA_MAX_OBJECTS, 0);
 std::vector<ushort>    FRAME_OBJECTS  (DA_MAX_OBJECTS, 0);
 std::vector<ushort>    SCENE_OCCLUDERS(DA_MAX_OBJECTS, 0);
+ushort                 FRUSTUM_OBJECTS           = 0;
 
 //  - --- - --- - --- - --- -
 
@@ -43,7 +43,7 @@ void DA_objects_update()                        {
 
     DA_OBJECT_UPDATE_NUMOBJS  = 0;
     DA_OBJECT_UPDATE_NUMCELLS = 0;
-    DA_ACTIVE_OCCLUDERS       = 0;
+    FRUSTUM_OBJECTS           = 0;
 
     actcam->resetCulling();
 
@@ -76,85 +76,8 @@ void DA_objects_update()                        {
             }
         }
 
-        if(closest)                             { FRAME_OBJECTS[k]               = DA_OBJECT_LOCATIONS[closest-1];
-                                                  DA_OBJECT_LOCATIONS[closest-1] = 0; k++;                              }
-    }
-
-//  - --- - --- - --- - --- -
-
-    ushort   total_materials = SIN_getActiveMatCount();
-    ushort   alpha_offset    = SIN_getOpaqueMatCount();
-    if(!alpha_offset) { alpha_offset = -1; }
-
-    int** render_bucket   = (int**) evil_malloc(total_materials+1, sizeof(int*));
-    for(uint i = 0; i < total_materials; i++) { render_bucket[i] = (int*) evil_malloc(k+1, sizeof(int)); }
-
-    render_bucket[total_materials] = (int*) evil_malloc(total_materials, sizeof(int));
-    for(uint i = 0; i < total_materials; i++) { render_bucket[total_materials][i] = -1;                  }
-
-    for(uint i = 0; i < k; i++)
-    {
-
-        DA_NODE* ob = SCENE_OBJECTS[FRAME_OBJECTS[i]];
-
-//  - --- - --- - --- - --- -
-
-        if(DA_grid_getInFrustum(ob->cellinfo.gridpos))
-        {
-            if(actcam->sphInFrustum(ob->bounds->sphere))
-            {
-
-                int eyechk = 1;
-
-                for(uint occlu_id = 0; occlu_id < DA_ACTIVE_OCCLUDERS; occlu_id++)
-                {
-                    DA_OCCLUDER* occlu = SCENE_OBJECTS[occlu_id]->occlu;
-                    eyechk             = occlu->sphTest(ob->bounds->sphere);
-
-                    if(eyechk < 0) { eyechk = occlu->getVisible(ob->bounds->box->points); }
-                    if(!eyechk)    { break;                                               }
-                }
-
-//  - --- - --- - --- - --- -
-
-                if(eyechk)
-                {
-
-                    ob->visible    = true;
-                    Material* mate = SIN_matbucket_get(ob->mesh->matloc);
-                    uint jstart    = 0;
-                    if(!mate->opaque) { jstart = alpha_offset; }
-
-                    uint mat_index = 0;
-                    for(uint j = jstart; j < total_materials; j++)
-                    {
-                        if     (render_bucket[total_materials][j] < 0)
-                        { render_bucket[total_materials][j] = ob->mesh->matloc; mat_index = j; break;   }
-
-                        else if(render_bucket[total_materials][j] == ob->mesh->matloc)
-                        { mat_index = j; break;                                                         }
-                    }
-
-                    uint draw_index = render_bucket[mat_index][0];
-
-                    render_bucket[mat_index][draw_index + 1]  = ob->id;
-                    render_bucket[mat_index][0]              += 1;
-
-                    if(ob->isOccluder())
-                    {
-                        ob->occlu->getFrustum  ( actcam_fwd,
-                                                 actcam_pos,
-                                                 actcam->getUp(),
-                                                 actcam->getFarZ(),
-                                                 actcam->getFarH(),
-                                                 actcam->getFarW()  );
-
-                        SCENE_OCCLUDERS[DA_ACTIVE_OCCLUDERS] = ob->id;
-                        DA_ACTIVE_OCCLUDERS++;
-                    }
-                }
-            }
-        }
+        if(closest)                             { FRAME_OBJECTS[FRUSTUM_OBJECTS] = DA_OBJECT_LOCATIONS[closest-1];
+                                                  DA_OBJECT_LOCATIONS[closest-1] = 0; FRUSTUM_OBJECTS++;                }
     }
 
 //  - --- - --- - --- - --- -
@@ -164,72 +87,7 @@ void DA_objects_update()                        {
                                                   actcam_pos      = actcam->getPos();
 
                                                   actcam->getFrustum();                                                 }
-
-    for(uint mat_index = 0; mat_index < total_materials; mat_index++)
-    {
-
-        Material* mate = NULL;
-
-        if(mat_index < alpha_offset)
-        {
-            int istart = 1;
-            int iend   = render_bucket[mat_index][0] + 1;
-
-            for(int draw_index = istart; draw_index < iend; draw_index++)
-            {
-                DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
-
-                if(draw_index == istart)
-                {
-                    mate           = SIN_matbucket_get(ob->mesh->matloc);
-                    int shaderSwap = shader_chkProgram(mate->shdloc    );
-
-                    if(shaderSwap || actcam->getUpdate())
-                    {
-                        shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
-                    }
-
-                    for(uchar t = 0; t < mate->num_textures; t++)
-                    { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
-                }
-
-                chkbatch(ob->mesh->drawLoc); ob->draw();
-            }
-        }
-
-        else
-        {
-            int istart = render_bucket[mat_index][0];
-            int iend   = 0;
-
-            for(int draw_index = istart; draw_index > iend; draw_index--)
-            {
-                DA_NODE* ob = SCENE_OBJECTS[render_bucket[mat_index][draw_index]];
-
-                if(draw_index == istart)
-                {
-                    mate           = SIN_matbucket_get(ob->mesh->matloc);
-                    int shaderSwap = shader_chkProgram(mate->shdloc    );
-
-                    if(shaderSwap || actcam->getUpdate())
-                    {
-                        shader_update_camera(&actcam_viewproj, &actcam_fwd, &actcam_pos);
-                    }
-
-                    for(uchar t = 0; t < mate->num_textures; t++)
-                    { bind_tex_to_slot(mate->texloc[t], SIN_TEXID_BASE + t); }
-                }
-
-                chkbatch(ob->mesh->drawLoc); ob->draw();
-            }
-        }
-
-    }
-
-    actcam->endUpdate();
-
-    for(ushort i = 0; i < total_materials+1; i++) { WARD_EVIL_MFREE(render_bucket[i]); }
-    WARD_EVIL_MFREE(render_bucket);                                                                                     }
+                                                                                                                        }
 
 //  - --- - --- - --- - --- -
 

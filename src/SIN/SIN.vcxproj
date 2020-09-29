@@ -165,8 +165,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="rend\SIN_Canvas.h" />
+    <ClInclude Include="rend\SIN_Render.h" />
+    <ClInclude Include="shaders\SIN_CanvasShader.h" />
     <ClInclude Include="shaders\SIN_DefaultShader.h" />
     <ClInclude Include="shaders\SIN_BoundShader.h" />
+    <ClInclude Include="shaders\SIN_DepthShader.h" />
     <ClInclude Include="SIN.h" />
     <ClInclude Include="SIN_Constants.h" />
     <ClInclude Include="types\SIN_Material.h" />
@@ -177,8 +181,12 @@
     <ClInclude Include="types\SIN_Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="rend\SIN_Canvas.c" />
+    <ClCompile Include="rend\SIN_Render.c" />
     <ClCompile Include="shaders\SIN_BoundShader.cpp" />
+    <ClCompile Include="shaders\SIN_CanvasShader.cpp" />
     <ClCompile Include="shaders\SIN_DefaultShader.cpp" />
+    <ClCompile Include="shaders\SIN_DepthShader.cpp" />
     <ClCompile Include="SIN.cpp" />
     <ClCompile Include="types\SIN_Material.c" />
     <ClCompile Include="types\SIN_Mesh.c" />

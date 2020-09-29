@@ -26,6 +26,9 @@ class DA_CAMERA {
 
         virtual ~DA_CAMERA();
 
+        glm::mat4 FAKEPROJ() const              { glm::vec3 fakepos(0,  1.8975f, 10);
+return projection * glm::lookAt(fakepos, fakepos + glm::vec3(0, 0, -1), glm::vec3(0,1,0)); }
+
         glm::mat4 getViewProjection() const     { return projection * glm::lookAt(pos, pos + fwd, yAxis);               }
         inline glm::vec3 getEye()               { return glm::normalize(pos + fwd);                                     }
 
@@ -62,6 +65,10 @@ class DA_CAMERA {
         float   getFarW()                       { return this->wFar;                                                    }
         float   getFarH()                       { return this->hFar;                                                    }
         float   getFarZ()                       { return this->zFar;                                                    }
+        float   getNearZ()                      { return this->zNear;                                                   }
+
+        float   getFOV ()                       { return this->FOV;                                                     }
+        float   getOrthoScale()                 { return this->orthoScale;                                              }
 
     private:
 
@@ -85,10 +92,10 @@ class DA_CAMERA {
         glm::vec3 yAxis           = glm::vec3(0, 1, 0);
 
         bool      update          = true;
-        float     pitch           = 0;
-        float     yaw             = 0;
-        float     FOV             = 0;
-        float     orthoScale      = 0.025f;
+        float     pitch           = 0.0f;
+        float     yaw             = 0.0f;
+        float     FOV             = 0.0f;
+        float     orthoScale      = 0.0175f;
 
         DAGCI     curcell         = { 0 };
         DAGCI*    nearcells       = 0;

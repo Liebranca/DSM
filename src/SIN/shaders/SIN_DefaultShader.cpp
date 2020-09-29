@@ -4,29 +4,49 @@ const GLchar* SIN_DefaultShader_source_v[1] =
 {
 R"glsl(#version 150
 
-in vec3      Position;
-in vec3      Normal;
-in vec3      Tangent;
-in vec3      Bitangent;
-in vec2      UV;
+const   uint  MAX_LIGHTS = 1;
 
-out vec2     texCoords;
-out vec3     CamPos0;
-out vec4     fragPos;
-out mat3     TBN;
-out float    fogFac;
+in      vec3  Position;
+in      vec3  Normal;
+in      vec3  Tangent;
+in      vec3  Bitangent;
+in      vec2  UV;
 
-uniform mat4 Model;
-uniform mat4 ViewProjection;
-uniform mat3 ModelInverseTranspose;
+out     vec2  texCoords;
+out     vec3  CamPos0;
+out     vec4  worldPosition;
+out     vec4  lightSpacePosition;
+out     vec3  lightDir;
+out     vec3  viewPos;
+out     mat3  TBN;
+out     float fogFac;
 
-uniform vec3 CamPos;
+uniform mat4  Model;
+uniform mat4  ViewProjection;
+uniform mat3  ModelInverseTranspose;
+
+uniform uint  NUM_LIGHTS;
+
+struct SIN_LIGHT {
+    mat4 mat;
+    vec3 position;
+    vec3 dirn;
+    vec4 color;
+};
+
+uniform SIN_LIGHT Lights[MAX_LIGHTS];
+
+uniform vec3  CamPos;
 
 void main()
 {
 
-    vec4 worldPosition = Model * vec4(Position, 1.0);
+    worldPosition      = Model * vec4(Position, 1.0);
+    lightSpacePosition = Lights[0].mat * worldPosition;
+    lightDir           = Lights[0].dirn;
+
     gl_Position        = ViewProjection * worldPosition;
+    viewPos            = gl_Position.xyz;
 
     texCoords          = UV;
 
@@ -36,11 +56,10 @@ void main()
 
     TBN                = mat3(T, B, N);
 
-    fragPos            = vec4(worldPosition.xyz, 1);
     CamPos0            = CamPos;
 
-    float distance = length(gl_Position.xyz);
-    fogFac = clamp( exp(-pow((distance*0.035), 2.5)), 0.0, 1.0 );
+    float distance     = length(gl_Position.xyz);
+    fogFac             = clamp( exp(-pow((distance*0.035), 2.5)), 0.0, 1.0 );
 
 }
 )glsl"
@@ -50,22 +69,29 @@ const GLchar* SIN_DefaultShader_source_p[1] =
 {
 R"glsl(#version 150
 
-in vec2   texCoords;
-in vec4   fragPos;
-in float  fogFac;
-in vec3   CamPos0;
-in mat3   TBN;
+in      vec2      texCoords;
+in      vec4      worldPosition;
+in      vec4      lightSpacePosition;
+in      vec3      lightDir;
+in      vec3      viewPos;
+in      float     fogFac;
+in      vec3      CamPos0;
+in      mat3      TBN;
 
 uniform sampler2D shineRough;
 uniform sampler2D shineSoft;
+uniform sampler2D DepthMap;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D ShadingInfo;
 uniform sampler2D NormalMap;
 
-uniform vec4   Ambient;
-//uniform vec3 SunFwd;
-uniform vec3   CamFwd;
+uniform vec4      Ambient;
+uniform vec3      CamFwd;
+
+float zNear      = 0.01;
+float zFar       = 10.0;
+float shadowBias = 0.05;
 
 vec2 voodoo_UV(vec3 u, vec3 n)
 {
@@ -87,13 +113,27 @@ vec3 vec_overlay(vec3 a, vec3 b)
     return blend;
 }
 
+float calcShadow()
+{
+    vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+    projCoords      = (projCoords * 0.5) + 0.5;
+
+    if(projCoords.z > 1.0) { return 0; }
+
+    float closestDepth = texture(DepthMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float shadow = currentDepth - shadowBias > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}  
+
 void main()
 {
-
     vec3 skyColor    = vec3(Ambient.x, Ambient.y, Ambient.z);
     vec3 ambient     = skyColor * Ambient.w;
 
-    vec3 lightDir    = normalize(CamPos0 - fragPos.xyz);
+    // vec3 toCam    = normalize(CamPos0 - worldPosition.xyz);
 
     vec3 diffuse     = texture2D(DiffuseMap,  texCoords).rgb;
     vec3 shadinginfo = texture2D(ShadingInfo, texCoords).rgb;
@@ -110,8 +150,8 @@ void main()
     float softness   = 1 - cavity;
     float metallic   = shadinginfo.b;
 
-    float specfac    = clamp(dot(reflect(lightDir, -normal), CamFwd), 0.0, 1.0);
-    vec3 specular    = (diffuse * specfac) * (0.5 * softness);
+    float specfac    = clamp(dot(reflect(-lightDir, normal), CamFwd), 0.0, 1.0);
+    vec3 specular    = (diffuse * specfac) * (0.65 * softness);
 
     vec3 refshine    = vec3(0,0,0);
 
@@ -128,11 +168,16 @@ void main()
         refshine         = vec_overlay(refshine, diffuse);
     }
 
-    float diff       = smoothstep(0.06, 0.8, dot(lightDir, softnormal));
+    float diff       = smoothstep(0.06, 0.8, dot(-lightDir, softnormal));
     diff             = clamp(diff, 0.75, 1.0);
     diffuse          = clamp(diffuse * diff * ao, 0.06, 1.0) + (cavity*0.5);
 
-    vec3 composite   = clamp(ambient + diffuse + specular + refshine, 0.06, 1.49);
+    float bounce     = 1 - dot(normal, lightDir);
+
+    shadowBias       = max(0.001 * bounce, 0.0005);
+
+    float shadow     = clamp(bounce, 0.2, 1) * clamp((1 - calcShadow()) + (bounce * 0.2), 0.2, 1);
+    vec3 composite   = clamp(ambient + shadow * (diffuse + specular) + refshine, 0.06, 1.49);
     composite        = mix(skyColor, composite, fogFac);
 
     gl_FragColor     = vec4(composite, 1);

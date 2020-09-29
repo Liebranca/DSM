@@ -36,6 +36,8 @@ ushort    SIN_matbucket_findloc  (ushort matid);
 ushort    SIN_getActiveMatCount  ();
 ushort    SIN_getOpaqueMatCount  ();
 
+ushort    SIN_getMaxMaterials    ();
+
 #ifdef __cplusplus
 }
 #endif

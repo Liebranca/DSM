@@ -44,5 +44,5 @@ void GAOL_COLLISION_BOUNDS::genBox
                               glm::vec3(model * points[6]), glm::vec3(model * points[7]) };
 
     box         = new COLBOX   (co);
-    sphere      = new COLSPHERE(box->origin, (maxf(box->area[0], box->area[1]) * 0.5f) + GAOL_COLMARGIN);               }
+    sphere      = new COLSPHERE(box->origin, (maxf(box->area[0], box->area[1])) + GAOL_COLMARGIN);                      }
 

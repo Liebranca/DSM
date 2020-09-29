@@ -25,6 +25,12 @@
     <Filter Include="Source Files\loader">
       <UniqueIdentifier>{de7c52c6-7ff3-4512-8680-3aeca3388d4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{909e08d1-68f3-4065-8051-abdaf4d055c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{fbe8d719-366e-46ab-8d74-41e6cabaa9cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DarkAge.cpp">
@@ -53,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="types\DA_Lamp.cpp">
       <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="core\DA_Engine.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="types\DA_Lamp.h">
       <Filter>Header Files\types</Filter>
+    </ClInclude>
+    <ClInclude Include="core\DA_Engine.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -60,6 +60,18 @@
     <ClCompile Include="SIN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rend\SIN_Canvas.c">
+      <Filter>Source Files\rend</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_DepthShader.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="rend\SIN_Render.c">
+      <Filter>Source Files\rend</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_CanvasShader.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h">
@@ -91,6 +103,18 @@
     </ClInclude>
     <ClInclude Include="SIN_Constants.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rend\SIN_Canvas.h">
+      <Filter>Header Files\rend</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_DepthShader.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="rend\SIN_Render.h">
+      <Filter>Header Files\rend</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_CanvasShader.h">
+      <Filter>Header Files\shaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

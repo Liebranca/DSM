@@ -47,6 +47,9 @@ class DA_NODE {
         friend void DA_objects_init  ();
         friend void DA_objects_end   ();
 
+        friend void SIN_Render_DepthPass();
+        friend void SIN_Render_ColorPass();
+
 //  - --- - --- - --- - --- -
 
         int        isOccluder   ()              { return this->nodeFlags  & DA_NF_OCCLUDER;                             }
@@ -143,6 +146,9 @@ void DA_objects_end   ();
 //  - --- - --- - --- - --- -
 
 extern std::vector<DA_NODE*> SCENE_OBJECTS;
+extern std::vector<ushort>   FRAME_OBJECTS;
+extern std::vector<ushort>   SCENE_OCCLUDERS;
+extern ushort                FRUSTUM_OBJECTS;
 
 #ifdef __cplusplus
 }

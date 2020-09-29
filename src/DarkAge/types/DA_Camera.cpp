@@ -1,4 +1,7 @@
 #include "DA_Camera.h"
+
+#include "lymath/ZJC_VOPS.h"
+
 #include "DA_WorldManager.h"
 #include "DA_Occluder.h"
 
@@ -50,15 +53,12 @@ DA_CAMERA::~DA_CAMERA()                         { WARD_EVIL_MFREE(nearcells);   
 //  - --- - --- - --- - --- -
 
 void DA_CAMERA::projOrtho(float width,
-                          float height)         {
-
-    width *= 0.5f;       height *= 0.5f;
-    width *= orthoScale; height *= orthoScale;
-    projection = glm::ortho(-width, width, -height, height, zNear, zFar);                                               }
+                          float height)         { projection = getOrthographicProjection
+                                                                    (width, height, orthoScale, zNear, zFar);           }
 
 void DA_CAMERA::projPersp(float width,
-                          float height)         { projection = glm::perspective(glm::radians(FOV), width/height,
-                                                                                zNear, zFar                      );     }
+                          float height)         { projection = getPerspectiveProjection
+                                                                                (width, height, FOV, zNear, zFar);      }
 
 void DA_CAMERA::getFrustum()                    {
 

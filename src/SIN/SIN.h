@@ -16,7 +16,7 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-void SIN_INIT(unsigned char flags);
+void SIN_INIT(ushort wWidth, ushort wHeight, unsigned char flags);
 void SIN_END ();
 
 void SIN_SWIPESCREEN   ();

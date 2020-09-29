@@ -33,6 +33,7 @@ void  SIN_bindMeshBatch(ushort loc);
 void  SIN_delMeshBatch(M3DB* batch);
 
 void  chkbatch        (ushort loc);
+void  resbatch        ();
 
 void  SIN_meshbatch_upload(ushort numVerts, ushort numIndices, float* vertex_data, ushort* indices);
 

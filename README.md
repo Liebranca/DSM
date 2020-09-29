@@ -1,15 +1,17 @@
-# DSM: the evil framework
+# dsm: the evil framework
 
-THUS FAR, STILL A WIP
-
-We have the following modules in development or planned so far:
+So what's in this repo?
 
 * `Zajec` general-purpose utility lib.
-* `Chasm` window manager powered by SDL2.
-* `SIN` retrophile OpenGL renderer.
-* `Gaoler` no-nonsense block-based c++ physics.
-* `BlackMagic` file import/export.
-* `Inquisitor` modding toolset.
-* `DarkAge` oldschool game logic for hardcore design.
+* `Chasm` window/input manager.
+* `SIN` retrophile graphics.
+* `Gaoler` block-based c++ physics.
+* `BlackMagic` model/scene converter (Blender 2.79 only).
+* `DarkAge` game logic/game engine.
 
-The aim of the project is creating a game development kit for personal use.
+There's a couple dependencies: SDL2, glew & glm. You can get 'em from this here MEGA link:
+https://mega.nz/file/krZAxC4L#TdcPaSvcxMEI2ROPCLPwtsYAVGMxDupajQ_mxy2RDYY
+
+And what's special about this motor? It's user-hostile and will spit you right in the eye if you don't know C. That's the point -- no GUIs, no buttons, no nuthin': just text.
+
+Thus far, still a WIP. Don't get your hopes up.

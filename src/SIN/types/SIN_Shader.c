@@ -22,6 +22,18 @@ static Program* SIN_shdbucket      = NULL;
 
 //  - --- - --- - --- - --- -
 
+Program*        __program          = NULL;
+ushort          __curShdLoc        = -1;
+
+void shader_reset_loc  ()                       { __program = NULL; __curShdLoc = -1;                                   }
+void shader_setProgram (ushort loc)             { __program = SIN_shdbucket_get(loc); __curShdLoc = loc+1;              }
+void shader_useProgram ()                       { glUseProgram(__program->location);                                    }
+
+int  shader_chkProgram (ushort loc)             {
+    if (loc+1 != __curShdLoc)                   { shader_setProgram(loc); shader_useProgram(); return 1; } return 0;    }
+
+//  - --- - --- - --- - --- -
+
 int       SIN_shdbucket_init  ()                {
 
     SIN_shdbucket     = (Program*) evil_malloc(SIN_MAX_SHADERS, sizeof(Program));
@@ -161,7 +173,6 @@ Program* build_shader(ushort id,
         program->uniforms[SIN_TRANSFORM_U]  = glGetUniformLocation(program->location, "Model");
         program->uniforms[SIN_NORMAL_U]     = glGetUniformLocation(program->location, "ModelInverseTranspose");
         program->uniforms[SIN_PROJECTION_U] = glGetUniformLocation(program->location, "ViewProjection");
-        program->uniforms[SIN_SUNFWD_U]     = glGetUniformLocation(program->location, "SunFwd");
         program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CamFwd");
         program->uniforms[SIN_CAMPOS_U]     = glGetUniformLocation(program->location, "CamPos");
         program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "Ambient");
@@ -170,18 +181,22 @@ Program* build_shader(ushort id,
 
         glUseProgram(program->location);
 
-        int diffuseLoc = glGetUniformLocation(program->location, "DiffuseMap");
-        int infoLoc    = glGetUniformLocation(program->location, "ShadingInfo");
-        int normalLoc  = glGetUniformLocation(program->location, "NormalMap");
-        int env1Loc    = glGetUniformLocation(program->location, "shineRough");
-        int env2Loc    = glGetUniformLocation(program->location, "shineSoft");
+        int env1Loc    = glGetUniformLocation(program->location, "shineRough" );
+        int env2Loc    = glGetUniformLocation(program->location, "shineSoft"  );
+        int depthLoc   = glGetUniformLocation(program->location, "DepthMap"   );
 
-        glUniform1i(env1Loc,    0);
-        glUniform1i(env2Loc,    1);
+        int diffuseLoc = glGetUniformLocation(program->location, "DiffuseMap" );
+        int infoLoc    = glGetUniformLocation(program->location, "ShadingInfo");
+        int normalLoc  = glGetUniformLocation(program->location, "NormalMap"  );
+
+        glUniform1i(env1Loc,    0                 );
+        glUniform1i(env2Loc,    1                 );
 
         glUniform1i(diffuseLoc, SIN_TEXID_BASE + 0);
         glUniform1i(infoLoc,    SIN_TEXID_BASE + 1);
         glUniform1i(normalLoc,  SIN_TEXID_BASE + 2);
+
+        glUniform1i(depthLoc,   SIN_TEXID_BASE + 4);
 
         SIN_ACTIVE_SHADERS++;
 

@@ -166,6 +166,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core\DA_Engine.h" />
     <ClInclude Include="DarkAge.h" />
     <ClInclude Include="DA_CommonTypes.h" />
     <ClInclude Include="loader\DA_Resource.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="types\DA_WorldManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\DA_Engine.cpp" />
     <ClCompile Include="DarkAge.cpp" />
     <ClCompile Include="loader\DA_Resource.c" />
     <ClCompile Include="loader\DA_SceneLoad.cpp" />

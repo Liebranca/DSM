@@ -9,8 +9,8 @@ extern "C" {
 
 #define __SIN_MAX_SHADERS_PER_PROGRAM__ 2
 
-enum     SIN_UNIFORM_NAMES    { SIN_TRANSFORM_U, SIN_NORMAL_U, SIN_PROJECTION_U, SIN_CAMFWD_U, SIN_CAMPOS_U, SIN_SUNFWD_U,
-                                SIN_AMBIENT_U, SIN_NUMLIGHTS_U, SIN_LIGHTS_U, __SIN_NUM_UNIFORMS__ };
+enum     SIN_UNIFORM_NAMES    { SIN_TRANSFORM_U, SIN_NORMAL_U, SIN_PROJECTION_U, SIN_CAMFWD_U, SIN_CAMPOS_U,
+                                SIN_AMBIENT_U, SIN_NUMLIGHTS_U, SIN_LIGHTS_U, __SIN_NUM_UNIFORMS__           };
 
 //  - --- - --- - --- - --- -
 
@@ -27,8 +27,8 @@ typedef struct SIN_SHADER_PROGRAM {
 
 //  - --- - --- - --- - --- -
 
-int      SIN_shdbucket_init ();
-int      SIN_shdbucket_end  ();
+int      SIN_shdbucket_init     ();
+int      SIN_shdbucket_end      ();
 
 ushort   SIN_shdbucket_findloc  (ushort id);
 Program* SIN_shdbucket_get      (ushort loc);
@@ -37,7 +37,19 @@ Program* build_shader           (ushort id, cchar** vert_source, cchar** frag_so
 
 void     unsub_shader           (ushort loc);
 
+int  shader_chkProgram        (ushort loc);
+void shader_setProgram        (ushort loc);
+void shader_useProgram        ();
+
+void shader_reset_loc         ();
+
 //  - --- - --- - --- - --- -
+
+uint createShader               (cchar** source, uint shaderType);
+void checkShaderError           (uint shader, uint flag, int isProgram, const char* errorMessage);
+
+extern Program* __program;
+extern ushort   __curShdLoc;
 
 #ifdef __cplusplus
 }

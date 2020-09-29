@@ -2,7 +2,7 @@
 #define __DARKAGE_H__
 
 #include "types/DA_WorldManager.h"
-#include "types/DA_GameObject.h"
+#include "core/DA_Engine.h"
 #include "types/DA_Camera.h"
 #include "types/DA_Occluder.h"
 

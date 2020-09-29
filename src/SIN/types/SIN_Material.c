@@ -22,6 +22,7 @@ static sHash*   SIN_MATHASH           = NULL;
 static Material SIN_matbucket[SIN_MAX_MATERIALS];
 
 //  - --- - --- - --- - --- -
+ushort    SIN_getMaxMaterials ()                { return SIN_MAX_MATERIALS;                                             }
 
 int       SIN_matbucket_init  ()                {
 
@@ -107,7 +108,8 @@ Material* build_material      (ushort  matid,
                                                   else
                                                 { material->texloc[i] = 0; }                                            }
 
-        material->opaque = opaque;
+        material->opaque = opaque; if(opaque)   { SIN_OPAQUE_MATERIALS++;                                               }
+
         material->shdloc = SIN_shdbucket_findloc(shdid);
 
         SIN_ACTIVE_MATERIALS++;
@@ -128,6 +130,8 @@ Material* build_material      (ushort  matid,
 
 void    del_material        (Material* material,
                              ushort loc)        {
+
+    if(material->opaque)                        { SIN_OPAQUE_MATERIALS--;                                               }
 
     unsub_shader(material->shdloc);
     for(uint i = 0;

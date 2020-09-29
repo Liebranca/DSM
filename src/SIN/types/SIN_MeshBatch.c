@@ -23,9 +23,7 @@ static M3DB*   SIN_meshbatches      = NULL;
 #define SIN_BATCH_VBOSIZE SIN_BATCH_MAXVERTS * SIN_BATCH_VERTSIZE
 #define SIN_BATCH_IBOSIZE SIN_BATCH_MAXVERTS * sizeof(uint)
 
-//  - --- - --- - --- - --- -
-
-M3DB*          SIN_active_meshbatch = NULL;
+M3DB*   SIN_active_meshbatch        = NULL;
 
 //  - --- - --- - --- - --- -
 
@@ -54,6 +52,8 @@ int  SIN_Batcher_end()                          {
 
 void  chkbatch     (ushort loc)                 { if(loc+1 != __curBatchLoc)
                                                 { __curBatchLoc = loc+1; SIN_bindMeshBatch(loc); }                      }
+
+void  resbatch     ()                           { __curBatchLoc = -1; SIN_active_meshbatch = NULL;                      }
 
 void  SIN_bindMeshBatch(ushort loc)             { glBindVertexArray((SIN_meshbatches + loc)->VAO);
                                                   SIN_active_meshbatch = SIN_meshbatches + loc;                         }
