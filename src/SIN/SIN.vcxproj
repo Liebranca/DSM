@@ -165,12 +165,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="rend\SIN_Ambient.h" />
     <ClInclude Include="rend\SIN_Canvas.h" />
+    <ClInclude Include="rend\SIN_Lighting.h" />
+    <ClInclude Include="rend\SIN_MateBlock.h" />
     <ClInclude Include="rend\SIN_Render.h" />
     <ClInclude Include="shaders\SIN_CanvasShader.h" />
     <ClInclude Include="shaders\SIN_DefaultShader.h" />
     <ClInclude Include="shaders\SIN_BoundShader.h" />
     <ClInclude Include="shaders\SIN_DepthShader.h" />
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Ambient.h" />
+    <ClInclude Include="shaders\SIN_ShaderBlocks_DefHed.h" />
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Light.h" />
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Transform.h" />
+    <ClInclude Include="shaders\SIN_ShaderParams.h" />
     <ClInclude Include="SIN.h" />
     <ClInclude Include="SIN_Constants.h" />
     <ClInclude Include="types\SIN_Material.h" />
@@ -181,12 +189,20 @@
     <ClInclude Include="types\SIN_Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="rend\SIN_Ambient.cpp" />
     <ClCompile Include="rend\SIN_Canvas.c" />
+    <ClCompile Include="rend\SIN_Lighting.cpp" />
+    <ClCompile Include="rend\SIN_MateBlock.c" />
     <ClCompile Include="rend\SIN_Render.c" />
     <ClCompile Include="shaders\SIN_BoundShader.cpp" />
     <ClCompile Include="shaders\SIN_CanvasShader.cpp" />
     <ClCompile Include="shaders\SIN_DefaultShader.cpp" />
     <ClCompile Include="shaders\SIN_DepthShader.cpp" />
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Ambient.cpp" />
+    <ClCompile Include="shaders\SIN_ShaderBlocks_DefHed.cpp" />
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Light.cpp" />
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Transform.cpp" />
+    <ClCompile Include="shaders\SIN_ShaderParams.c" />
     <ClCompile Include="SIN.cpp" />
     <ClCompile Include="types\SIN_Material.c" />
     <ClCompile Include="types\SIN_Mesh.c" />

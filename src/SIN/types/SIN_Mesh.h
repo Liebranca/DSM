@@ -35,14 +35,14 @@ int     SIN_mesh_extract_end  (cchar* filename);
 int     SIN_meshbucket_init   ();
 int     SIN_meshbucket_end    ();
 
-void    unsub_mesh            (ushort loc);
+void    SIN_unsubMesh         (ushort loc);
 
 M3D*    SIN_meshbucket_find   (ushort id);
-ushort SIN_meshbucket_findloc (ushort id);
+ushort  SIN_meshbucket_findloc(ushort id);
 M3D*    SIN_meshbucket_get    (ushort loc);
-M3D*    build_mesh            (ushort id, uchar offset);
+M3D*    SIN_buildMesh         (ushort id, uchar offset);
 
-void    draw_mesh             (M3D*   mesh);
+void    SIN_drawMesh          (M3D*   mesh);
 
 //  - --- - --- - --- - --- -
 

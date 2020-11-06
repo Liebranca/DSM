@@ -7,7 +7,9 @@
 
 //  - --- - --- - --- - --- -
 
-#define ZVEC3 glm::vec3(0,0,0)
+#define ZVEC3 glm::vec3      (0,0,0)
+
+static const  glm::vec3 yAxis(0,1,0);
 
 struct Booflo { 
     bool a = false;

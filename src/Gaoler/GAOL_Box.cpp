@@ -176,16 +176,9 @@ Booflo GAOL_COLLISION_BOX::groundCheck
 bool GAOL_COLLISION_BOX::pointInside
                             (glm::vec3 point)   {
 
-    uint count = 0;
-    for (int i = 0; i < 6; i++)
-    {
-        if ( (dot(faces[i].normal, point)
-             + faces[i].d)
+    for (int i = 0; i < 6; i++)                 { if (faces[i].pointTest(point) > GAOL_COLNORMAL) { return 0; }         }
 
-             <= GAOL_COLMARGIN          )       { count++;                                                              }
-    }
-
-    return count == 6;                                                                                                  }
+    return 1;                                                                                                           }
 
 //  - --- - --- - --- - --- -
 

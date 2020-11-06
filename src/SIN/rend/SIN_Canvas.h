@@ -6,10 +6,11 @@ extern "C" {
 #endif
 
 #include "ZJC_CommonTypes.h"
+#include "../shaders/SIN_ShaderParams.h"
 
 //  - --- - --- - --- - --- -
 
-void  SIN_DepthBuffer_init      (cchar** vert_source, cchar** frag_source);
+void  SIN_DepthBuffer_init      (const shaderParams* shader);
 uint  SIN_DepthBuffer_getProgram();
 uint* SIN_DepthBuffer_getUniform();
 void  SIN_DepthBuffer_bind      ();
@@ -18,8 +19,8 @@ void  SIN_DepthMap_bind         ();
 
 //  - --- - --- - --- - --- -
 
-void SIN_Canvas_init            (cchar** vert_source, cchar** frag_source);
-void SIN_Canvas_draw            ();
+void SIN_Canvas_init            (const shaderParams* shader);
+void SIN_Canvas_draw            (uint texloc);
 void SIN_Canvas_end             ();
 
 //  - --- - --- - --- - --- -

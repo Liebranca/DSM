@@ -9,10 +9,10 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-typedef struct DSM_ARCHIVE_FORMAT DAF;
+typedef struct DARK_AGE_FILE DAF;
 
 typedef struct MESH_FILE_3D CRK;
-typedef struct IMAGE_FILE_24BIT_YUV JOJ;
+typedef struct TEXTURE_FILE_24BITYUVA JOJ;
 
 typedef struct SCENE_OBJECT                     {
 
@@ -39,7 +39,10 @@ int    extractcrk       (DAF* daf, uchar offset, ushort* matid, ushort* vertCoun
                          ushort* indexCount, pVP3D_8** bounds,
                          VP3D_8** verts, ushort** indices);
 
-int    extractjoj       (DAF* daf, uchar offset, uchar* flags, uint* size, ushort* width, ushort* height, float** pixels);
+int    extractjoj       (DAF* daf, uchar offset, uchar* imcount, uint* size, ushort* width,
+                         ushort* height, uchar* flags, float fvalues[4], ushort* shdid);
+
+void   joj_subTexRead   (uint dim, uchar imcount, uchar curim, float** pixels);
 
 int    readssx          (SSX* ssx, cchar* filename);
 void   del_SsxFile      (SSX* ssx);

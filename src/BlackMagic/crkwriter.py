@@ -177,12 +177,12 @@ def writecrk(ob_name):
                 n                       = sumdic[(vert.co[0], vert.co[1], vert.co[2])]
 
                 vertBuff[svi+0 :svi+4 ] = ftb( vert.co[0]*sf);
-                vertBuff[svi+4 :svi+8 ] = ftb(-vert.co[2]*sf);
-                vertBuff[svi+8 :svi+12] = ftb( vert.co[1]*sf);
+                vertBuff[svi+4 :svi+8 ] = ftb( vert.co[2]*sf);
+                vertBuff[svi+8 :svi+12] = ftb(-vert.co[1]*sf);
 
                 vertBuff[svi+12:svi+16] = ftb( n[0]*sf);
-                vertBuff[svi+16:svi+20] = ftb(-n[2]*sf);
-                vertBuff[svi+20:svi+24] = ftb( n[1]*sf);
+                vertBuff[svi+16:svi+20] = ftb( n[2]*sf);
+                vertBuff[svi+20:svi+24] = ftb(-n[1]*sf);
 
                 vertBuff[svi+48:svi+52] = ftb(uv[loop_index].uv[0]);
                 vertBuff[svi+52:svi+56] = ftb(uv[loop_index].uv[1]);
@@ -202,12 +202,12 @@ def writecrk(ob_name):
                 svi                     =  vi * stride;
 
                 vertBuff[svi+24:svi+28] = ftb( loop.tangent[0]*sf);
-                vertBuff[svi+28:svi+32] = ftb(-loop.tangent[2]*sf);
-                vertBuff[svi+32:svi+36] = ftb( loop.tangent[1]*sf);
+                vertBuff[svi+28:svi+32] = ftb( loop.tangent[2]*sf);
+                vertBuff[svi+32:svi+36] = ftb(-loop.tangent[1]*sf);
 
                 vertBuff[svi+36:svi+40] = ftb( loop.bitangent[0]*sf);
-                vertBuff[svi+40:svi+44] = ftb(-loop.bitangent[2]*sf);
-                vertBuff[svi+44:svi+48] = ftb( loop.bitangent[1]*sf);
+                vertBuff[svi+40:svi+44] = ftb( loop.bitangent[2]*sf);
+                vertBuff[svi+44:svi+48] = ftb(-loop.bitangent[1]*sf);
 
 #   ---     ---     ---     ---     ---
 
@@ -274,5 +274,4 @@ def masscrk():
     d = sorted(d.items(), key=lambda x : x[1], reverse = False);
 
     for obname, meshid in d:
-        print(meshid);
         writecrk(obname);

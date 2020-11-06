@@ -10,26 +10,16 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-typedef struct SIN_SHADER_LIGHTSOURCE {
-
-    glm::mat4 mat;
-    glm::vec3 position;
-    glm::vec3 dirn;
-    glm::vec4 color;
-
-} SIN_LIGHT;
+void SHDEX_umat4 (uint loc, glm::mat4* mat);
+void SHDEX_umat3 (uint loc, glm::mat3* mat);
+void SHDEX_uvec4 (uint loc, glm::vec4* vec);
+void SHDEX_uvec3 (uint loc, glm::vec3* vec);
+void SHDEX_uvec2 (uint loc, glm::vec2* vec);
 
 //  - --- - --- - --- - --- -
 
-void shader_update_model      (glm::mat4* model);
-void shader_update_nmat       (glm::mat3* nmat);
-void shader_update_camera     (glm::mat4* viewprojection, glm::vec3* camfwd, glm::vec3* campos);
-
-void shader_update_viewproj   (glm::mat4* viewprojection);
-void shader_update_lights     (SIN_LIGHT* lights, uint num_lights);
-void shader_update_campos     (glm::vec3* campos);
-
-void shader_update_ambient    (glm::vec4* ambient_color);
+void SHDEX_baseTransformUpdate(glm::mat4* model);
+void SHDEX_fullTransformUpdate(glm::mat4* model, glm::mat3* nmat);
 
 //  - --- - --- - --- - --- -
 

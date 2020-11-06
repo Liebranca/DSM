@@ -1,8 +1,12 @@
 #include "SIN_CanvasShader.h"
+#include "SIN_ShaderBlocks_DefHed.h"
 
-const GLchar* SIN_CanvasShader_source_v[1] = 
+const GLchar* SIN_CanvasShader_source_v[2] = 
 {
-R"glsl(#version 150
+
+SIN_ShaderBlock_DefHed,
+
+R"glsl(
 
 in       vec3  Position;
 in       vec2  UV;
@@ -14,32 +18,46 @@ void main()                                     { gl_Position = vec4(Position.x,
 )glsl"
 };
 
-const GLchar* SIN_CanvasShader_source_p[1] =
+const GLchar* SIN_CanvasShader_source_f[2] =
 {
-R"glsl(#version 150
+
+SIN_ShaderBlock_DefHed,
+
+R"glsl(
 
 in vec2 texCoords;
-uniform sampler2D DiffuseMap;
+uniform sampler2DArray Surface;
 
-float zNear = 0.001;
-float zFar  = 100.0;
-
-float LinearizeDepth(float depth)
+void main()
 {
-    float z = (depth * 2.0) - 1.0;
-    return (2.0 * zNear * zFar) / (zFar + zNear - z * (zFar - zNear));
+    vec3 color   = texture(Surface, vec3(texCoords, 0)).rgb;
+    gl_FragColor = vec4(color, 1);
 }
 
-float calcShadow()
-{
-
-    float closestDepth = LinearizeDepth(texture2D(DiffuseMap, texCoords).r);
-
-    return clamp(closestDepth, 0.0, 1.0);
-}
-
-void main()                                     { float depth = calcShadow();
-                                                  if(depth > 0.95) { discard; }
-    gl_FragColor = vec4(vec3(0), 1);                           }
 )glsl"
+};
+
+const shaderParams SIN_CanvasShader =
+{
+
+    SIN_CanvasShader_source_v,                      // Vertex sources
+    SIN_CanvasShader_source_f,                      // Fragment sources
+
+    { "Position", "UV"                      },      // Attributes
+
+    {                                       },      // Uniforms
+
+    {                                       },      // UBOs
+
+    { "Surface"                             },      // Samplers
+
+    2,                                              // Number of vertex shader blocks
+    2,                                              // Number of fragment shader blocks
+    2,                                              // Number of attributes
+    0,                                              // Number of uniforms
+    0,                                              // Number of UBOs
+    1,                                              // Number of samplers
+
+    0                                               // Flags
+
 };

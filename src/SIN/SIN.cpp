@@ -2,8 +2,13 @@
 
 #include "rend/SIN_Render.h"
 #include "rend/SIN_Canvas.h"
+#include "rend/SIN_Ambient.h"
+#include "rend/SIN_Lighting.h"
+
 #include "shaders/SIN_DepthShader.h"
 #include "shaders/SIN_CanvasShader.h"
+
+#include "lymath/ZJC_GOPS.h"
 
 static unsigned char INITFLAGS   = 0;
 
@@ -25,8 +30,12 @@ void SIN_INIT(ushort wWidth,
     SIN_matbucket_init   (                                                    );
     SIN_meshbucket_init  (                                                    );
 
-    SIN_DepthBuffer_init (SIN_DepthShader_source_v,  SIN_DepthShader_source_p );
-    SIN_Canvas_init      (SIN_CanvasShader_source_v, SIN_CanvasShader_source_p);
+    SIN_SHADOWSIZE = maxi(wWidth, wHeight) / SIN_SHADOWSCALE;
+
+    SIN_Ambient_init     (                                                    );
+    SIN_Lighting_init    (                                                    );
+    SIN_DepthBuffer_init (&SIN_DepthShader                                    );
+    SIN_Canvas_init      (&SIN_CanvasShader                                   );
     SIN_RenderBucket_init(                                                    );
 
     INITFLAGS = flags;                                                                                                  }
@@ -36,6 +45,8 @@ void SIN_END()                                  {
     SIN_RenderBucket_end();
     SIN_Canvas_end      ();
     SIN_DepthBuffer_end ();
+    SIN_Lighting_init   ();
+    SIN_Ambient_end     ();
 
     SIN_meshbucket_end  ();
     SIN_matbucket_end   ();
@@ -57,9 +68,6 @@ void SIN_SWIPESCREEN()                          {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                                                                 }
 
-void SIN_UPDATE_AMBIENT()                       { glm::vec4 ambient_u( ambientColor[0], ambientColor[1],
-                                                                       ambientColor[2], ambientIntensity );
-
-                                                  shader_update_ambient(&ambient_u);                                    }
+void SIN_UPDATE_AMBIENT()                       { SIN_Ambient_setSky(&glm::vec3(ambientColor), ambientIntensity);       }
 
 //  - --- - --- - --- - --- -

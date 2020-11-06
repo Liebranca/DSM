@@ -20,9 +20,8 @@ typedef struct DA_ASSETLOAD_HANDLE {
     cushort num_materials;
     cushort mat_idbase;
     cushort mat_texture_idbase;
-    cushort mat_num_textures[ZJC_DAFSIZE];
     cushort mat_shader_ids[ZJC_DAFSIZE];
-    cuchar  mat_opaque[ZJC_DAFSIZE];
+    cuchar  mat_opaque    [ZJC_DAFSIZE];
 
     cchar*  mesh_archive;
     cushort num_meshes;

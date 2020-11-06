@@ -23,7 +23,7 @@ static int  main_joy      = -1;
 int   chmang_winOpen    ()                      { return !chmang_curwin()->isClosed;                                    }
 void  chmang_frameStart ()                      { clock_frameStart(); pollEvents(curwin);                               }
 void  chmang_fBy        ()                      { fBy = clock_fBy(1.0f);                                                }
-void  chmang_frameEnd   ()                      { clock_frameEnd(); chmang_fBy(); swapBuffers(curwin);       }
+void  chmang_frameEnd   ()                      { clock_frameEnd(); chmang_fBy(); swapBuffers(curwin);                  }
 
 void  chmang_wait       ()                      { if(clock_getSleep()) { SDL_Delay(clock_getSleepTime()); }             }
 
@@ -37,14 +37,17 @@ int chmang_init         (cchar* title,
 
     SDL_Init           (SDL_INIT_EVERYTHING         );
 
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,           3);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,         3);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,          2);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,              3);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,            3);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,             2);
 
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE,       16);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,        16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,       1);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE,          16);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,           16);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,          1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,    1);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
     chmang.curwin   = 0;
     chmang.openwins = 1;
@@ -68,7 +71,7 @@ int chmang_init         (cchar* title,
     if (status != GLEW_OK)                      { fprintf(stderr, "GLEW failed it's own init; something's wrong...\n");
                                                   chmang_end(); return FATAL;                                           }
 
-    if (!glewIsSupported("GL_VERSION_3_2"))     { printf("This application requires OpenGL v3.2\n");                    }
+    if (!glewIsSupported("GL_VERSION_4_0"))     { printf("This application requires OpenGL v4.0\n");                    }
 
     SDL_GL_SetSwapInterval(1);
 
@@ -80,7 +83,7 @@ int chmang_init         (cchar* title,
         for(int i = 0; i < numjoys; i++)
         {
             SDL_JoystickEventState(SDL_ENABLE);
-            openJoy(curwin, i); curwin->joys[i].sens = 5.0f;
+            openJoy(curwin, i); curwin->joys[i].sens = 2.5f;
         }
     }
 

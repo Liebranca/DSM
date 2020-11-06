@@ -8,6 +8,7 @@ extern "C" {
 #endif
 //  - --- - --- - --- - --- -
 
+void SIN_Render_Update   ();
 void SIN_Render_DepthPass();
 void SIN_Render_ColorPass();
 

@@ -25,12 +25,12 @@ static Program* SIN_shdbucket      = NULL;
 Program*        __program          = NULL;
 ushort          __curShdLoc        = -1;
 
-void shader_reset_loc  ()                       { __program = NULL; __curShdLoc = -1;                                   }
-void shader_setProgram (ushort loc)             { __program = SIN_shdbucket_get(loc); __curShdLoc = loc+1;              }
-void shader_useProgram ()                       { glUseProgram(__program->location);                                    }
+void SIN_resetShdloc()                          { __program = NULL; __curShdLoc = -1;                                   }
+void SIN_setProgram (ushort loc)                { __program = SIN_shdbucket_get(loc); __curShdLoc = loc+1;              }
+void SIN_useProgram ()                          { glUseProgram(__program->location);                                    }
 
-int  shader_chkProgram (ushort loc)             {
-    if (loc+1 != __curShdLoc)                   { shader_setProgram(loc); shader_useProgram(); return 1; } return 0;    }
+int  SIN_chkProgram (ushort loc)                {
+    if (loc+1 != __curShdLoc)                   { SIN_setProgram(loc); SIN_useProgram(); return 1; } return 0;          }
 
 //  - --- - --- - --- - --- -
 
@@ -99,10 +99,10 @@ Program* SIN_shdbucket_get  (ushort loc)        {
 
 //  - --- - --- - --- - --- -
 
-void checkShaderError(uint shader,
-                             uint flag,
-                             int isProgram,
-                             const char* errorMessage)
+void SIN_checkShaderError(uint shader,
+                          uint flag,
+                          int isProgram,
+                          const char* errorMessage)
 {
     int success = 0;
     char error[1024] = { 0 };
@@ -119,23 +119,22 @@ void checkShaderError(uint shader,
     }
 }
 
-uint createShader(cchar** source, uint shaderType)
+uint SIN_createShader(cchar** source, uchar num_sources, uint shaderType)
 {
     uint shader = glCreateShader(shaderType);
     if (!shader)                                { fprintf(stderr, "Shader couldn't be created\n");                      }
 
-    glShaderSource(shader, 1, source, NULL);
-    glCompileShader(shader);
+    glShaderSource      (shader, num_sources, source, NULL                       );
+    glCompileShader     (shader                                                  );
 
-    checkShaderError(shader, GL_COMPILE_STATUS, 0, "Shader couldn't compile");
+    SIN_checkShaderError(shader, GL_COMPILE_STATUS, 0, "Shader couldn't compile" );
 
     return shader;                                                                                                      }
 
 //  - --- - --- - --- - --- -
 
-Program* build_shader(ushort id,
-                     cchar** vert_source,
-                     cchar** frag_source)       {
+Program* SIN_buildShader (ushort id, const shaderParams* shader)
+{
 
     Program* program = SIN_shdbucket_find(id);
 
@@ -153,50 +152,66 @@ Program* build_shader(ushort id,
         program             = SIN_shdbucket+loc;
 
         program->location   = glCreateProgram();
+        program->flags      = shader->flags;
 
-        program->shaders[0] = createShader(vert_source, GL_VERTEX_SHADER);
-        program->shaders[1] = createShader(frag_source, GL_FRAGMENT_SHADER);
+//  - --- - --- - --- - --- -
+
+        program->shaders[0] = SIN_createShader(shader->source_v, shader->num_vsources, GL_VERTEX_SHADER  );
+        program->shaders[1] = SIN_createShader(shader->source_f, shader->num_fsources, GL_FRAGMENT_SHADER);
 
         for (uint i = 0; i < 2; i++)            { glAttachShader(program->location, program->shaders[i]);               }
 
-        glBindAttribLocation(program->location, 0, "Position");
-        glBindAttribLocation(program->location, 1, "Normal");
-        glBindAttribLocation(program->location, 2, "Tangent");
-        glBindAttribLocation(program->location, 3, "Bitangent");
-        glBindAttribLocation(program->location, 4, "UV");
+        for(uchar attrib_loc = 0; attrib_loc < shader->num_attribs; attrib_loc++)
+        { glBindAttribLocation(program->location, attrib_loc, shader->attribs[attrib_loc]); }
 
-        glLinkProgram    (program->location);
-        checkShaderError (program->location, GL_LINK_STATUS, 1, "Shader linking failed");
-        glValidateProgram(program->location);
-        checkShaderError (program->location, GL_VALIDATE_STATUS, 1, "Shader validation failed");
+        glLinkProgram       (program->location                                                   );
+        SIN_checkShaderError(program->location, GL_LINK_STATUS, 1, "Shader linking failed"       );
 
-        program->uniforms[SIN_TRANSFORM_U]  = glGetUniformLocation(program->location, "Model");
-        program->uniforms[SIN_NORMAL_U]     = glGetUniformLocation(program->location, "ModelInverseTranspose");
-        program->uniforms[SIN_PROJECTION_U] = glGetUniformLocation(program->location, "ViewProjection");
-        program->uniforms[SIN_CAMFWD_U]     = glGetUniformLocation(program->location, "CamFwd");
-        program->uniforms[SIN_CAMPOS_U]     = glGetUniformLocation(program->location, "CamPos");
-        program->uniforms[SIN_AMBIENT_U]    = glGetUniformLocation(program->location, "Ambient");
-        program->uniforms[SIN_NUMLIGHTS_U]  = glGetUniformLocation(program->location, "NUM_LIGTS");
-        program->uniforms[SIN_LIGHTS_U]     = glGetUniformLocation(program->location, "Lights");
+        glUseProgram        (program->location                                                   );
 
-        glUseProgram(program->location);
+//  - --- - --- - --- - --- -
 
-        int env1Loc    = glGetUniformLocation(program->location, "shineRough" );
-        int env2Loc    = glGetUniformLocation(program->location, "shineSoft"  );
-        int depthLoc   = glGetUniformLocation(program->location, "DepthMap"   );
+        for(uchar i = 0; i < shader->num_uniforms; i++)
+        {
+            int uniform_loc = -1;
 
-        int diffuseLoc = glGetUniformLocation(program->location, "DiffuseMap" );
-        int infoLoc    = glGetUniformLocation(program->location, "ShadingInfo");
-        int normalLoc  = glGetUniformLocation(program->location, "NormalMap"  );
+            if     (!strcmp(shader->uniforms[i], "Model"                )) { uniform_loc = SIN_MODEL_U; }
+            else if(!strcmp(shader->uniforms[i], "ModelInverseTranspose")) { uniform_loc = SIN_NMAT_U;  }
 
-        glUniform1i(env1Loc,    0                 );
-        glUniform1i(env2Loc,    1                 );
+            if(uniform_loc >= 0)
+            { program->uniforms[uniform_loc] = glGetUniformLocation(program->location, shader->uniforms[i]); }
+        }
 
-        glUniform1i(diffuseLoc, SIN_TEXID_BASE + 0);
-        glUniform1i(infoLoc,    SIN_TEXID_BASE + 1);
-        glUniform1i(normalLoc,  SIN_TEXID_BASE + 2);
+        for(uchar i = 0; i < shader->num_ubos; i++)
+        {
+            int block_binding = -1;
 
-        glUniform1i(depthLoc,   SIN_TEXID_BASE + 4);
+            if     (!strcmp(shader->ubos[i], "Ambient")) { block_binding = 0; }
+            else if(!strcmp(shader->ubos[i], "Lights" )) { block_binding = 1; }
+
+            if(block_binding >= 0)
+            {
+                uint block_index = glGetUniformBlockIndex(program->location, shader->ubos[i]           );
+                glUniformBlockBinding                    (program->location, block_index, block_binding);
+            }
+        }
+
+//  - --- - --- - --- - --- -
+
+        for(uchar i = 0; i < shader-> num_samplers; i++)
+        {
+            int sampler_loc = glGetUniformLocation(program->location, shader->samplers[i]);
+            int texslot     = SIN_TEXID_BASE;
+
+            if     (!strcmp(shader->samplers[i], "ShadowMap")) { texslot = 0;       }
+            else if(!strcmp(shader->samplers[i], "ENV"      )) { texslot = 1;       }
+            else if(!strcmp(shader->samplers[i], "Surface"  )) { texslot = 2;       }
+
+            glUniform1i                                        (sampler_loc, texslot);
+        }
+
+        glValidateProgram   (program->location                                                   );
+        SIN_checkShaderError(program->location, GL_VALIDATE_STATUS, 1, "Shader validation failed");
 
         SIN_ACTIVE_SHADERS++;
 
@@ -217,7 +232,7 @@ void    del_shader        (Program* program,
 
     SIN_ACTIVE_SHADERS--;                                                                                               }
 
-void     unsub_shader       (ushort loc)        {
+void     SIN_unsubShader       (ushort loc)     {
 
     Program* program = SIN_shdbucket+loc;
     if(program)

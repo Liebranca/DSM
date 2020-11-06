@@ -2,13 +2,13 @@
 #define __SIN_CANVAS_SHADER_H__
 
 #include "GL/glew.h"
+#include "SIN_ShaderParams.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const GLchar* SIN_CanvasShader_source_v[1];
-extern const GLchar* SIN_CanvasShader_source_p[1];
+extern const shaderParams SIN_CanvasShader;
 
 #ifdef __cplusplus
 }

@@ -13,11 +13,9 @@ extern "C" {
 typedef struct SIN_MATERIAL {
 
     ushort id;
-    uchar  num_textures;
-    uchar  opaque;
 
     ushort shdloc;
-    ushort texloc[SIN_MATERIAL_MAX_TEXTURES];
+    ushort texloc;
     ushort users;
 
 } Material;
@@ -26,9 +24,9 @@ typedef struct SIN_MATERIAL {
 
 int       SIN_matbucket_init     ();
 int       SIN_matbucket_end      ();
-void      unsub_material         (ushort loc);
+void      SIN_unsubMaterial      (ushort loc);
 
-Material* build_material         (ushort matid, uchar opaque, cushort texid[SIN_MATERIAL_MAX_TEXTURES], ushort shdid);
+Material* SIN_buildMaterial      (ushort matid, ushort texid, uchar texoffset);
 Material* SIN_matbucket_find     (ushort matid);
 Material* SIN_matbucket_get      (ushort loc);
 ushort    SIN_matbucket_findloc  (ushort matid);
@@ -37,6 +35,7 @@ ushort    SIN_getActiveMatCount  ();
 ushort    SIN_getOpaqueMatCount  ();
 
 ushort    SIN_getMaxMaterials    ();
+int       SIN_getMaterialIsOpaque(ushort loc);
 
 #ifdef __cplusplus
 }

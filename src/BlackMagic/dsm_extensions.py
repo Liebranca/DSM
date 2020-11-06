@@ -1,6 +1,6 @@
 # add this to "Blender Foundation\Blender\version\scripts\startup"
 
-dsm_srcpath = "D:\\lieb_git\\dsm\\src";
+dsm_srcpath = "D:\\lieb_git\\dsm\\src"; # set this path to the dsm folder
 
 #   ---     ---     ---     ---     ---
 
@@ -28,7 +28,9 @@ if BlackMagic.bmpath != dsm_srcpath + "\\\\BlackMagic":
 
     importlib.reload(BlackMagic);
 
-
+    from BlackMagic.dsm_ui import register as dsm_register_ui
+    dsm_register_ui();
+    
 print("Done!");
 print("\n# - -- - --- - -- - = - -- - --- - -- -\n");
 

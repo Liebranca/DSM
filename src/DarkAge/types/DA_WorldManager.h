@@ -23,7 +23,8 @@ typedef struct DA_GRIDCELL {
     uchar  num_objects;
     ushort shuffle_loc;
 
-    ushort oblocs[__DA_MAX_OBJECTS_PER_CELL__];
+    ushort oblocs  [__DA_MAX_OBJECTS_PER_CELL__];
+    ushort LIT[20];
 
 } DA_CELL;
 
@@ -36,19 +37,22 @@ typedef struct DA_CELL_LOOKUP {
 
 //  - --- - --- - --- - --- -
 
-void DA_grid_init          (int xwidth, int zwidth, int height);
-void DA_grid_end           ();
-void DA_grid_modWorldOffset(int mvec[3]);
-void DA_grid_calcRugPull   (int mvec[3]);
+void DA_grid_init               (int xwidth, int zwidth, int height);
+void DA_grid_end                ();
+void DA_grid_modWorldOffset     (int mvec[3]);
+void DA_grid_calcRugPull        (int mvec[3]);
 
-void DA_grid_regObject     (DANCI* nci, ushort obloc);
-void DA_grid_unregObject   (DANCI* nci, int    ret[2]);
-void DA_grid_fetchOblocs   (int origin[3], DAGCI* camcells, uint* cellCounter, uint* obCounter, ushort* locations);
-void DA_grid_setInFrustum  (uint gridpos[3], int cellInFrustum);
-int  DA_grid_getInFrustum  (uint gridpos[3]);
+void DA_grid_regObject          (DANCI* nci, ushort obloc);
+void DA_grid_unregObject        (DANCI* nci, int    ret[2]);
+void DA_grid_fetchOblocs        (int origin[3], DAGCI* camcells, uint* cellCounter, uint* obCounter, ushort* locations);
+void DA_grid_setInFrustum       (uint gridpos[3], int cellInFrustum);
+void DA_grid_setInLightFrustum  (uint gridpos[3], uint lampid, int cellInLightFrustum);
 
-void DA_grid_setSimRadius  (uint radius);
-uint DA_grid_getFrustumFac ();
+int  DA_grid_getInLightFrustum  (uint gridpos[3], uint lampid);
+int  DA_grid_getInFrustum       (uint gridpos[3]);
+
+void DA_grid_setSimRadius       (uint radius);
+uint DA_grid_getFrustumFac      ();
 
 void DA_grid_findpos       (int dest[3], float pos[3]);
 void DA_grid_findabspos    (uint dest[3], int pos[3]);

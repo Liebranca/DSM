@@ -1,99 +1,44 @@
 #include "SIN_DefaultShader.h"
+#include "SIN_ShaderBlocks_DefHed.h"
+#include "SIN_ShaderBlocks_Ambient.h"
+#include "SIN_ShaderBlocks_Transform.h"
+#include "SIN_ShaderBlocks_Light.h"
 
-const GLchar* SIN_DefaultShader_source_v[1] = 
+const char* SIN_DefaultShader_source_v[6] = 
 {
-R"glsl(#version 150
 
-const   uint  MAX_LIGHTS = 1;
+SIN_ShaderBlock_DefHed,
+SIN_ShaderBlock_VertAmbient,
+SIN_ShaderBlock_VertTransform,
+SIN_ShaderBlock_VertLightIn,
+SIN_ShaderBlock_VertLightOut,
 
-in      vec3  Position;
-in      vec3  Normal;
-in      vec3  Tangent;
-in      vec3  Bitangent;
-in      vec2  UV;
-
-out     vec2  texCoords;
-out     vec3  CamPos0;
-out     vec4  worldPosition;
-out     vec4  lightSpacePosition;
-out     vec3  lightDir;
-out     vec3  viewPos;
-out     mat3  TBN;
-out     float fogFac;
-
-uniform mat4  Model;
-uniform mat4  ViewProjection;
-uniform mat3  ModelInverseTranspose;
-
-uniform uint  NUM_LIGHTS;
-
-struct SIN_LIGHT {
-    mat4 mat;
-    vec3 position;
-    vec3 dirn;
-    vec4 color;
-};
-
-uniform SIN_LIGHT Lights[MAX_LIGHTS];
-
-uniform vec3  CamPos;
+R"glsl(
 
 void main()
 {
-
-    worldPosition      = Model * vec4(Position, 1.0);
-    lightSpacePosition = Lights[0].mat * worldPosition;
-    lightDir           = Lights[0].dirn;
-
-    gl_Position        = ViewProjection * worldPosition;
-    viewPos            = gl_Position.xyz;
-
-    texCoords          = UV;
-
-    vec3 T             = normalize(ModelInverseTranspose * Tangent);
-    vec3 B             = normalize(ModelInverseTranspose * Bitangent);
-    vec3 N             = normalize(ModelInverseTranspose * Normal);
-
-    TBN                = mat3(T, B, N);
-
-    CamPos0            = CamPos;
-
-    float distance     = length(gl_Position.xyz);
-    fogFac             = clamp( exp(-pow((distance*0.035), 2.5)), 0.0, 1.0 );
-
+    SIN_applyTransforms    ();
+    SIN_setAmbient         ();
+    SIN_calcFragLight      ();
 }
+
 )glsl"
 };
 
-const GLchar* SIN_DefaultShader_source_p[1] =
+const char* SIN_DefaultShader_source_f[5] =
 {
-R"glsl(#version 150
 
-in      vec2      texCoords;
-in      vec4      worldPosition;
-in      vec4      lightSpacePosition;
-in      vec3      lightDir;
-in      vec3      viewPos;
-in      float     fogFac;
-in      vec3      CamPos0;
-in      mat3      TBN;
+SIN_ShaderBlock_DefHed,
+SIN_ShaderBlock_FragAmbient,
+SIN_ShaderBlock_FragTransform,
+SIN_ShaderBlock_FragLight,
 
-uniform sampler2D shineRough;
-uniform sampler2D shineSoft;
-uniform sampler2D DepthMap;
+R"glsl(
 
-uniform sampler2D DiffuseMap;
-uniform sampler2D ShadingInfo;
-uniform sampler2D NormalMap;
+uniform sampler2DArray ENV;
+uniform sampler2DArray Surface;
 
-uniform vec4      Ambient;
-uniform vec3      CamFwd;
-
-float zNear      = 0.01;
-float zFar       = 10.0;
-float shadowBias = 0.05;
-
-vec2 voodoo_UV(vec3 u, vec3 n)
+vec2 spheremap_UV(vec3 u, vec3 n)
 {
     vec3  r = reflect(u, n);
     float m = 2 * sqrt( (r.x*r.x) + (r.y*r.y) + ((r.z+1.0)*(r.z+1.0)) );
@@ -113,33 +58,16 @@ vec3 vec_overlay(vec3 a, vec3 b)
     return blend;
 }
 
-float calcShadow()
-{
-    vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
-    projCoords      = (projCoords * 0.5) + 0.5;
-
-    if(projCoords.z > 1.0) { return 0; }
-
-    float closestDepth = texture(DepthMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
-
-    float shadow = currentDepth - shadowBias > closestDepth ? 1.0 : 0.0;
-
-    return shadow;
-}  
-
 void main()
 {
-    vec3 skyColor    = vec3(Ambient.x, Ambient.y, Ambient.z);
-    vec3 ambient     = skyColor * Ambient.w;
+    vec3 skyColor    = vec3(AmbientColor.x, AmbientColor.y, AmbientColor.z);
+    vec3 ambient     = skyColor * AmbientColor.w;
 
-    // vec3 toCam    = normalize(CamPos0 - worldPosition.xyz);
+    vec3 diffuse     = texture(Surface, vec3(texCoords, 0)).rgb;
+    vec3 shadinginfo = texture(Surface, vec3(texCoords, 1)).rgb;
+    vec3 normalmap   = texture(Surface, vec3(texCoords, 2)).rgb;
 
-    vec3 diffuse     = texture2D(DiffuseMap,  texCoords).rgb;
-    vec3 shadinginfo = texture2D(ShadingInfo, texCoords).rgb;
-    vec3 normalmap   = texture2D(NormalMap,   texCoords).rgb;
-
-    normalmap        = (normalmap * 2.0) - 1.0;    
+    normalmap        = (normalmap * 2.0) - 1.0;
     vec3 normal      = normalize(TBN * normalmap);
 
     normalmap.rg    *= 0.35;
@@ -150,38 +78,68 @@ void main()
     float softness   = 1 - cavity;
     float metallic   = shadinginfo.b;
 
-    float specfac    = clamp(dot(reflect(-lightDir, normal), CamFwd), 0.0, 1.0);
-    vec3 specular    = (diffuse * specfac) * (0.65 * softness);
+    vec4 lighting    = SIN_calcLight(normal, softnormal);
 
+    float shadow     = lighting.x;
+    float light      = lighting.y;
+    float diff       = lighting.z;
+    float spec       = lighting.w;
+
+    vec3 specular    = (diffuse * spec) * (0.65 * softness);
     vec3 refshine    = vec3(0,0,0);
 
-    // if(ao < 0.8) { ao *= 0.90; }
-
-    if(metallic)
+    /*if(metallic)
     {
-        vec2 refUV       = voodoo_UV(CamFwd, softnormal);
+        vec2 refUV     = spheremap_UV(CamFwd, softnormal);
 
-        vec3 rougshine   = texture2D(shineRough, refUV).rgb * 0.75;
-        vec3 softshine   = texture2D(shineSoft, refUV).rgb  * 0.75;
+        vec3 rougshine = texture(ENV, vec3(refUV, 0)).rgb * 0.75;
+        vec3 softshine = texture(ENV, vec3(refUV, 1)).rgb * 0.75;
 
-        refshine         = mix(rougshine, softshine, softness) * metallic;
-        refshine         = vec_overlay(refshine, diffuse);
-    }
+        refshine       = mix(rougshine, softshine, softness) * metallic;
+        refshine       = vec_overlay(refshine, diffuse);
+    }*/
 
-    float diff       = smoothstep(0.06, 0.8, dot(-lightDir, softnormal));
-    diff             = clamp(diff, 0.75, 1.0);
     diffuse          = clamp(diffuse * diff * ao, 0.06, 1.0) + (cavity*0.5);
 
-    float bounce     = 1 - dot(normal, lightDir);
+    vec3 composite   = clamp(ambient + (shadow * (diffuse + specular)) + light + refshine, 0.06, 1.49);
+    composite        = mix  (skyColor, composite, fogFac);
 
-    shadowBias       = max(0.001 * bounce, 0.0005);
-
-    float shadow     = clamp(bounce, 0.2, 1) * clamp((1 - calcShadow()) + (bounce * 0.2), 0.2, 1);
-    vec3 composite   = clamp(ambient + shadow * (diffuse + specular) + refshine, 0.06, 1.49);
-    composite        = mix(skyColor, composite, fogFac);
-
-    gl_FragColor     = vec4(composite, 1);
+    gl_FragColor     = vec4 (composite, 1);
 
 }
 )glsl"
+};
+
+const shaderParams SIN_DefaultShader =
+{
+
+    SIN_DefaultShader_source_v,                     // Vertex sources
+    SIN_DefaultShader_source_f,                     // Fragment sources
+
+    { SIN_ShaderBlock_TransformAttribs [0],        // Attributes
+      SIN_ShaderBlock_TransformAttribs [1],
+      SIN_ShaderBlock_TransformAttribs [2],
+      SIN_ShaderBlock_TransformAttribs [3],
+      SIN_ShaderBlock_TransformAttribs [4]  },
+
+    { 
+      SIN_ShaderBlock_TransformUniforms[0],
+      SIN_ShaderBlock_TransformUniforms[1]  },      // Uniforms
+
+    { SIN_ShaderBlock_AmbientUniforms  [0],
+      SIN_ShaderBlock_LightUniforms    [0]  },      // UBOs
+
+    { SIN_ShaderBlock_LightSamplers    [0],
+      "ENV", "Surface"                      },      // Samplers
+
+    6,                                              // Number of vertex shader blocks
+    5,                                              // Number of fragment shader blocks
+    5,                                              // Number of attributes
+    2,                                              // Number of uniforms
+    2,                                              // Number of UBOs
+    3,                                              // Number of samplers
+
+    SIN_SBFTRANSFORMA | SIN_SBFTRANSFORMB |         // Flags
+    SIN_SBFAMBIENT    | SIN_SBFLIGHTING
+
 };

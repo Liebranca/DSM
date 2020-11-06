@@ -109,6 +109,16 @@ void DA_grid_setInFrustum (uint gridpos[3],
 int  DA_grid_getInFrustum (uint gridpos[3])     { DA_CELL* cell = &DA_GRID[gridpos[1]][gridpos[2]][gridpos[0]];
                                                   return   cell->inFrustum;                                             }
 
+void DA_grid_setInLightFrustum
+(uint gridpos[3],
+ uint lampid,
+ int  cellInLightFrustum)                       { DA_CELL* cell     = &DA_GRID[gridpos[1]][gridpos[2]][gridpos[0]];
+                                                  cell->LIT[lampid] = cellInLightFrustum;                               }
+
+int  DA_grid_getInLightFrustum
+(uint gridpos[3], uint lampid)                  { DA_CELL* cell = &DA_GRID[gridpos[1]][gridpos[2]][gridpos[0]];
+                                                  return   cell->LIT[lampid];                                           }
+
 //  - --- - --- - --- - --- -
 
 void DA_grid_regObject     (DANCI* nci,

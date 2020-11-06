@@ -32,7 +32,7 @@ void zh8_pack(H8PACK* hpck,
         for(ushort j = 0; j < hpck->dictsize; j++)
         {
             if(protodict[j])                    { uchar  value     =  protodict[j] & 0x000000FF;
-                                                  ushort frequency = (protodict[j] & 0xFFFF0000) >> 16;
+                                                  ushort frequency = (protodict[j] & 0xFFFFFF00) >> 8;
 
                                                   if(frequency > hifrequency)
                                                 { mostfrequent = value; hifrequency = frequency; popi = j; }            }
@@ -109,7 +109,7 @@ void zh8_pack(H8PACK* hpck,
 
     }
 
-    printf("%u\n", numbytes);
+    printf("%u\n", hpck->usize);
     hpck->datasize = numbytes+1;                                                                                        }
 
 //      - --- - --- - --- - --- -

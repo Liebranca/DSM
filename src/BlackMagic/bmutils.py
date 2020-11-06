@@ -40,10 +40,10 @@ def make_DA_Object(resid, offset, flags, pos, rot, scale):
     buff[10:14] = ftb( pos[2]);
     buff[14:18] = ftb(-pos[1]);
 
-    buff[18:22] = ftb(-rot[0]);
-    buff[22:26] = ftb( rot[2]);
-    buff[26:30] = ftb( rot[1]);
-    buff[30:34] = ftb( rot[3]);
+    buff[18:22] = ftb( rot[0]);
+    buff[22:26] = ftb( rot[1]);
+    buff[26:30] = ftb( rot[3]);
+    buff[30:34] = ftb(-rot[2]);
 
     buff[34:38] = ftb( scale[0]);
     buff[38:42] = ftb( scale[2]);
@@ -66,10 +66,10 @@ def make_DA_Lamp(resid, offset, flags, pos, rot, scale, lpos, color, ldirn, rad,
     buff[10:14] = ftb( pos[2]);
     buff[14:18] = ftb(-pos[1]);
 
-    buff[18:22] = ftb(-rot[0]);
-    buff[22:26] = ftb( rot[2]);
-    buff[26:30] = ftb( rot[1]);
-    buff[30:34] = ftb( rot[3]);
+    buff[18:22] = ftb( rot[0]);
+    buff[22:26] = ftb(-rot[1]);
+    buff[26:30] = ftb( rot[3]);
+    buff[30:34] = ftb( rot[2]);
 
     buff[34:38] = ftb( scale[0]);
     buff[38:42] = ftb( scale[2]);

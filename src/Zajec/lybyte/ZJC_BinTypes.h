@@ -19,13 +19,14 @@ typedef struct JOJ_COLOR_COMPRESSED {
     uchar chroma_u;
     uchar chroma_v;
     uchar luma;
+    uchar alpha;
 
 } JOJPIX;
 
 //  - --- - --- - --- - --- -
 
-JOJPIX rgb_to_joj        (float r, float g, float b);
-void   joj_to_rgb        (float pixel[3], JOJPIX* joj);
+JOJPIX rgba_to_joj       (float r, float g, float b, float a);
+void   joj_to_rgba       (float pixel[4], JOJPIX* joj);
 
 uchar  bitsize           (uchar x);
 uchar  usbitsize         (ushort x);

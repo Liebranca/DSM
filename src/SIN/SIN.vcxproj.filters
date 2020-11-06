@@ -72,6 +72,30 @@
     <ClCompile Include="shaders\SIN_CanvasShader.cpp">
       <Filter>Source Files\shaders</Filter>
     </ClCompile>
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Light.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_ShaderParams.c">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_ShaderBlocks_DefHed.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Transform.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="rend\SIN_Lighting.cpp">
+      <Filter>Source Files\rend</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\SIN_ShaderBlocks_Ambient.cpp">
+      <Filter>Source Files\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="rend\SIN_Ambient.cpp">
+      <Filter>Source Files\rend</Filter>
+    </ClCompile>
+    <ClCompile Include="rend\SIN_MateBlock.c">
+      <Filter>Source Files\rend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SIN.h">
@@ -115,6 +139,30 @@
     </ClInclude>
     <ClInclude Include="shaders\SIN_CanvasShader.h">
       <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_ShaderParams.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Light.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_ShaderBlocks_DefHed.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Transform.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="rend\SIN_Lighting.h">
+      <Filter>Header Files\rend</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\SIN_ShaderBlocks_Ambient.h">
+      <Filter>Header Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="rend\SIN_Ambient.h">
+      <Filter>Header Files\rend</Filter>
+    </ClInclude>
+    <ClInclude Include="rend\SIN_MateBlock.h">
+      <Filter>Header Files\rend</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

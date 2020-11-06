@@ -28,6 +28,8 @@ extern "C" {
 #define DA_NF_HASPROPS      0x0040
 #define DA_NF_CHARACTER     0x0080
 
+#define DA_MAX_OBJECTS        1024
+
 //  - --- - --- - --- - --- -
 
 class DA_NODE {
@@ -43,16 +45,17 @@ class DA_NODE {
 
 //  - --- - --- - --- - --- -
 
-        friend void DA_objects_update();
-        friend void DA_objects_init  ();
-        friend void DA_objects_end   ();
+        friend void DA_objects_init     ();
+        friend void DA_objects_end      ();
 
+        friend void SIN_Render_Update   ();
         friend void SIN_Render_DepthPass();
         friend void SIN_Render_ColorPass();
 
 //  - --- - --- - --- - --- -
 
         int        isOccluder   ()              { return this->nodeFlags  & DA_NF_OCCLUDER;                             }
+        int        isLightSource()              { return this->nodeFlags  & DA_NF_LIGHTSOURCE;                          }
         int        isDynamic    ()              { return this->physMode  == GAOL_PHYSMODE_DYNAMIC;                      }
         int        isStatic     ()              { return this->physMode  == GAOL_PHYSMODE_STATIC;                       }
         glm::mat4  getModel     (bool ig)       { return transform->getModel(ig);                                       }
@@ -93,6 +96,11 @@ class DA_NODE {
 
     protected:
 
+        virtual void onUpdate   ();
+        virtual void endUpdate  ()              { ;                                                                     }
+
+//  - --- - --- - --- - --- -
+
         ushort       id;
 
         T3D*         transform;
@@ -129,26 +137,16 @@ class DA_NODE {
 
         DANCI        cellinfo     = { 0 };
 
-//  - --- - --- - --- - --- -
-
-    private:
-
-        void       prePhysUpdate();
-
 };
 
 //  - --- - --- - --- - --- -
 
-void DA_objects_update();
 void DA_objects_init  ();
 void DA_objects_end   ();
 
 //  - --- - --- - --- - --- -
 
 extern std::vector<DA_NODE*> SCENE_OBJECTS;
-extern std::vector<ushort>   FRAME_OBJECTS;
-extern std::vector<ushort>   SCENE_OCCLUDERS;
-extern ushort                FRUSTUM_OBJECTS;
 
 #ifdef __cplusplus
 }

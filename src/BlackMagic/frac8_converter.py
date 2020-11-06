@@ -2,16 +2,17 @@ import bpy
 
 # - --- - -- - --- -
 
-f8_size   = 128;
-f8_step   = 1/32;
-f8_maxval = (128 - 1) * f8_step;
+f8_size     = 128;
+f8_step     = 1/32;
+f8_maxval   = (f8_size - 1) * f8_step;
+f8_clampval = f8_size * f8_step
 
-f8_range  = [i * f8_step for i in range(f8_size)];
+f8_range    = [i * f8_step for i in range(f8_size)];
 
-uf8_size  = 256;
-uf8_step = 0.00390625;
+uf8_size    = 256;
+uf8_step    = 0.00390625;
 
-uf8_range = [i * uf8_step for i in range(uf8_size)];
+uf8_range   = [i * uf8_step for i in range(uf8_size)];
 
 # - --- - -- - --- -
 
@@ -40,7 +41,7 @@ def take_closest(x, fvr, step):
 
 def ftf8(x):
     sign = 1 if x < 0 else 0;
-    if abs(x) >= f8_maxval: return f8_maxval * (1 - (sign * 2));
+    if abs(x) >= f8_maxval: return f8_clampval * (1 - (sign * 2));
 
     return take_closest(abs(x), f8_range, f8_step) * (1 - (sign * 2));
 

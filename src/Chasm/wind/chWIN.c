@@ -49,7 +49,7 @@ chWH        build_whandle(const char title[],
 
     whandle.mouse.rel.x = 0.0f;
     whandle.mouse.rel.y = 0.0f;
-    whandle.mouse.sens  = 1.0f;
+    whandle.mouse.sens  = 0.65f;
 
     whandle.id = SDL_GetWindowID(whandle.window);
 

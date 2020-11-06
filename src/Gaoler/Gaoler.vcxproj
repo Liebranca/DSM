@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GAOL_Frustum.h" />
     <ClInclude Include="GAOL_Bounds.h" />
     <ClInclude Include="GAOL_Box.h" />
     <ClInclude Include="GAOL_ColData.h" />
@@ -31,6 +32,7 @@
     <ClCompile Include="GAOL_Bounds.cpp" />
     <ClCompile Include="GAOL_Box.cpp" />
     <ClCompile Include="GAOL_Face.cpp" />
+    <ClCompile Include="GAOL_Frustum.cpp" />
     <ClCompile Include="GAOL_Sphere.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

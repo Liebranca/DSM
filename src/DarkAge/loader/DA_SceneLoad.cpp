@@ -29,7 +29,7 @@ void DA_LOAD_SCENE(RESOURCE* resources,
         ushort    meshid =                      (resources[resid].mesh_idbase) + offset;
 
         glm::vec3 pos                           (ob->fvalues[0], ob->fvalues[1], ob->fvalues[2]                         );
-        glm::quat rot                           (ob->fvalues[6], ob->fvalues[3], ob->fvalues[4], ob->fvalues[5]         );
+        glm::quat rot                           (ob->fvalues[3], ob->fvalues[4], ob->fvalues[5], ob->fvalues[6]         );
         glm::vec3 scale                         (ob->fvalues[7], ob->fvalues[8], ob->fvalues[9]                         );
 
         if(!resources[resid].loaded)            { DA_LOAD_RESOURCE(resources + resid, cwd);                             }

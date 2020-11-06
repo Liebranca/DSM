@@ -104,7 +104,9 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 
 //  - --- - --- - --- - --- -
 
-float frac_tofloat(uchar frac)                  { float  v = (frac >> 1) * 0.03125f;
+float frac_tofloat(uchar frac)                  { uchar i = frac >> 1; if(i == 127) { i++; }
+
+                                                  float  v = i * 0.03125f;
                                                   return v * (1 - (2 * (frac & 1)));                                }
 
 float ufrac_tofloat(uchar frac)                 { return frac * 0.00390625f;                                        }
@@ -121,28 +123,32 @@ uchar float_toufrac(float v)                    { uchar frac = fvRange_take_clos
 
 //      - --- - --- - --- - --- -
 
-JOJPIX rgb_to_joj   (float r,
+JOJPIX rgba_to_joj  (float r,
                      float g,
-                     float b)                   {
+                     float b,
+                     float a)                   {
 
     JOJPIX joj = { 0 };
 
     joj.luma     = fvRange_take_closest_1b(&joj_luma_range,   ( 0.257f * r) + (0.504f * g) + (0.098f * b));
     joj.chroma_u = fvRange_take_closest_1b(&joj_chroma_range, (-0.148f * r) - (0.291f * g) + (0.439f * b));
     joj.chroma_v = fvRange_take_closest_1b(&joj_chroma_range, ( 0.439f * r) - (0.368f * g) - (0.071f * b));
+    joj.alpha    = fvRange_take_closest_1b(&joj_luma_range, a                                            );
 
     return joj;                                                                                                     }
 
-void  joj_to_rgb   (float pixel[3],
+void  joj_to_rgba  (float pixel[4],
                     JOJPIX* joj)                {
 
-    float luma        = ( joj->luma     * 0.015625f ) * 1.164000f;
+    float luma        = ( joj->luma     * 0.015625f  ) * 1.164000f;
     float chroma_u    = ( joj->chroma_u - 32         ) * 0.03125f;
     float chroma_v    = ( joj->chroma_v - 32         ) * 0.03125f;
+    float alpha       = ( joj->alpha    * 0.015625f  );
 
     pixel[0]          = (luma) + (1.596f * chroma_v);
     pixel[1]          = (luma) - (0.392f * chroma_u) - (0.813f * chroma_v);
-    pixel[2]          = (luma) + (2.017f * chroma_u);                                                               }
+    pixel[2]          = (luma) + (2.017f * chroma_u);
+    pixel[4]          = alpha;                                                                                          }
 
 //      - --- - --- - --- - --- -
 

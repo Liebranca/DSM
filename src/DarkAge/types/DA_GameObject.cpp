@@ -9,20 +9,11 @@
 
 #include "types/SIN_Shader_EX.h"
 
-#define                DA_MAX_OBJECTS              1024
-
 static sStack*         DA_OBJ_SLOTSTACK          = NULL;
 static ushort          DA_ACTIVE_OBJECTS         = 0;
 
-static uint            DA_OBJECT_UPDATE_NUMOBJS  = 0;
-static uint            DA_OBJECT_UPDATE_NUMCELLS = 0;
-
-static ushort          DA_OBJECT_LOCATIONS[DA_MAX_OBJECTS];
-
 std::vector<DA_NODE*>  SCENE_OBJECTS  (DA_MAX_OBJECTS, 0);
-std::vector<ushort>    FRAME_OBJECTS  (DA_MAX_OBJECTS, 0);
-std::vector<ushort>    SCENE_OCCLUDERS(DA_MAX_OBJECTS, 0);
-ushort                 FRUSTUM_OBJECTS           = 0;
+
 
 //  - --- - --- - --- - --- -
 
@@ -38,56 +29,6 @@ void DA_objects_end()                           {
                                                   if(ob) { delete ob; }                                                 }
 
     del_sStack(DA_OBJ_SLOTSTACK);                                                                                       }
-
-void DA_objects_update()                        {
-
-    DA_OBJECT_UPDATE_NUMOBJS  = 0;
-    DA_OBJECT_UPDATE_NUMCELLS = 0;
-    FRUSTUM_OBJECTS           = 0;
-
-    actcam->resetCulling();
-
-    DA_grid_fetchOblocs(actcam->getCellpos(),
-                        actcam->getCellPositions(),
-                        &DA_OBJECT_UPDATE_NUMCELLS,
-                        &DA_OBJECT_UPDATE_NUMOBJS,
-                        DA_OBJECT_LOCATIONS        );
-
-//  - --- - --- - --- - --- -
-
-    actcam->cellCulling(DA_OBJECT_UPDATE_NUMCELLS);
-
-    uint k = 0;
-    for(uint i = 0; i < DA_OBJECT_UPDATE_NUMOBJS; i++)
-    {
-        ushort    closest  = 0;
-        float     dist     = 520200;
-        float     new_dist = 520200;
-
-        for(uint j = 0; j < DA_OBJECT_UPDATE_NUMOBJS; j++)
-        {
-            if(DA_OBJECT_LOCATIONS[j])
-            {
-                DA_NODE* ob = SCENE_OBJECTS[DA_OBJECT_LOCATIONS[j]];
-                if(ob->needsUpdate) { ob->prePhysUpdate(); }
-
-                new_dist    = glm::distance(actcam_pos, ob->transform->position);
-                if(new_dist < dist)             { dist = new_dist; closest = j+1;                                       }
-            }
-        }
-
-        if(closest)                             { FRAME_OBJECTS[FRUSTUM_OBJECTS] = DA_OBJECT_LOCATIONS[closest-1];
-                                                  DA_OBJECT_LOCATIONS[closest-1] = 0; FRUSTUM_OBJECTS++;                }
-    }
-
-//  - --- - --- - --- - --- -
-
-    if(actcam->getUpdate())                     { actcam_viewproj = actcam->getViewProjection();
-                                                  actcam_fwd      = actcam->getFwd();
-                                                  actcam_pos      = actcam->getPos();
-
-                                                  actcam->getFrustum();                                                 }
-                                                                                                                        }
 
 //  - --- - --- - --- - --- -
 
@@ -133,7 +74,7 @@ DA_NODE::DA_NODE(ushort meshid,
     DA_ACTIVE_OBJECTS++;
 
     float fpos[3] = { pos.x, pos.y, pos.z };
-    this->id     = obloc;
+    this->id      = obloc;
 
     DA_grid_findpos  (cellinfo.worldpos, fpos );
     DA_grid_regObject(&cellinfo,         obloc);                                                                        }
@@ -142,12 +83,14 @@ DA_NODE::~DA_NODE()                             {
 
     int ret[2] = { 0, 1 };
     DA_grid_unregObject(&cellinfo, ret);
-    if(ret[1])                                  { DA_NODE* other        = SCENE_OBJECTS[ret[0]];
+
+    if(ret[1] && ret[0])                        { DA_NODE* other        = SCENE_OBJECTS[ret[0]];
                                                   other->cellinfo.index = this->cellinfo.index;                         }
 
     delete this->transform;
-    unsub_mesh (SIN_meshbucket_findloc(this->mesh->id));
-    sStack_push(DA_OBJ_SLOTSTACK, this->id);                                                                            }
+
+    SIN_unsubMesh(SIN_meshbucket_findloc(this->mesh->id));
+    sStack_push  (DA_OBJ_SLOTSTACK, this->id            );                                                              }
 
 //  - --- - --- - --- - --- -
 
@@ -267,12 +210,13 @@ void DA_NODE::move      (glm::vec3 mvec,
 
     needsUpdate = true;                                                                                                 }
 
-void DA_NODE::prePhysUpdate()                   { model       = transform->getModel();
+void DA_NODE::onUpdate()                        { model       = transform->getModel();
                                                   nmat        = transform->getNormal(model);
                                                   needsUpdate = false;
 
                                                   buildBounds(model);
 
+                                                  // TODO: move this bit to the occlu node subclass
                                                   if(isOccluder()) { occlu->setBox(bounds->box); }                      }
 
 void DA_NODE::draw() {
@@ -291,9 +235,8 @@ void DA_NODE::draw() {
 
             // TODO: handle ANS here
 
-            shader_update_model(&model);
-            shader_update_nmat (&nmat );
-            draw_mesh          (mesh  );
+            SHDEX_fullTransformUpdate(&model, &nmat);
+            SIN_drawMesh             (mesh         );
 
             visible = false;
         }

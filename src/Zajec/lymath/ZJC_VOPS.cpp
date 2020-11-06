@@ -28,7 +28,7 @@ glm::mat4 getOrthographicProjection(float width,
                                     float near,
                                     float far)  {
 
-    width *= 0.5f;       height *= 0.5f;
+    width *= 0.5f;  height *= 0.5f;
     width *= scale; height *= scale;
     return glm::ortho(-width, width, -height, height, near, far);                                                       }
 

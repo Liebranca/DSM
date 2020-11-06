@@ -41,8 +41,10 @@ int SIN_texbucket_init ()                       {
 
 int SIN_texbucket_end  ()                       {
 
-    del_sStack(SIN_TEX_SLOTSTACK);
-    del_sHash (SIN_TEXHASH);
+    del_sStack   (SIN_TEX_SLOTSTACK     );
+    del_sHash    (SIN_TEXHASH           );
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
     for(uint i = 0;
         i < SIN_MAX_TEXTURES; i++)              { Texture* tex = SIN_texbucket + i;
@@ -93,8 +95,10 @@ Texture* SIN_texbucket_get  (ushort loc)        {
 
 //  - --- - --- - --- - --- -
 
-Texture* build_texture(ushort id,
-                       uchar offset)            {
+Texture* SIN_buildTexture (ushort       id,
+                           ushort*      shdid,
+                           uchar        offset,
+                           SIN_MATDATA* matdata) {
 
     Texture* tex = SIN_texbucket_find(id);
 
@@ -109,40 +113,62 @@ Texture* build_texture(ushort id,
 
         sh_insert(SIN_TEXHASH, id, loc);
 
-        tex                 = SIN_texbucket+loc;
+        tex                    = SIN_texbucket+loc;
 
-        tex->id           = id;
-        uint   size       = 0;
-        uchar  flags      = 0;
-        float* pixels     = NULL;
+        tex->id                = id;
+        tex->imcount           = 0;
+
+        uint        size       = 0;
+
+        float       fvalues[4] = { matdata->spec_mult, matdata->diff_mult,
+                                   matdata->ref_mult,  matdata->glow_rea   };
 
         extractjoj(TEX_ARCHIVE,
                    offset,
-                   &flags,
+
+                   &tex->imcount,
                    &size,
                    &tex->width,
                    &tex->height,
-                   &pixels);
+
+                   &matdata->flags,
+                   fvalues,
+                   shdid            );
+
+        uint dim       = (tex->width) * (tex->height);
+        float* pixels  = (float*) evil_malloc(dim * 3, sizeof(float));
+
+        matdata->spec_mult = fvalues[0];
+        matdata->diff_mult = fvalues[1];
+        matdata->ref_mult  = fvalues[2];
+        matdata->glow_rea  = fvalues[3];
 
 //  - --- - --- - --- - --- -
 
-        GLfloat texfilter = GL_NEAREST;
+        glGenTextures  (1, &tex->location                                                       );
+        glActiveTexture(GL_TEXTURE0                                                             );
+        glBindTexture  (GL_TEXTURE_2D_ARRAY, tex->location                                      );
 
-        if(flags & SIN_TEXFLAGS_SMOOTHMAP) { texfilter = GL_LINEAR; }
+        glTexStorage3D (GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, tex->width, tex->height, tex->imcount  );
 
-        glGenTextures(1, &tex->location);
-        glBindTexture(GL_TEXTURE_2D, tex->location);
+        for(uchar layer = 0; layer < tex->imcount; layer++)
+        {
+            joj_subTexRead(dim, tex->imcount, layer, &pixels);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0,  layer, tex->width, tex->height, 1,
+                            GL_RGB,              GL_FLOAT, pixels                               );
+        }
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0                          );
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL,  3                          );
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S,     GL_REPEAT                  );
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T,     GL_REPEAT                  );
 
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter);
+        glTexParameterf (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST  );
+        glTexParameterf (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST                 );
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0,
-                     GL_RGB, GL_FLOAT, pixels);
-
-        WARD_EVIL_MFREE(pixels);
+        WARD_EVIL_MFREE (pixels                                                                 );
+        glGenerateMipmap(GL_TEXTURE_2D_ARRAY                                                    );
+        glBindTexture   (GL_TEXTURE_2D_ARRAY, 0                                                 );
 
         SIN_ACTIVE_TEXTURES++;
 
@@ -152,21 +178,22 @@ Texture* build_texture(ushort id,
 
 //  - --- - --- - --- - --- -
 
-void bind_tex_to_slot(ushort loc, uint slot)    {
+void SIN_bindTexture(ushort loc, uint slot)     {
 
     Texture* tex = SIN_texbucket_get(loc);
 
     if(slot >= 31)                              { slot = 31;                                                            }
 
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, tex->location);                                                                        }
+    glBindTexture(GL_TEXTURE_2D_ARRAY, tex->location);                                                                  }
 
 //  - --- - --- - --- - --- -
 
 void     del_tex            (Texture*   tex,
                              ushort loc)        {
 
-    glDeleteTextures(1, &tex->location);
+    glBindTexture   (GL_TEXTURE_2D_ARRAY, 0);
+    glDeleteTextures(1, &tex->location     );
 
     SIN_texbucket[loc] = SIN_emptytex;
     int memward = sStack_push(SIN_TEX_SLOTSTACK, loc);
@@ -174,7 +201,7 @@ void     del_tex            (Texture*   tex,
 
     SIN_ACTIVE_TEXTURES--;                                                                                              }
 
-void  unsub_tex       (ushort loc)              {
+void  SIN_unsubTexture       (ushort loc)       {
 
     Texture* tex = SIN_texbucket_get(loc);
 

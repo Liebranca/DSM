@@ -19,6 +19,7 @@ def writessx(ssxname):
         if ob.data:
 
           if isinstance(ob.data, bpy.types.Mesh) and not ob.parent:
+            ob.rotation_mode = "QUATERNION";
 
             for propname in obj_proplist:
                 if propname not in ob.game.properties: raise STAHP ("Object %s missing property %s"%(ob.name, propname));
@@ -72,6 +73,7 @@ def writessx(ssxname):
                                   ob.scale                             )
 
             ssx.add_entry(buff, size);
+            ob.rotation_mode = "XYZ";
 
 #   ---     ---     ---     ---     ---
 

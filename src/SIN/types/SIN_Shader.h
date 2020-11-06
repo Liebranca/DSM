@@ -6,11 +6,11 @@ extern "C" {
 #endif
 
 #include "../Zajec/ZJC_CommonTypes.h"
+#include "../shaders/SIN_ShaderParams.h"
 
 #define __SIN_MAX_SHADERS_PER_PROGRAM__ 2
 
-enum     SIN_UNIFORM_NAMES    { SIN_TRANSFORM_U, SIN_NORMAL_U, SIN_PROJECTION_U, SIN_CAMFWD_U, SIN_CAMPOS_U,
-                                SIN_AMBIENT_U, SIN_NUMLIGHTS_U, SIN_LIGHTS_U, __SIN_NUM_UNIFORMS__           };
+enum     SIN_UNIFORM_NAMES    { SIN_MODEL_U, SIN_NMAT_U, __SIN_NUM_UNIFORMS__ };
 
 //  - --- - --- - --- - --- -
 
@@ -21,7 +21,9 @@ typedef struct SIN_SHADER_PROGRAM {
 
     uint   location;
     uint   shaders [__SIN_MAX_SHADERS_PER_PROGRAM__];
-    uint   uniforms[__SIN_NUM_UNIFORMS__];
+    uint   uniforms[__SIN_NUM_UNIFORMS__           ];
+
+    ushort flags;
 
 } Program;
 
@@ -33,20 +35,20 @@ int      SIN_shdbucket_end      ();
 ushort   SIN_shdbucket_findloc  (ushort id);
 Program* SIN_shdbucket_get      (ushort loc);
 Program* SIN_shdbucket_find     (ushort id);
-Program* build_shader           (ushort id, cchar** vert_source, cchar** frag_source);
+Program* SIN_buildShader        (ushort id, const shaderParams* shader);
 
-void     unsub_shader           (ushort loc);
+void     SIN_unsubShader       (ushort loc);
 
-int  shader_chkProgram        (ushort loc);
-void shader_setProgram        (ushort loc);
-void shader_useProgram        ();
+int      SIN_chkProgram        (ushort loc);
+void     SIN_setProgram        (ushort loc);
+void     SIN_useProgram        ();
 
-void shader_reset_loc         ();
+void     SIN_resetShdloc       ();
 
 //  - --- - --- - --- - --- -
 
-uint createShader               (cchar** source, uint shaderType);
-void checkShaderError           (uint shader, uint flag, int isProgram, const char* errorMessage);
+uint SIN_createShader          (cchar** source, uchar num_sources, uint shaderType);
+void SIN_checkShaderError      (uint shader, uint flag, int isProgram, const char* errorMessage);
 
 extern Program* __program;
 extern ushort   __curShdLoc;

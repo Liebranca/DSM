@@ -21,7 +21,8 @@ void DA_LOAD_RESOURCE(RESOURCE* res,
 
         SIN_tex_extract_from(tex_archive);
         for(uint i = 0;
-            i < res->num_textures; i++)         { build_texture(res->tex_idbase + i, res->tex_offset + i);              }
+            i < res->num_textures; i++)         { SIN_buildTexture (res->tex_idbase + i,
+                                                                    res->tex_offset + i  );                             }
 
         SIN_tex_extract_end(tex_archive);
         WARD_EVIL_MFREE    (tex_archive);
@@ -33,16 +34,10 @@ void DA_LOAD_RESOURCE(RESOURCE* res,
     {
         uint j = 0;
         for(uint i = 0;
-            i < res->num_materials; i++)        { ushort texids[SIN_MATERIAL_MAX_TEXTURES];
-
-                                                  for(int k = 0; k < SIN_MATERIAL_MAX_TEXTURES; k++)
-                                                { texids[k] = 0;
-
-                                                  if(k < res->mat_num_textures[i])
-                                                { texids[k] = res->mat_texture_idbase + j; j++; }                       }
-
-                                                  build_material(res->mat_idbase + i, res->mat_opaque[i],
-                                                                 texids, res->mat_shader_ids [i]          );            }
+            i < res->num_materials; i++)        { SIN_buildMaterial(res->mat_idbase         + i,
+                                                                    res->mat_opaque          [i],
+                                                                    res->mat_texture_idbase + i,
+                                                                    res->mat_shader_ids      [i]  );                    }
     }
 
 //  - --- - --- - --- - --- -
@@ -54,7 +49,7 @@ void DA_LOAD_RESOURCE(RESOURCE* res,
 
         SIN_mesh_extract_from(mesh_archive);
         for(uint i = 0;
-            i < res->num_meshes; i++)           { build_mesh( res->mesh_idbase + i, res->mesh_offset + i  );            }
+            i < res->num_meshes; i++)           { SIN_buildMesh( res->mesh_idbase + i, res->mesh_offset + i  );         }
 
         SIN_mesh_extract_end(mesh_archive);
         WARD_EVIL_MFREE     (mesh_archive);

@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#define   SIN_MAX_MATERIALS             64
+
 
 static Material SIN_emptymat          = {0};
 static ushort   SIN_ACTIVE_MATERIALS  = 0;
@@ -78,11 +78,9 @@ Material* SIN_matbucket_get      (ushort loc)   {
 
 //  - --- - --- - --- - --- -
 
-Material* build_material      (ushort  matid,
-                               uchar   opaque,
-                               cushort texid[SIN_MATERIAL_MAX_TEXTURES],
-
-                               ushort  shdid)   {
+Material* SIN_buildMaterial   (ushort matid,
+                               ushort texid,
+                               uchar  texoffset){
 
     Material* material = SIN_matbucket_find(matid);
 
@@ -97,30 +95,27 @@ Material* build_material      (ushort  matid,
 
         sh_insert(SIN_MATHASH, matid, loc);
 
-        material         = SIN_matbucket+loc;
+        material             = SIN_matbucket+loc;
+        material->id         = matid;
 
-        material->id     = matid;
-        for(uint i = 0;
-            i < SIN_MATERIAL_MAX_TEXTURES; i++) { if(texid[i])
-                                                { material->texloc[i] = SIN_texbucket_findloc(texid[i]);
-                                                  material->num_textures++;                                             }
+        ushort*      shdid   = NULL;
+        SIN_MATDATA* matdata = SIN_MateBlock_getSlot(loc);
 
-                                                  else
-                                                { material->texloc[i] = 0; }                                            }
+        SIN_buildTexture(texid, &shdid, texoffset, matdata);
 
-        material->opaque = opaque; if(opaque)   { SIN_OPAQUE_MATERIALS++;                                               }
+        material->texloc  = SIN_texbucket_findloc(texid);
 
-        material->shdloc = SIN_shdbucket_findloc(shdid);
+        if(matdata->flags & 2)                  { SIN_OPAQUE_MATERIALS++;                                               }
+
+        material->shdloc  = SIN_shdbucket_findloc(shdid);
 
         SIN_ACTIVE_MATERIALS++;
 
         Program* program  = SIN_shdbucket_get(material->shdloc);
         program->users++;
 
-        for(uint i = 0;
-            i < SIN_MATERIAL_MAX_TEXTURES; i++) { if(material->texloc[i])
-                                                { Texture* tex      = SIN_texbucket_get(material->texloc[i]);
-                                                  tex->users++; }                                                       }
+        Texture* tex      = SIN_texbucket_get(material->texloc);
+        tex->users++;
 
     }
 
@@ -128,15 +123,17 @@ Material* build_material      (ushort  matid,
 
 //  - --- - --- - --- - --- -
 
+int SIN_getMaterialIsOpaque(ushort loc)         { return (SIN_MateBlock_getSlot(loc)->flags & 2);                       }
+
+//  - --- - --- - --- - --- -
+
 void    del_material        (Material* material,
                              ushort loc)        {
 
-    if(material->opaque)                        { SIN_OPAQUE_MATERIALS--;                                               }
+    if(SIN_getMaterialIsOpaque(loc))            { SIN_OPAQUE_MATERIALS--;                                               }
 
-    unsub_shader(material->shdloc);
-    for(uint i = 0;
-        i < SIN_MATERIAL_MAX_TEXTURES; i++)     { if(material->texloc[i])
-                                                { unsub_tex(material->texloc[i]); }                                     }
+    SIN_unsubShader (material->shdloc);
+    SIN_unsubTexture(material->texloc);
 
     SIN_matbucket[loc] = SIN_emptymat;
     int memward = sStack_push(SIN_MAT_SLOTSTACK, loc);
@@ -144,7 +141,7 @@ void    del_material        (Material* material,
 
     SIN_ACTIVE_MATERIALS--;                                                                                             }
 
-void    unsub_material      (ushort loc)        {
+void    SIN_unsubMaterial  (ushort loc)         {
 
     Material* material = SIN_matbucket+loc;
 

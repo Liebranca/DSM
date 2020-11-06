@@ -3,6 +3,7 @@
 
 #include "ZJC_CommonTypes.h"
 #include "SIN_Constants.h"
+#include "shaders/SIN_ShaderParams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +16,7 @@ typedef struct DA_SHADERLOAD_HANDLE {
     ushort  num_shaders;
     ushort  idbase;
 
-    cchar** v_Sources[SIN_MAX_SHADERS];
-    cchar** p_Sources[SIN_MAX_SHADERS];
+    const shaderParams* params[SIN_MAX_SHADERS];
 
 } SHADERLOAD;
 

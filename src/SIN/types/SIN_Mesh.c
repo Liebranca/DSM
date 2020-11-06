@@ -101,7 +101,7 @@ M3D* SIN_meshbucket_get  (ushort loc)           {
 
 //  - --- - --- - --- - --- -
 
-M3D*    build_mesh          (ushort id,
+M3D*    SIN_buildMesh       (ushort id,
                              uchar  offset)     {
 
     M3D* mesh = SIN_meshbucket_find(id);
@@ -186,14 +186,14 @@ M3D*    build_mesh          (ushort id,
 
 //  - --- - --- - --- - --- -
 
-void    draw_mesh             (M3D*   mesh)     { glDrawElements(GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
+void    SIN_drawMesh             (M3D*   mesh)  { glDrawElements(GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
                                                                  (void*) (mesh->drawOffset));                           }
 
 void     del_mesh            (M3D*   mesh,
                               ushort loc)       {
 
-    WARD_EVIL_MFREE(mesh->bounds);
-    unsub_material(mesh->matloc);
+    WARD_EVIL_MFREE  (mesh->bounds);
+    SIN_unsubMaterial(mesh->matloc);
 
     SIN_meshbucket[loc] = SIN_emptymesh;
     int memward = sStack_push(SIN_MESH_SLOTSTACK, loc);
@@ -201,7 +201,7 @@ void     del_mesh            (M3D*   mesh,
 
     SIN_ACTIVE_MESHES--;                                                                                                }
 
-void  unsub_mesh       (ushort loc)             {
+void  SIN_unsubMesh       (ushort loc)          {
 
     M3D* mesh = SIN_meshbucket_get(loc);
 
