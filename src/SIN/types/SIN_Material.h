@@ -12,11 +12,11 @@ extern "C" {
 
 typedef struct SIN_MATERIAL {
 
-    ushort id;
+    uint id;
 
-    ushort shdloc;
-    ushort texloc;
-    ushort users;
+    uint shdloc;
+    uint texloc;
+    uint users;
 
 } Material;
 
@@ -24,18 +24,18 @@ typedef struct SIN_MATERIAL {
 
 int       SIN_matbucket_init     ();
 int       SIN_matbucket_end      ();
-void      SIN_unsubMaterial      (ushort loc);
+void      SIN_unsubMaterial      (uint loc);
 
-Material* SIN_buildMaterial      (ushort matid, ushort texid, uchar texoffset);
-Material* SIN_matbucket_find     (ushort matid);
-Material* SIN_matbucket_get      (ushort loc);
-ushort    SIN_matbucket_findloc  (ushort matid);
+Material* SIN_buildMaterial      (uint matid, uint texid, uchar texoffset);
+Material* SIN_matbucket_find     (uint matid);
+Material* SIN_matbucket_get      (uint loc);
+uint      SIN_matbucket_findloc  (uint matid);
 
-ushort    SIN_getActiveMatCount  ();
-ushort    SIN_getOpaqueMatCount  ();
+uint      SIN_getActiveMatCount  ();
+uint      SIN_getOpaqueMatCount  ();
 
-ushort    SIN_getMaxMaterials    ();
-int       SIN_getMaterialIsOpaque(ushort loc);
+uint      SIN_getMaxMaterials    ();
+int       SIN_getMaterialIsOpaque(uint loc);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,14 @@ DA_ObjectAttrs = [
 
 static_attrs = ["displayName", "weight"];
 
-#   ---     ---     ---     ---     ---    
+#   ---     ---     ---     ---     ---
+
+class DA_ObjectSettings(PropertyGroup):
+
+    arc_offset   = IntProperty  (name        = "",                 default = 0, min = 0, max = 255,
+                                 description = "DAF file mesh slot"                                              );
+
+#   ---     ---     ---     ---     ---
 
 class DA_SceneSettings(PropertyGroup):
 
@@ -53,6 +60,9 @@ class DA_SceneSettings(PropertyGroup):
 
     curmat       = PointerProperty(name         = "",           type    = Material,
                                    description  = "Selected material for adjusting settings & exporting");
+
+    curobj       = PointerProperty(name         = "",           type    = Object,
+                                   description  = "Selected object for adjusting settings & exporting"  );
 
 #   ---     ---     ---     ---     ---
 
@@ -155,6 +165,9 @@ class DA_MaterialSettings(PropertyGroup):
     mat_offset   = IntProperty  (name        = "",                 default = 0, min = 0, max = 255,
                                  description = "DAF file material slot"                                          );
 
+    matid        = IntProperty  (name        = "",                 default = 1, min = 1, max = 65535,
+                                 description = "Unique material ID (nonzero)"                                    );
+
     flags        = IntProperty  (default     = DA_MaterialFlags["Specular"] | DA_MaterialFlags["Opaque"]         );
 
     shader       = IntProperty  (default     = 0                                                                 );
@@ -176,17 +189,21 @@ class DA_MaterialSettings(PropertyGroup):
 def register():
 
     register_class(DA_SceneSettings   );
+    register_class(DA_ObjectSettings  );
     register_class(DA_MaterialSettings);
 
     Scene.BlackMagic    = PointerProperty(type = DA_SceneSettings   );
+    Object.BlackMagic   = PointerProperty(type = DA_ObjectSettings  );
     Material.BlackMagic = PointerProperty(type = DA_MaterialSettings);
 
 def unregister():
     
     del Scene.BlackMagic;
+    del Object.BlackMagic;
     del Material.BlackMagic;
 
     unregister_class(DA_SceneSettings   );
+    unregister_class(DA_ObjectSettings  );
     unregister_class(DA_MaterialSettings);
 
 #   ---     ---     ---     ---     ---

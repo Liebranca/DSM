@@ -39,34 +39,28 @@ def reset_pose(ob):
 
 #   ---     ---     ---     ---     ---
 
-def writecrk(ob_name):
+def writecrk():
 
-    from . import bmpath, filepath, filename, archive, writeoffset, writemode
+    from . import bmpath, filepath, filename, writemode
 
     print("");
 
-    ob = None;
+    scene = bpy.context.scene.BlackMagic;
+    ob    = scene.curobj;
 
-    if ob_name not in bpy.data.objects:
-        raise STAHP ("Object %s not found"%ob_name)
+    if not ob: return ("No active object!");
 
-    else: ob = bpy.data.objects[ob_name];
+#   ---     ---     ---     ---     ---
 
-    context = bpy.context
+    archive         = scene.mesharch;
+    writeoffset     = ob.BlackMagic.arc_offset;
+
+    context         = bpy.context
     original_object = ob;
-    mesh = ob.data
+    mesh            = ob.data
 
-    if not ob:
-        raise STAHP ("No object selected -- export failed.")
-
-    elif not isinstance(mesh, bpy.types.Mesh):
+    if not isinstance(mesh, bpy.types.Mesh):
         raise STAHP ("Selected object has no mesh data -- export failed.")
-
-    for propname in obj_proplist:
-        if propname not in ob.game.properties: raise STAHP ("Object %s missing property %s"%(ob.name, propname));
-
-    archive     = ob.game.properties["obarc"].value;
-    writeoffset = "0x%X"%ob.game.properties["obarci"].value;
 
     if os.path.exists(filepath + "\\" + archive  + ".daf"):
 
@@ -76,10 +70,10 @@ def writecrk(ob_name):
             x        = f.read(2);
             fcounter = x[0] + (x[1] << 8);
 
-            if fcounter <= int(writeoffset, 16): writemode = '0x01';
-            else:                                writemode = '0x02';
+            if fcounter <= writeoffset: writemode = '0x01';
+            else:                       writemode = '0x02';
 
-    else:                                        writemode = '0x00';
+    else:                               writemode = '0x00';
 
 #   ---     ---     ---     ---     ---
 
@@ -148,7 +142,7 @@ def writecrk(ob_name):
 
         header[0:2]            = numVerts.to_bytes(2, "little");
         header[2:4]            = numIndices.to_bytes(2, "little");
-        header[4:6]            = (ob.game.properties["matid"].value).to_bytes(2, "little");
+        header[4:6]            = (mesh.materials[0].BlackMagic.matid).to_bytes(2, "little");
         ii                     = 6;
 
         l = []; i = 0;
@@ -222,7 +216,7 @@ def writecrk(ob_name):
                   + filepath + "\\" + filename + ".crk"  + " "
                   + filepath + "\\" + archive  + ".daf"  + " "
                   + writemode                            + " "
-                  + writeoffset                        );
+                  + str(writeoffset)                                    );
 
         end = time.time(); cpp_execTimer = end - start;
 
@@ -235,7 +229,6 @@ def writecrk(ob_name):
         print("");
 
 #   ---     ---     ---     ---     ---
-
 
     finally:
 
@@ -265,6 +258,8 @@ def writecrk(ob_name):
         del header;
         del vertBuff;
         del indexBuff;
+
+        return None;
 
 def masscrk():
 

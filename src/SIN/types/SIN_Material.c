@@ -1,7 +1,6 @@
 #include "SIN_Material.h"
 
-#include "lyarr/ZJC_Hash.h"
-#include "lyarr/ZJC_Stack.h"
+#include "lyarr/ZJC_Container.h"
 #include "lyutils/ZJC_Evil.h"
 
 #include "SIN_Texture.h"
@@ -9,78 +8,41 @@
 
 #include <stdio.h>
 
+static Material   SIN_emptymat          = {0};
+static ushort     SIN_ACTIVE_MATERIALS  = 0;
 
+static ushort     SIN_OPAQUE_MATERIALS  = 0;
 
-static Material SIN_emptymat          = {0};
-static ushort   SIN_ACTIVE_MATERIALS  = 0;
-
-static ushort   SIN_OPAQUE_MATERIALS  = 0;
-
-static sStack*  SIN_MAT_SLOTSTACK     = NULL;
-static sHash*   SIN_MATHASH           = NULL;
-
-static Material SIN_matbucket[SIN_MAX_MATERIALS];
+static Container* SIN_matbucket;
 
 //  - --- - --- - --- - --- -
-ushort    SIN_getMaxMaterials ()                { return SIN_MAX_MATERIALS;                                             }
 
-int       SIN_matbucket_init  ()                {
+uint SIN_getMaxMaterials()                      { return SIN_MAX_MATERIALS;                                             }
 
-    SIN_MATHASH       = build_sHash (SIN_MAX_MATERIALS);
-    SIN_MAT_SLOTSTACK = build_sStack(SIN_MAX_MATERIALS);
+int SIN_matbucket_init()                        {
 
-    for(int i = SIN_MAX_MATERIALS-1;
-        i > 0; i--)                             { sStack_push(SIN_MAT_SLOTSTACK, i);                                    }
-
+    SIN_matbucket = ZJC_buildcont(SIN_MAX_MATERIALS, 64, sizeof(Material), "Material");
     return 0;                                                                                                           }
 
-int       SIN_matbucket_end   ()                {
-
-    del_sStack(SIN_MAT_SLOTSTACK);
-    del_sHash (SIN_MATHASH);
-
-    return 0;                                                                                                           }
+int SIN_matbucket_end()                         { ZJC_delcont(SIN_matbucket); return 0;                                 }
 
 //  - --- - --- - --- - --- -
 
-ushort    SIN_getActiveMatCount ()              { return SIN_ACTIVE_MATERIALS;                                          }
-ushort    SIN_getOpaqueMatCount ()              { return SIN_OPAQUE_MATERIALS;                                          }
+uint SIN_getActiveMatCount()                    { return SIN_ACTIVE_MATERIALS;                                          }
+uint SIN_getOpaqueMatCount()                    { return SIN_OPAQUE_MATERIALS;                                          }
 
 //  - --- - --- - --- - --- -
 
-Material* SIN_matbucket_find  (ushort matid)    {
+Material* SIN_matbucket_find(uint matid)        { ZJC_cont_find(SIN_matbucket, Material, matid);                        }
+Material* SIN_matbucket_get(uint loc)           { ZJC_cont_get(SIN_matbucket, Material, loc);                           }
 
-    ushort loc = sh_hashloc(SIN_MATHASH, matid);
-    if(loc == 0)                                { return NULL;                                                          }
-
-    return SIN_matbucket+(loc-1);                                                                                       }
-
-ushort SIN_matbucket_findloc  (ushort matid)    {
-
-    ushort loc = sh_hashloc(SIN_MATHASH, matid);
-    if(loc == 0)                                { fprintf(stderr, "Material %u not found\n", matid);
-                                                  return 0;                                                             }
-
-    return loc-1;                                                                                                       }
-
-Material* SIN_matbucket_get      (ushort loc)   {
-
-    if(loc < SIN_MAX_MATERIALS)
-    { 
-        if(SIN_matbucket+loc)                   { return SIN_matbucket+loc;                                             }
-
-        printf("Location %u points to an empty material slot\n", loc);
-        return NULL;
-    }
-
-    printf("No material at location %u\n", loc);
-    return NULL;                                                                                                        }
+uint SIN_matbucket_findloc(uint matid)          { return ZJC_cont_findLoc(SIN_matbucket, matid);                        }
 
 //  - --- - --- - --- - --- -
 
-Material* SIN_buildMaterial   (ushort matid,
-                               ushort texid,
-                               uchar  texoffset){
+Material* SIN_buildMaterial(uint  matid,
+                            uint  texid,
+                            uchar texoffset)    {
 
     Material* material = SIN_matbucket_find(matid);
 
@@ -90,24 +52,21 @@ Material* SIN_buildMaterial   (ushort matid,
         == SIN_MAX_MATERIALS)                   { fprintf(stderr, "Cannot create more than %u materials\n",
                                                   SIN_MAX_MATERIALS); return NULL;                                      }
 
-        uint loc = sStack_pop(SIN_MAT_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
+        uint loc = ZJC_pushcont(SIN_matbucket, matid);
 
-        sh_insert(SIN_MATHASH, matid, loc);
-
-        material             = SIN_matbucket+loc;
+        material             = ((Material*) SIN_matbucket->buff) + loc;
         material->id         = matid;
 
         ushort*      shdid   = NULL;
         SIN_MATDATA* matdata = SIN_MateBlock_getSlot(loc);
 
-        SIN_buildTexture(texid, &shdid, texoffset, matdata);
+        //SIN_buildTexture(texid, &shdid, texoffset, matdata);
 
         material->texloc  = SIN_texbucket_findloc(texid);
 
         if(matdata->flags & 2)                  { SIN_OPAQUE_MATERIALS++;                                               }
 
-        material->shdloc  = SIN_shdbucket_findloc(shdid);
+        // material->shdloc  = SIN_shdbucket_findloc(shdid);
 
         SIN_ACTIVE_MATERIALS++;
 
@@ -123,32 +82,32 @@ Material* SIN_buildMaterial   (ushort matid,
 
 //  - --- - --- - --- - --- -
 
-int SIN_getMaterialIsOpaque(ushort loc)         { return (SIN_MateBlock_getSlot(loc)->flags & 2);                       }
+int SIN_getMaterialIsOpaque(uint loc)           { return (SIN_MateBlock_getSlot(loc)->flags & 2);                       }
 
 //  - --- - --- - --- - --- -
 
-void    del_material        (Material* material,
-                             ushort loc)        {
+void del_material(Material* material,
+                  uint      loc)                {
 
     if(SIN_getMaterialIsOpaque(loc))            { SIN_OPAQUE_MATERIALS--;                                               }
 
     SIN_unsubShader (material->shdloc);
     SIN_unsubTexture(material->texloc);
 
-    SIN_matbucket[loc] = SIN_emptymat;
+    /*SIN_matbucket[loc] = SIN_emptymat;
     int memward = sStack_push(SIN_MAT_SLOTSTACK, loc);
-    WARD_EVIL_UNSIG(memward, 1);
+    WARD_EVIL_UNSIG(memward, 1);*/
 
     SIN_ACTIVE_MATERIALS--;                                                                                             }
 
-void    SIN_unsubMaterial  (ushort loc)         {
+void SIN_unsubMaterial(uint loc)                {
 
-    Material* material = SIN_matbucket+loc;
+    Material* material = SIN_matbucket_get(loc);
 
     if(material)
     {
         material->users--;
-        if(material->users == 0)                { sh_pop(SIN_MATHASH, loc); del_material(material, loc);                }
+        if(material->users == 0)                { /*sh_pop(SIN_MATHASH, loc);*/ del_material(material, loc);                }
     }
 
                                                                                                                         }

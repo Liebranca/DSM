@@ -41,6 +41,44 @@ class DA_scenePanel(bpy.types.Panel):
 
 #   ---     ---     ---     ---     ---
 
+class DA_objectPanel(bpy.types.Panel):
+
+    bl_label       = 'Object';
+    bl_idname      = 'DA_objectPanel';
+    bl_space_type  = 'VIEW_3D';
+    bl_region_type = 'TOOLS';
+    bl_category    = 'BlackMagic';
+
+#   ---     ---     ---     ---     ---
+    
+    @classmethod
+    def poll(cls, context):
+        return context.scene is not None;
+
+    def draw(self, context):
+        layout = self.layout;
+
+        scene  = context.scene;
+        ob     = scene.BlackMagic.curobj;
+
+        row = layout.row();
+        layout.prop_search(scene.BlackMagic, "curobj", bpy.data, "objects");
+
+        if ob:
+
+            row = layout.row();
+            row.label(text = "Slot:")
+            row.prop(ob.BlackMagic, "arc_offset");
+
+            layout.separator();
+
+            row = layout.row();
+            row.operator("blackmagic.exportmesh", text = "Export", icon = "EXPORT");
+
+            layout.separator();
+
+#   ---     ---     ---     ---     ---
+
 class DA_materialPanel(bpy.types.Panel):
 
     bl_label       = 'Material';
@@ -74,6 +112,10 @@ class DA_materialPanel(bpy.types.Panel):
             row.operator("blackmagic.setmateflags", text = "Set Flags", icon = "MOD_SOFT");
 
             layout.separator();
+
+            row = layout.row();
+            row.label(text = "ID:");
+            row.prop(mate.BlackMagic, "matid");
 
             row = layout.row();
             row.label(text = "TexCount:");
@@ -123,6 +165,7 @@ def register():
     bmcommops.register();
 
     register_class(DA_scenePanel   );
+    register_class(DA_objectPanel  );
     register_class(DA_materialPanel);
 
 
@@ -132,6 +175,7 @@ def unregister():
     bmcommops.unregister();
 
     unregister_class(DA_scenePanel   );
+    unregister_class(DA_objectPanel  );
     unregister_class(DA_materialPanel);
 
 if __name__ == "__main__":

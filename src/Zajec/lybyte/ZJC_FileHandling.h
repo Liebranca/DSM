@@ -9,10 +9,45 @@ extern "C" {
 
 //  - --- - --- - --- - --- -
 
-typedef struct DARK_AGE_FILE DAF;
+typedef struct DARK_AGE_FILE                    {
 
-typedef struct MESH_FILE_3D CRK;
-typedef struct TEXTURE_FILE_24BITYUVA JOJ;
+    uchar    sign[8];
+    ushort   fileCount;
+    uint     size;
+    uint     offsets[ZJC_DAFSIZE];
+
+} DAF;
+
+typedef struct MESH_FILE_3D                     {
+
+    ushort   vertCount;
+    ushort   indexCount;
+    ushort   matid;
+
+} CRK;
+
+typedef struct TEXTURE_FILE_24BITYUVA           {
+
+    ushort  height;
+    ushort  width;
+
+    uint    imcount;
+    uint    datasize_i;
+    uint    datasize_d;
+
+} JOJ;
+
+typedef struct JOJ_MATERIAL_BLOCK {
+
+    float   spec_mult;
+    float   diff_mult;
+    float   ref_mult;
+    float   glow_rea;
+
+    ushort  shdid;
+    ushort  flags;
+
+} JOJMATE;
 
 typedef struct SCENE_OBJECT                     {
 
@@ -29,15 +64,20 @@ typedef struct SCENE_OBJECTS_FILE               {
 
 } SSX;
 
+//  - --- - --- - --- - --- -
+
+void   ZJC_CRK_INIT     ();
+void   ZJC_CRK_END      ();
+
+//  - --- - --- - --- - --- -
+
 int    writecrk         (cchar* filename, cchar* archive, char* mode, char* offset);
 int    writejoj         (cchar* filename, cchar* archive, char* mode, char* offset);
 
-int    extraction_start (cchar* filename, uchar archtype, DAF** daf);
-int    extraction_end   (cchar* filename, DAF** daf);
+int    extraction_start (cchar* filename, uchar archtype);
+int    extraction_end   (cchar* filename);
 
-int    extractcrk       (DAF* daf, uchar offset, ushort* matid, ushort* vertCount,
-                         ushort* indexCount, pVP3D_8** bounds,
-                         VP3D_8** verts, ushort** indices);
+int    extractcrk       (uchar offset, uchar start);
 
 int    extractjoj       (DAF* daf, uchar offset, uchar* imcount, uint* size, ushort* width,
                          ushort* height, uchar* flags, float fvalues[4], ushort* shdid);
@@ -47,7 +87,7 @@ void   joj_subTexRead   (uint dim, uchar imcount, uchar curim, float** pixels);
 int    readssx          (SSX* ssx, cchar* filename);
 void   del_SsxFile      (SSX* ssx);
 
-DAF*   dafalloc();
+//  - --- - --- - --- - --- -
 
 #ifdef __cplusplus
 }
