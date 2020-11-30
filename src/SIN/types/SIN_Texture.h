@@ -12,33 +12,33 @@ extern "C" {
 
 typedef struct SIN_TEXTURE {
 
-    ushort id;
-    ushort users;
+    uint   id;
+    uint   users;
 
     ushort width;
     ushort height;
 
     uint   location;
-    uchar  imcount;
+    uint   imcount;
 
 } Texture;
 
 //  - --- - --- - --- - --- -
 
-int      SIN_texbucket_init    ();
-int      SIN_texbucket_end     ();
+int      SIN_init_texbucket     (uint top_id);
+int      SIN_end_texbucket      ();
 
-int      SIN_tex_extract_from  (cchar* filename);
-int      SIN_tex_extract_end   (cchar* filename);
+int      SIN_fopen_texture      (cchar* filename);
+int      SIN_fclose_texture     (cchar* filename);
 
-Texture* SIN_buildTexture      (ushort idbase, ushort* shdid, uchar offset, SIN_MATDATA* matdata);
+Texture* SIN_build_texture      (uint texid, uint* shdid, uchar offset, SIN_MATDATA* matdata);
 
-Texture* SIN_texbucket_get     (ushort loc);
-Texture* SIN_texbucket_find    (ushort id);
-ushort   SIN_texbucket_findloc (ushort id);
+Texture* SIN_getItem_texbucket  (uint loc);
+Texture* SIN_findItem_texbucket (uint id, int shutit);
+uint     SIN_findLoc_texbucket  (uint id);
 
-void     SIN_unsubTexture      (ushort loc);
-void     SIN_bindTexture       (ushort loc, uint slot);
+void     SIN_unsub_texture      (uint loc);
+void     SIN_bind_texture       (uint loc, uint slot);
 
 //  - --- - --- - --- - --- -
 

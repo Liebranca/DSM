@@ -17,11 +17,11 @@ static uchar   zjc_convertor_flags  = 0;
 
 int zjc_convertor_init(uchar flags)             {
 
-    if (flags & BUILD_FRAC)                     { build_fvRange(&frac_range,       128, 0.03125f   );
+    if (flags & BUILD_FRAC)                     { build_fvRange(&frac_range,       256, -0.03125f  );
                                                   build_fvRange(&ufrac_range,      256, 0.00390625f);               }
 
     if (flags & BUILD_JOJ)                      { build_fvRange(&joj_luma_range,   64,  0.015625f);
-                                                  build_fvRange(&joj_chroma_range, 64, -0.03125f);               }
+                                                  build_fvRange(&joj_chroma_range, 64, -0.03125f);                  }
 
     zjc_convertor_flags = flags;
 
@@ -104,19 +104,16 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 
 //  - --- - --- - --- - --- -
 
-float frac_tofloat(uchar frac)                  { uchar i = frac >> 1; if(i == 127) { i++; }
+float frac_tofloat(uchar frac)                  { int i = frac - 128;
 
-                                                  float  v = i * 0.03125f;
-                                                  return v * (1 - (2 * (frac & 1)));                                }
+    if     (i ==      127)                      { i++;                                                              }
+    return  i *  0.03125f;                                                                                          }
 
 float ufrac_tofloat(uchar frac)                 { return frac * 0.00390625f;                                        }
 
 //      - --- - --- - --- - --- -
 
-uchar float_tofrac(float v)                     { uchar frac;
-
-                                                  uchar index = fvRange_take_closest_1b(&frac_range, (float)fabs(v));
-                                                  frac = (index << 1) + (v < 0); return frac;                       }
+uchar float_tofrac(float v)                     { return fvRange_take_closest_1b(&frac_range, v);                   }
 
 uchar float_toufrac(float v)                    { uchar frac = fvRange_take_closest_1b(&ufrac_range, v);
                                                   return frac;                                                      }

@@ -166,6 +166,8 @@
   <ItemGroup>
     <ClInclude Include="lyarr\ZJC_Container.h" />
     <ClInclude Include="lyarr\ZJC_DynArray.h" />
+    <ClInclude Include="lyarr\ZJC_Hash.h" />
+    <ClInclude Include="lyarr\ZJC_LinkList.h" />
     <ClInclude Include="lyarr\ZJC_Stack.h" />
     <ClInclude Include="lybyte\ZJC_BitPacker.h" />
     <ClInclude Include="lymath\ZJC_GOPS.h" />
@@ -182,6 +184,8 @@
   <ItemGroup>
     <ClCompile Include="lyarr\ZJC_Container.c" />
     <ClCompile Include="lyarr\ZJC_DynArray.c" />
+    <ClCompile Include="lyarr\ZJC_Hash.c" />
+    <ClCompile Include="lyarr\ZJC_LinkList.c" />
     <ClCompile Include="lyarr\ZJC_Stack.c" />
     <ClCompile Include="lybyte\ZJC_BitPacker.c" />
     <ClCompile Include="lybyte\ZJC_FileHandling.c" />

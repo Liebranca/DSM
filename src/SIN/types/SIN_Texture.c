@@ -1,11 +1,10 @@
 #include "SIN_Texture.h"
 
-#include "lyarr/ZJC_Hash.h"
-#include "lyarr/ZJC_Stack.h"
+#include "lyarr/ZJC_Container.h"
 #include "lybyte/ZJC_FileHandling.h"
 #include "lyutils/ZJC_Evil.h"
 
-#include "GL\glew.h"
+#include "GL/glew.h"
 
 #include <stdio.h>
 
@@ -17,90 +16,48 @@ static ushort   SIN_ACTIVE_TEXTURES = 0;
 
 static DAF*     TEX_ARCHIVE         = NULL;
 
-static sStack*  SIN_TEX_SLOTSTACK   = NULL;
-static sHash*   SIN_TEXHASH         = NULL;
-
-static Texture* SIN_texbucket       = NULL;
+static Container* SIN_texbucket     = NULL;
 
 #define SIN_TEXFLAGS_SMOOTHMAP        1
 
 //  - --- - --- - --- - --- -
 
-int SIN_texbucket_init ()                       {
+int SIN_init_texbucket(uint top_id)             {
 
-    TEX_ARCHIVE       = dafalloc();
-    SIN_texbucket     = (Texture*) evil_malloc(SIN_MAX_TEXTURES, sizeof(Texture));
-
-    SIN_TEXHASH       = build_sHash (SIN_MAX_TEXTURES);
-    SIN_TEX_SLOTSTACK = build_sStack(SIN_MAX_TEXTURES);
-
-    for(int i = SIN_MAX_TEXTURES-1;
-        i > 0; i--)                             { sStack_push(SIN_TEX_SLOTSTACK, i);                                    }
-
+    SIN_texbucket = ZJC_build_cont              (SIN_MAX_TEXTURES, sizeof(Texture), top_id, "Texture"                   );
     return 0;                                                                                                           }
 
-int SIN_texbucket_end  ()                       {
-
-    del_sStack   (SIN_TEX_SLOTSTACK     );
-    del_sHash    (SIN_TEXHASH           );
+int SIN_end_texbucket()                         {
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
     for(uint i = 0;
-        i < SIN_MAX_TEXTURES; i++)              { Texture* tex = SIN_texbucket + i;
+        i < SIN_MAX_TEXTURES; i++)              { Texture* tex = ((Texture*) SIN_texbucket->buff) + i;
+                                                  if(tex->id) { glDeleteTextures(1, &tex->location); }                  }
 
-                                                  if(tex->id)
-                                                { glDeleteTextures(1, &tex->location); }                                }
-
-    WARD_EVIL_MFREE(SIN_texbucket);
-    WARD_EVIL_MFREE(TEX_ARCHIVE);
-
-    return 0;                                                                                                           }
+    ZJC_del_cont(SIN_texbucket); return 0;                                                                              }
 
 //  - --- - --- - --- - --- -
 
-int     SIN_tex_extract_from(cchar* filename)  { return extraction_start(filename, 1, &TEX_ARCHIVE);                    }
-
-int     SIN_tex_extract_end (cchar* filename)  { return extraction_end(filename, &TEX_ARCHIVE);                         }
-
-//  - --- - --- - --- - --- -
-
-Texture* SIN_texbucket_find (ushort id)         {
-
-    ushort loc = sh_hashloc(SIN_TEXHASH, id);
-    if(loc == 0)                                { return NULL;                                                          }
-
-    return SIN_texbucket+(loc-1);                                                                                       }
-
-ushort SIN_texbucket_findloc  (ushort id)       {
-
-    ushort loc = sh_hashloc(SIN_TEXHASH, id);
-    if(loc == 0)                                { fprintf(stderr, "Texture %u not found\n", id);
-                                                  return 0;                                                             }
-
-    return loc-1;                                                                                                       }
-
-Texture* SIN_texbucket_get  (ushort loc)        {
-
-    if(loc < SIN_MAX_TEXTURES)
-    { 
-        if(SIN_texbucket+loc)                   { return SIN_texbucket+loc;                                             }
-
-        printf("Location %u points to an empty texture slot\n", loc);
-        return NULL;
-    }
-
-    printf("No texture at location %u\n", loc);
-    return NULL;                                                                                                        }
+int SIN_fopen_texture (cchar* filename)         { return extraction_start(filename, 1, &TEX_ARCHIVE);                    }
+int SIN_fclose_texture(cchar* filename)         { return extraction_end(filename, &TEX_ARCHIVE);                         }
 
 //  - --- - --- - --- - --- -
 
-Texture* SIN_buildTexture (ushort       id,
-                           ushort*      shdid,
+Texture* SIN_findItem_texbucket(uint id,
+                                int shutit)     {        ZJC_findItem_cont(SIN_texbucket, Texture, id, shutit );        }
+
+Texture* SIN_getItem_texbucket (uint loc)       {        ZJC_getItem_cont (SIN_texbucket, Texture, loc        );        }
+uint     SIN_findLoc_texbucket (uint id )       { return ZJC_findLoc_cont (SIN_texbucket, id,      0          ) - 1;    }
+
+//  - --- - --- - --- - --- -
+
+Texture* SIN_build_texture(uint       texid,
+                           uint*      shdid,
                            uchar        offset,
-                           SIN_MATDATA* matdata) {
+                           SIN_MATDATA* matdata){
 
-    Texture* tex = SIN_texbucket_find(id);
+    Texture* tex = SIN_findItem_texbucket(texid, 1);
 
     if(tex == NULL)
     {
@@ -108,14 +65,12 @@ Texture* SIN_buildTexture (ushort       id,
            == SIN_MAX_TEXTURES)                 { fprintf(stderr, "Cannot create more than %u textures",
                                                   SIN_MAX_TEXTURES); return NULL;                                       }
 
-        uint loc = sStack_pop(SIN_TEX_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
+        uint loc               = ZJC_push_cont  (SIN_texbucket, texid);
+                                 WARD_EVIL_UNSIG(loc,           1    );
 
-        sh_insert(SIN_TEXHASH, id, loc);
+        Texture* tex           = ((Texture*) SIN_texbucket->buff) + loc;
 
-        tex                    = SIN_texbucket+loc;
-
-        tex->id                = id;
+        tex->id                = texid;
         tex->imcount           = 0;
 
         uint        size       = 0;
@@ -178,37 +133,36 @@ Texture* SIN_buildTexture (ushort       id,
 
 //  - --- - --- - --- - --- -
 
-void SIN_bindTexture(ushort loc, uint slot)     {
+void SIN_bind_texture(uint loc, uint slot)      {
 
-    Texture* tex = SIN_texbucket_get(loc);
+    Texture* tex  = SIN_getItem_texbucket       (loc                                                                    );
+    if(slot      >= 31)                         { slot = 31;                                                            }
 
-    if(slot >= 31)                              { slot = 31;                                                            }
-
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, tex->location);                                                                  }
+    glActiveTexture                             (GL_TEXTURE0 + slot                                                     );
+    glBindTexture                               (GL_TEXTURE_2D_ARRAY, tex->location                                     );
+                                                                                                                        }
 
 //  - --- - --- - --- - --- -
 
-void     del_tex            (Texture*   tex,
-                             ushort loc)        {
+void SIN_del_texture(Texture* tex,
+                     uint     loc)              {
 
     glBindTexture   (GL_TEXTURE_2D_ARRAY, 0);
     glDeleteTextures(1, &tex->location     );
 
     SIN_texbucket[loc] = SIN_emptytex;
-    int memward = sStack_push(SIN_TEX_SLOTSTACK, loc);
-    WARD_EVIL_UNSIG(memward, 1);
 
     SIN_ACTIVE_TEXTURES--;                                                                                              }
 
-void  SIN_unsubTexture       (ushort loc)       {
+void  SIN_unsub_texture(uint loc)               {
 
-    Texture* tex = SIN_texbucket_get(loc);
+    Texture* tex = SIN_getItem_texbucket(loc);
 
     if(tex)
     {
         tex->users--;
-        if(tex->users == 0)                     { sh_pop(SIN_TEXHASH, tex->id); del_tex(tex, loc);                      }
+        if(tex->users == 0)                     { if( ZJC_pop_cont   (SIN_texbucket, tex->id)  )
+                                                {     SIN_del_texture(tex,           loc    ); }                        }
     }
 
                                                                                                                         }

@@ -22,20 +22,20 @@ typedef struct SIN_MATERIAL {
 
 //  - --- - --- - --- - --- -
 
-int       SIN_matbucket_init     ();
-int       SIN_matbucket_end      ();
-void      SIN_unsubMaterial      (uint loc);
+int       SIN_init_matbucket            (uint top_id);
+int       SIN_end_matbucket             ();
+void      SIN_unsub_material            (uint loc);
 
-Material* SIN_buildMaterial      (uint matid, uint texid, uchar texoffset);
-Material* SIN_matbucket_find     (uint matid);
-Material* SIN_matbucket_get      (uint loc);
-uint      SIN_matbucket_findloc  (uint matid);
+Material* SIN_build_material            (uint matid, uint texid, uchar texoffset);
+Material* SIN_findItem_matbucket        (uint id, int shutit);
+Material* SIN_getItem_matbucket         (uint loc);
+uint      SIN_findLoc_matbucket         (uint id);
 
-uint      SIN_getActiveMatCount  ();
-uint      SIN_getOpaqueMatCount  ();
+uint      SIN_getActiveCount_material   ();
+uint      SIN_getOpaqueCount_material   ();
 
-uint      SIN_getMaxMaterials    ();
-int       SIN_getMaterialIsOpaque(uint loc);
+uint      SIN_getMax_material           ();
+int       SIN_getIsOpaque_material      (uint loc);
 
 #ifdef __cplusplus
 }

@@ -87,6 +87,12 @@
     <ClInclude Include="lyarr\ZJC_Container.h">
       <Filter>Header Files\lyarr</Filter>
     </ClInclude>
+    <ClInclude Include="lyarr\ZJC_LinkList.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
+    <ClInclude Include="lyarr\ZJC_Hash.h">
+      <Filter>Header Files\lyarr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZJC_CommonTypes.c">
@@ -126,6 +132,12 @@
       <Filter>Source Files\lybyte</Filter>
     </ClCompile>
     <ClCompile Include="lyarr\ZJC_Container.c">
+      <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\ZJC_LinkList.c">
+      <Filter>Source Files\lyarr</Filter>
+    </ClCompile>
+    <ClCompile Include="lyarr\ZJC_Hash.c">
       <Filter>Source Files\lyarr</Filter>
     </ClCompile>
   </ItemGroup>

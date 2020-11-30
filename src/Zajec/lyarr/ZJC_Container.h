@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "ZJC_Stack.h"
+#include "ZJC_Hash.h"
 
 //  - --- - --- - --- - --- -
 
@@ -15,7 +16,7 @@ typedef struct ZJC_CONTAINER {
     cuchar* objname;
 
     Stack*  stack;
-    uint*   ID_table;
+    HASH*   hash;
 
     void*   buff;
 
@@ -23,24 +24,33 @@ typedef struct ZJC_CONTAINER {
 
 //  - --- - --- - --- - --- -
 
-Container*  ZJC_buildcont       (uint       stacksize, uint tablesize, uint objsize, cuchar* objname);
-void        ZJC_delcont         (Container* cont                                                    );
+Container*  ZJC_build_cont      (uint       tablesize, uint objsize, uint maxvalue, cuchar* objname );
+void        ZJC_del_cont        (Container* cont                                                    );
 
-uint        ZJC_pushcont        (Container* cont,      uint id                                      );
-uint        ZJC_cont_findLoc    (Container* cont,      uint id                                      );
-uint        ZJC_cont_chkLoc     (Container* cont,      uint loc                                     );
+uint        ZJC_push_cont       (Container* cont,      uint id                                      );
+uint        ZJC_pop_cont        (Container* cont,      uint id                                      );
+uint        ZJC_findLoc_cont    (Container* cont,      uint id     , int shutit                     );
 
 //  - --- - --- - --- - --- -
 
-#define ZJC_cont_find(cont, type, id) { uint loc = ZJC_cont_findLoc(cont, id); if(loc == 0) { return (void*) 0;         }\
-                                        return ((type*) cont->buff) + loc;                                               \
-                                                                                                                        }
-
-#define ZJC_cont_get(cont, type, loc) { if(loc > cont->stack->size)                                                      \
-                                      { printf("Location %u out of bounds for %s container.\n", loc, cont->objname); }   \
+#define ZJC_findItem_cont(cont, type, id, mute) {                                                                        \
                                                                                                                          \
-                                        else if( ((type*) cont->buff) + loc ) { return ((type*) cont->buff) + loc;      }\
-                                        printf("Location %u points to an empty %s.\n", loc, cont->objname);             }\
+    if(id)                                      { uint loc = ZJC_findLoc_cont(cont, id, mute);                           \
+                                                  if(!loc) { return (void*) 0; }                                         \
+                                                  return ((type*) cont->buff) + loc;                                    }\
+                                                                                                                         \
+    return (void*) 0;                                                                                                   }
+
+#define ZJC_getItem_cont(cont, type, loc)       {                                                                        \
+                                                                                                                         \
+    if(loc > cont->stack->size || !loc)         { printf("Location %u out of bounds for %s container.\n",                \
+                                                         loc, cont->objname);                                           }\
+                                                                                                                         \
+    else if(((type*) cont->buff) + loc )        { return ((type*) cont->buff) + loc;                                    }\
+                                                                                                                         \
+    printf("Location %u points to an empty %s.\n", loc, cont->objname);                                                  \
+                                                                                                                         \
+    return (void*) 0;                                                                                                   }
 
 //  - --- - --- - --- - --- -
 

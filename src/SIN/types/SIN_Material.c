@@ -17,34 +17,35 @@ static Container* SIN_matbucket;
 
 //  - --- - --- - --- - --- -
 
-uint SIN_getMaxMaterials()                      { return SIN_MAX_MATERIALS;                                             }
+uint SIN_getMax_material()                      { return SIN_MAX_MATERIALS;                                             }
 
-int SIN_matbucket_init()                        {
+int SIN_init_matbucket(uint top_id)             {
 
-    SIN_matbucket = ZJC_buildcont(SIN_MAX_MATERIALS, 64, sizeof(Material), "Material");
+    SIN_matbucket = ZJC_build_cont              (SIN_MAX_MATERIALS, sizeof(Material), top_id, "Material"                );
     return 0;                                                                                                           }
 
-int SIN_matbucket_end()                         { ZJC_delcont(SIN_matbucket); return 0;                                 }
+int SIN_end_matbucket()                         { ZJC_del_cont(SIN_matbucket); return 0;                                }
 
 //  - --- - --- - --- - --- -
 
-uint SIN_getActiveMatCount()                    { return SIN_ACTIVE_MATERIALS;                                          }
-uint SIN_getOpaqueMatCount()                    { return SIN_OPAQUE_MATERIALS;                                          }
+uint SIN_getActiveCount_material()              { return SIN_ACTIVE_MATERIALS;                                          }
+uint SIN_getOpaqueCount_material()              { return SIN_OPAQUE_MATERIALS;                                          }
 
 //  - --- - --- - --- - --- -
 
-Material* SIN_matbucket_find(uint matid)        { ZJC_cont_find(SIN_matbucket, Material, matid);                        }
-Material* SIN_matbucket_get(uint loc)           { ZJC_cont_get(SIN_matbucket, Material, loc);                           }
+Material* SIN_findItem_matbucket(uint id,
+                                 int shutit)    {        ZJC_findItem_cont(SIN_matbucket, Material, id, shutit );       }
 
-uint SIN_matbucket_findloc(uint matid)          { return ZJC_cont_findLoc(SIN_matbucket, matid);                        }
+Material* SIN_getItem_matbucket (uint loc)      {        ZJC_getItem_cont (SIN_matbucket, Material, loc);               }
+uint      SIN_findLoc_matbucket (uint id )      { return ZJC_findLoc_cont (SIN_matbucket, id,       0  ) - 1;           }
 
 //  - --- - --- - --- - --- -
 
-Material* SIN_buildMaterial(uint  matid,
-                            uint  texid,
-                            uchar texoffset)    {
+Material* SIN_build_material(uint  matid,
+                             uint  texid,
+                             uchar texoffset)    {
 
-    Material* material = SIN_matbucket_find(matid);
+    Material* material = SIN_findItem_matbucket(matid, 1);
 
     if(material == NULL)
     {
@@ -52,7 +53,8 @@ Material* SIN_buildMaterial(uint  matid,
         == SIN_MAX_MATERIALS)                   { fprintf(stderr, "Cannot create more than %u materials\n",
                                                   SIN_MAX_MATERIALS); return NULL;                                      }
 
-        uint loc = ZJC_pushcont(SIN_matbucket, matid);
+        uint loc             = ZJC_push_cont  (SIN_matbucket, matid);
+                               WARD_EVIL_UNSIG(loc,           1    );
 
         material             = ((Material*) SIN_matbucket->buff) + loc;
         material->id         = matid;
@@ -82,12 +84,12 @@ Material* SIN_buildMaterial(uint  matid,
 
 //  - --- - --- - --- - --- -
 
-int SIN_getMaterialIsOpaque(uint loc)           { return (SIN_MateBlock_getSlot(loc)->flags & 2);                       }
+int SIN_getIsOpaque_material(uint loc)          { return (SIN_MateBlock_getSlot(loc)->flags & 2);                       }
 
 //  - --- - --- - --- - --- -
 
-void del_material(Material* material,
-                  uint      loc)                {
+void SIN_del_material(Material* material,
+                      uint      loc)            {
 
     if(SIN_getMaterialIsOpaque(loc))            { SIN_OPAQUE_MATERIALS--;                                               }
 
@@ -100,14 +102,15 @@ void del_material(Material* material,
 
     SIN_ACTIVE_MATERIALS--;                                                                                             }
 
-void SIN_unsubMaterial(uint loc)                {
+void SIN_unsub_material(uint loc)               {
 
-    Material* material = SIN_matbucket_get(loc);
+    Material* material = SIN_getItem_matbucket(loc);
 
     if(material)
     {
         material->users--;
-        if(material->users == 0)                { /*sh_pop(SIN_MATHASH, loc);*/ del_material(material, loc);                }
+        if(material->users == 0)                { if( ZJC_pop_cont    (SIN_matbucket, material->id)  )
+                                                {     SIN_del_material(material,      loc         ); }                  }
     }
 
                                                                                                                         }

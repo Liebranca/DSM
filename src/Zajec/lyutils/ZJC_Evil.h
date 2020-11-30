@@ -58,21 +58,24 @@ static cuint ERROR = 0x02;
 
 //  - --- - --- - --- - --- -
 
-#define WARD_EVIL_MALLOC(x)             if(x == NULL)       { terminator(0x00, "");                                 }
-#define WARD_EVIL_MFREE(x)              if(x != NULL)       { evil_free((void*) x); x = NULL;                       }
-#define WARD_EVIL_FOPEN(x, y)           if(x == NULL)       { terminator(0x40, y);  return ERROR;                   }
-#define WARD_EVIL_FCLOSE(x, y)          if(x)               { terminator(0x41, y);  return ERROR;                   }
-#define WARD_EVIL_FWRITE(x, y, z)       if(x != z)          { terminator(0x42, y);  return ERROR;                   }
+#define WARD_EVIL_MALLOC(x)             if(x == NULL)       { terminator(0x00, "");                                     }
+#define WARD_EVIL_MFREE(x)              if(x != NULL)       { evil_free((void*) x); x = NULL;                           }
+#define WARD_EVIL_FOPEN(x, y)           if(x == NULL)       { terminator(0x40, y);  return ERROR;                       }
+#define WARD_EVIL_FCLOSE(x, y)          if(x)               { terminator(0x41, y);  return ERROR;                       }
+#define WARD_EVIL_FWRITE(x, y, z)       if(x != z)          { terminator(0x42, y);  return ERROR;                       }
 
 #define WARD_EVIL_WRAP(x, func)         GETLOC;\
                                         x = func;\
-                                        if(x == 1)          { return FATAL;                                         }\
-                                        else if(x == 2)     { return ERROR;                                         }\
-                                        else                { evil_poplocreg();                                     }
+                                        if(x == 1)          { return FATAL;                                             }\
+                                        else if(x == 2)     { return ERROR;                                             }\
+                                        else                { evil_poplocreg();                                         }
 
 #define WARD_EVIL_UNSIG(x, tresh)       GETLOC;\
-                                        if(x < tresh)       { terminator(0x03, "");                                 }\
-                                        else                { evil_poplocreg(); x -= tresh;                         }
+                                        if(x < tresh)       { terminator(0x03, "");                                     }\
+                                        else                { evil_poplocreg(); x -= tresh;                             }
+
+#define MEAN_NZID_WARNING(modname, id) if(!id)              { printf("WARNING (%s): use non-zero IDs, you schmuck!",    \
+                                                                     modname                                        );  }
 
 #ifdef __cplusplus
 }

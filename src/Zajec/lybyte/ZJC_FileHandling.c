@@ -513,18 +513,25 @@ int jojmate_to_daf(JOJMATE* mate,
 
 //  - --- - --- - --- - --- -
 
-int writecrk_daf(CRK*       crk,
-                 uint8_t    mode,
-                 uint8_t    offset,
-                 cchar*     filename)           {
+int writedaf(void*      obj,
+             cchar      sign[8],
+             uint       objsize,
+
+             JOJMATE*   mate,
+             uchar      mateoff,
+
+             uint8_t    mode,
+             uint8_t    offset,
+             cchar*     filename)           {
 
     int evilstate = 0;
+    int isJOJ     = !strcmp(sign, JOJSIGN);
 
     {
         cchar* readmode = get_fmode(mode);
         WARD_EVIL_WRAP(evilstate, openarch(filename,
                                            readmode,
-                                           CRKSIGN,
+                                           sign,
                                            mode,
                                            0        ));
     }
@@ -535,143 +542,16 @@ int writecrk_daf(CRK*       crk,
 
     if      (mode == DAF_WRITE)
     {
-        WARD_EVIL_WRAP(evilstate, crk_to_daf(crk, filename));
-        curdaf->fileCount++;
+        if  (isJOJ)                             { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
+        else                                    { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
 
-        rewind(curfile);
-        fseek (curfile, 8, SEEK_CUR);
-        fseek (curfile, 0, SEEK_CUR);
-
-        uint32_t newsize_offset[2] = { curdaf->size + curcrk_size, sizeof(DAF) };
-
-        EVIL_FWRITE(ushort,   1, &curdaf->fileCount, filename);
-        EVIL_FWRITE(uint32_t, 2, newsize_offset,  filename);
-
-    }
-
-    else if (mode == DAF_APPEND)
-    {
-        WARD_EVIL_WRAP(evilstate, crk_to_daf(crk, filename));
-
-        closebin(filename, 1);
-        openbin (filename, "rb+", 1);
-
-        fseek (curfile, 8, SEEK_CUR);
-        fseek (curfile, 0, SEEK_CUR);
-
-        uint32_t newsize = curdaf->size + curcrk_size;
-        uint32_t newoffset = curdaf->size;
-        uint16_t offset_stride = (curdaf->fileCount) * 4;
-
-        curdaf->fileCount++;
-        EVIL_FWRITE(ushort,   1, &curdaf->fileCount,  filename);
-        EVIL_FWRITE(uint32_t, 1, &newsize,         filename);
-
-        fseek (curfile, 0,             SEEK_CUR);
-        fseek (curfile, offset_stride, SEEK_CUR);
-
-        EVIL_FWRITE(uint32_t, 1, &newoffset,       filename);
-    }
-
-    else if (mode == DAF_UPDATE && offset < ZJC_DAFSIZE)
-    {
-
-        int isLastChunk = offset == (ZJC_DAFSIZE - 1) || offset == (curdaf->fileCount - 1);
-
-        uint32_t chunk_start = curdaf->offsets[offset];
-        uint32_t newsize, byteshift, old_end;
-
-        if(isLastChunk)
-        {
-            newsize   = chunk_start + curcrk_size;
-            old_end   = curdaf->size;
-            byteshift = newsize - old_end;
-
-            fseek (curfile, 0,           SEEK_CUR);
-            fseek (curfile, chunk_start, SEEK_CUR);
-            WARD_EVIL_WRAP(evilstate, crk_to_daf(crk, filename));
-            fseek (curfile, 0,           SEEK_CUR);
-
-            rewind(curfile);
-            fseek(curfile, 10, SEEK_CUR);
-            fseek(curfile, 0, SEEK_CUR);
-            EVIL_FWRITE(uint32_t, 1, &newsize, filename);
-            fseek(curfile, 0, SEEK_CUR);
-        }
-
-        else
-        {
-            uint32_t chunk_end;
-
-            chunk_end = chunk_start + curcrk_size;
-            old_end   = curdaf->offsets[offset+1];
-            byteshift = chunk_end - old_end;
-            newsize   = (curdaf->size - (old_end - chunk_start)) + curcrk_size;
-
-            fseek(curfile, 0,           SEEK_CUR);
-            fseek(curfile, chunk_start, SEEK_CUR);
-            WARD_EVIL_WRAP(evilstate, crk_to_daf(crk, filename));
-
-            curdaf_data += (old_end - sizeof(DAF));
-            fseek(curfile, 0,         SEEK_CUR);
-            fseek(curfile, chunk_end, SEEK_CUR);
-            fseek(curfile, 0,         SEEK_CUR);
-            EVIL_FWRITE(uchar, curdaf->size - old_end, curdaf_data, filename);
-            fseek(curfile, 0,         SEEK_CUR);
-
-            for(uint i = offset+1;
-                i < curdaf->fileCount; i++)        { curdaf->offsets[i] += byteshift;                                         }
-
-            rewind(curfile);
-            fseek(curfile, 10, SEEK_CUR);
-            fseek(curfile, 0, SEEK_CUR);
-            EVIL_FWRITE(uint32_t, 1,   &newsize,     filename);
-            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, curdaf->offsets, filename);
-            fseek(curfile, 0, SEEK_CUR);
-        }
-
-        _chsize_s(_fileno(curfile), curdaf->size + byteshift);
-
-    }
-
-    closebin(filename, 0);
-    return 0;
-                                                                                                                        }
-
-//  - --- - --- - --- - --- -
-
-int writejoj_daf(JOJ*       joj,
-                 JOJMATE*   mate,
-                 uchar      mateoff,
-                 uint8_t    mode,
-                 uint8_t    offset,
-                 cchar*     filename)           {
-
-    int evilstate = 0;
-
-    {
-        cchar* readmode = get_fmode(mode);
-        WARD_EVIL_WRAP(evilstate, openarch(filename,
-                                           readmode,
-                                           JOJSIGN,
-                                           mode,
-                                           0        ));
-    }
-
-    if      (curdaf->fileCount == ZJC_DAFSIZE
-            && mode != DAF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
-                                                  return 0;                                                             }
-
-    if      (mode == DAF_WRITE)
-    {
-        WARD_EVIL_WRAP(evilstate, joj_to_daf(joj, filename));
         curdaf->fileCount++;
 
         rewind(curfile             );
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize_offset[2] = { curdaf->size + curjoj_size, sizeof(DAF) + JDAF_MATEBLOCK };
+        uint32_t newsize_offset[2] = { curdaf->size + objsize, sizeof(DAF) + (JDAF_MATEBLOCK * (mate != NULL)) };
 
         EVIL_FWRITE(ushort,   1, &curdaf->fileCount, filename);
         EVIL_FWRITE(uint32_t, 2, newsize_offset,  filename);
@@ -680,7 +560,8 @@ int writejoj_daf(JOJ*       joj,
 
     else if (mode == DAF_APPEND)
     {
-        WARD_EVIL_WRAP(evilstate, joj_to_daf(joj, filename));
+        if  (isJOJ)                             { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
+        else                                    { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
 
         closebin(filename, 1);
         openbin (filename, "rb+", 1);
@@ -688,7 +569,7 @@ int writejoj_daf(JOJ*       joj,
         fseek (curfile, 8, SEEK_CUR);
         fseek (curfile, 0, SEEK_CUR);
 
-        uint32_t newsize   = curdaf->size + curjoj_size;
+        uint32_t newsize   = curdaf->size + objsize;
         uint32_t newoffset = curdaf->size;
 
         uint16_t offset_stride = (curdaf->fileCount) * 4;
@@ -713,13 +594,16 @@ int writejoj_daf(JOJ*       joj,
 
         if(isLastChunk)
         {
-            newsize   = chunk_start + curjoj_size;
+            newsize   = chunk_start + objsize;
             old_end   = curdaf->size;
             byteshift = newsize - old_end;
 
             fseek (curfile, 0,           SEEK_CUR);
             fseek (curfile, chunk_start, SEEK_CUR);
-            WARD_EVIL_WRAP(evilstate, joj_to_daf(joj, filename));
+
+            if  (isJOJ)                         { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
+            else                                { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
+
             fseek (curfile, 0,           SEEK_CUR);
 
             rewind(curfile);
@@ -733,14 +617,16 @@ int writejoj_daf(JOJ*       joj,
         {
             uint32_t chunk_end;
 
-            chunk_end = chunk_start + curjoj_size;
+            chunk_end = chunk_start + objsize;
             old_end   = curdaf->offsets[offset+1];
             byteshift = chunk_end - old_end;
-            newsize   = (curdaf->size - (old_end - chunk_start)) + curjoj_size;
+            newsize   = (curdaf->size - (old_end - chunk_start)) + objsize;
 
             fseek(curfile, 0,           SEEK_CUR);
             fseek(curfile, chunk_start, SEEK_CUR);
-            WARD_EVIL_WRAP(evilstate, joj_to_daf(joj, filename));
+
+            if  (isJOJ)                         { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
+            else                                { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
 
             curdaf_data += (old_end - sizeof(DAF));
             fseek(curfile, 0,         SEEK_CUR);
@@ -764,22 +650,25 @@ int writejoj_daf(JOJ*       joj,
 
     }
 
-    if(!(mate->flags & 128))                    { uint first_stride = sizeof(JOJMATE) * mateoff;
-                                                  uint final_stride = JDAF_MATEBLOCK - (first_stride + sizeof(JOJMATE));
+    if(mate)
+    {
+        if(!(mate->flags & 128))                { uint first_stride = sizeof(JOJMATE) * mateoff;
+                                                  uint final_stride = JDAF_MATEBLOCK - (first_stride + sizeof(JOJMATE)  );
 
-                                                  rewind        (curfile                                              );
-                                                  fseek         (curfile,   sizeof(DAF),  SEEK_CUR                    );
-                                                  fseek         (curfile,   0,            SEEK_CUR                    );
+                                                  rewind        (curfile                                                );
+                                                  fseek         (curfile,   sizeof(DAF),  SEEK_CUR                      );
+                                                  fseek         (curfile,   0,            SEEK_CUR                      );
 
-                                                  fseek         (curfile,   0,            SEEK_CUR                    );
-                                                  fseek         (curfile,   first_stride, SEEK_CUR                    );
+                                                  fseek         (curfile,   0,            SEEK_CUR                      );
+                                                  fseek         (curfile,   first_stride, SEEK_CUR                      );
 
-                                                  WARD_EVIL_WRAP(evilstate, jojmate_to_daf(mate, filename)            );
+                                                  WARD_EVIL_WRAP(evilstate, jojmate_to_daf(mate, filename)              );
 
-                                                  fseek         (curfile,   final_stride, SEEK_CUR                    );
-                                                  fseek         (curfile,   0,            SEEK_CUR                    );
+                                                  fseek         (curfile,   final_stride, SEEK_CUR                      );
+                                                  fseek         (curfile,   0,            SEEK_CUR                      );
 
                                                                                                                         }
+    }
 
     closebin(filename, 0);
     return 0;                                                                                                           }
@@ -904,29 +793,30 @@ int writecrk(cchar* filename,
              char*  mode,
              char*  offset)                     {
 
-    int evilstate =    0;
-
     curdaf = (DAF*) evil_malloc(1, sizeof(DAF));
     curcrk = (CRK*) evil_malloc(1, sizeof(CRK));
 
-    float* bounds =    NULL;
-    float* verts  =    NULL;
+    int    evilstate  = 0;
 
-    uint8_t numoffset = (uint8_t) hexstr_tolong(offset);
-    uint8_t nummode   = (uint8_t) hexstr_tolong(mode);
+    float* bounds     = NULL;
+    float* verts      = NULL;
 
-    zjc_convertor_init(BUILD_FRAC);
-    evilstate = read_crkdump(filename, curcrk, bounds, verts);
+    uint8_t numoffset = (uint8_t) hexstr_tolong (offset                                                                 );
+    uint8_t nummode   = (uint8_t) hexstr_tolong (mode                                                                   );
 
-    zjc_convertor_end();
+    zjc_convertor_init                          (BUILD_FRAC                                                             );
+    evilstate = read_crkdump                    (filename, curcrk, bounds, verts                                        );
+    zjc_convertor_end                           (                                                                       );
 
-    WARD_EVIL_MFREE(bounds);
-    WARD_EVIL_MFREE(verts);
+    WARD_EVIL_MFREE                             (bounds                                                                 );
+    WARD_EVIL_MFREE                             (verts                                                                  );
 
-    if(!evilstate)                              { evilstate = writecrk_daf(curcrk, nummode, numoffset, archive);}
+    if(!evilstate)                              { evilstate = writedaf(curcrk, CRKSIGN, curcrk_size, NULL,
+                                                                       0, nummode, numoffset, archive      );           }
+
     if(nummode == DAF_UPDATE || DAF_DELETE)     { WARD_EVIL_MFREE(curdaf_data);                                         }
 
-    ZJC_CRK_END();
+    ZJC_CRK_END                                 (                                                                       );
 
     return evilstate;                                                                                                   }
 
@@ -951,8 +841,8 @@ int writejoj(cchar* filename,
     evilstate = read_jojdump                    (filename, &joj, &mate, &mateoff                                        );
     zjc_convertor_end                           (                                                                       );
 
-    if(!evilstate)                              { evilstate = writejoj_daf(&joj, &mate, mateoff,
-                                                                           nummode, numoffset, archive);                }
+    if(!evilstate)                              { evilstate = writedaf(&joj, JOJSIGN, curjoj_size, &mate,
+                                                                       mateoff, nummode, numoffset, archive);           }
 
     if(nummode == DAF_UPDATE || DAF_DELETE)     { WARD_EVIL_MFREE(curdaf_data);                                         }
 

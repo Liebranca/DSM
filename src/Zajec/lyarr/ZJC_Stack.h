@@ -19,10 +19,10 @@ typedef struct ZJC_STACK {
 
 //  - --- - --- - --- - --- -
 
-Stack* ZJC_buildstack   (uint statcksize           );
-void   ZJC_delstack     (Stack* stack              );
-int    ZJC_pushstack    (Stack* stack, uint value  );
-uint   ZJC_popstack     (Stack* stack              );
+Stack* ZJC_build_stack   (uint statcksize           );
+void   ZJC_del_stack     (Stack* stack              );
+int    ZJC_push_stack    (Stack* stack, uint value  );
+uint   ZJC_pop_stack     (Stack* stack              );
 
 //  - --- - --- - --- - --- -
 
