@@ -16,7 +16,7 @@ typedef struct ZJC_CONTAINER {
     cuchar* objname;
 
     Stack*  stack;
-    HASH*   hash;
+    Hash*   hash;
 
     void*   buff;
 
@@ -24,12 +24,12 @@ typedef struct ZJC_CONTAINER {
 
 //  - --- - --- - --- - --- -
 
-Container*  ZJC_build_cont      (uint       tablesize, uint objsize, uint maxvalue, cuchar* objname );
-void        ZJC_del_cont        (Container* cont                                                    );
+Container*  ZJC_build_cont      (uint tablesize, uint objsize, uint maxvalue, cuchar* objname);
+void        ZJC_del_cont        (Container*  cont                                            );
 
-uint        ZJC_push_cont       (Container* cont,      uint id                                      );
-uint        ZJC_pop_cont        (Container* cont,      uint id                                      );
-uint        ZJC_findLoc_cont    (Container* cont,      uint id     , int shutit                     );
+uint        ZJC_push_cont       (Container*  cont, uint id                                   );
+uint        ZJC_pop_cont        (Container*  cont, uint id                                   );
+uint        ZJC_findLoc_cont    (Container*  cont, uint id,        int shutit                );
 
 //  - --- - --- - --- - --- -
 

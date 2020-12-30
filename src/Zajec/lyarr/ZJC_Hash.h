@@ -18,16 +18,16 @@ typedef struct ZJC_HASHTABLE {
 
     LND** table;
 
-} HASH;
+} Hash;
 
 //  - --- - --- - --- - --- -
 
-HASH* ZJC_build_hash        (uint size, uint max_value      );
-void  ZJC_del_hash          (HASH* hash                     );
+Hash* ZJC_build_hash        (uint  size, uint max_value             );
+void  ZJC_del_hash          (Hash* hash                             );
 
-void  ZJC_push_hash         (HASH* hash, uint id, uint data );
-uint  ZJC_pop_hash          (HASH* hash, uint id            );
-uint  ZJC_find_hash         (HASH* hash, uint id            );
+void  ZJC_push_hash         (Hash* hash, uint id,       uint data   );
+uint  ZJC_pop_hash          (Hash* hash, uint id                    );
+uint  ZJC_find_hash         (Hash* hash, uint id                    );
 
 //  - --- - --- - --- - --- -
 

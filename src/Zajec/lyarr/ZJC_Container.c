@@ -8,19 +8,20 @@
 Container* ZJC_build_cont(uint    tablesize,
                           uint    objsize,
                           uint    maxvalue,
-                          cuchar* objname    )  {
+                          cuchar* objname  )    {
 
-    Container* cont = (Container*) evil_malloc  (1,         sizeof(Container)                                           );
-    cont->buff      = (uchar*    ) evil_malloc  (tablesize, objsize                                                     );
+    Container* cont  = NULL;
 
-    cont->hash      = ZJC_build_hash            (tablesize, maxvalue                                                    );
-    cont->stack     = ZJC_build_stack           (tablesize                                                              );
+    WARD_EVIL_MALLOC                            (cont,       Container, sizeof(Container), 1                            );
+    WARD_EVIL_MALLOC                            (cont->buff, void,      objsize,           tablesize                    );
 
-    cont->objsize   = objsize;
-    cont->objname   = objname;
+    cont->hash       = ZJC_build_hash           (tablesize, maxvalue                                                    );
+    cont->stack      = ZJC_build_stack          (tablesize                                                              );
+                     
+    cont->objsize    = objsize;
+    cont->objname    = objname;
 
     for(uint i = tablesize; i > 0; i--)         { ZJC_push_stack(cont->stack, i);                                       }
-
     return cont;                                                                                                        }
 
 void ZJC_del_cont(Container* cont)              { ZJC_del_stack   (cont->stack); ZJC_del_hash   (cont->hash);

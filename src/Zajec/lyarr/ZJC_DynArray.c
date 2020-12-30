@@ -6,10 +6,12 @@
 
 fArray* build_fArray(uint32_t size)             {
 
-    fArray* farr = (fArray*) evil_malloc(1, sizeof(fArray));
+    fArray* farr = NULL;
+
+    WARD_EVIL_MALLOC(farr,       fArray, sizeof(fArray), 1   );
+    WARD_EVIL_MALLOC(farr->buff, float,  sizeof(float ), size);
 
     farr->size   = size;
-    farr->buff   = (float*) evil_malloc(size, sizeof(float));
 
     return farr;                                                                                                        }
 
@@ -19,10 +21,12 @@ void   del_fArray(fArray* farr)                 { WARD_EVIL_MFREE(farr->buff); W
 
 usArray* build_usArray(uint32_t size)           {
 
-    usArray* usarr = (usArray*) evil_malloc(1, sizeof(usArray));
+    usArray* usarr = NULL;
+
+    WARD_EVIL_MALLOC(usarr,       usArray, sizeof(usArray), 1   );
+    WARD_EVIL_MALLOC(usarr->buff, ushort,  sizeof(ushort ), size);
 
     usarr->size = size;
-    usarr->buff = (ushort*) evil_malloc(size, sizeof(ushort));
 
     return usarr;                                                                                                       }
 

@@ -10,7 +10,7 @@ extern "C" {
 //      - --- - --- - --- - --- -
 
 char* subpath(cchar* fullpath, uint levels);
-char* catpath(cchar* root, cchar* added);
+void  catpath(cchar* root, cchar* added, char** dst);
 
 //      - --- - --- - --- - --- -
 

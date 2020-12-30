@@ -1,7 +1,6 @@
 #include "SIN_Mesh.h"
 
-#include "lyarr/ZJC_Hash.h"
-#include "lyarr/ZJC_Stack.h"
+#include "lyarr/ZJC_Container.h"
 #include "lybyte/ZJC_FileHandling.h"
 #include "lyutils/ZJC_Evil.h"
 
@@ -13,98 +12,55 @@
 #include <stdio.h>
 #include <math.h>
 
-#define SIN_MAX_MESHES              512
+#define           SIN_MAX_MESHES       512
 
-static M3D     SIN_emptymesh      = {0};
+static M3D        SIN_emptymesh      = {0};
 
-static ushort  SIN_ACTIVE_MESHES  = 0;
+static uint       SIN_ACTIVE_MESHES  = 0;
 
-static DAF*    MESH_ARCHIVE       = NULL;
+static DAF*       MESH_ARCHIVE       = NULL;
 
-static sStack* SIN_MESH_SLOTSTACK = NULL;
-static sHash*  SIN_MEHASH         = NULL;
-
-static M3D*    SIN_meshbucket     = NULL;
-
-typedef struct TRI_NORMAL_GROUP {
-
-    float face_normals[3];
-    uint  len;
-
-} TNG;
+static Container* SIN_meshbucket     = NULL;
 
 //  - --- - --- - --- - --- -
 
-int SIN_meshbucket_init ()                      {
+int SIN_init_meshbucket (uint top_id)           {
 
-    MESH_ARCHIVE       = dafalloc();
-    SIN_meshbucket     = (M3D*) evil_malloc(SIN_MAX_MESHES, sizeof(M3D));
-
-    SIN_MEHASH         = build_sHash (SIN_MAX_MESHES);
-    SIN_MESH_SLOTSTACK = build_sStack(SIN_MAX_MESHES);
-
-    for(int i = SIN_MAX_MESHES-1; i > 0; i--)   { sStack_push(SIN_MESH_SLOTSTACK, i);                                   }
-
+    SIN_meshbucket = ZJC_build_cont             (SIN_MAX_MESHES, sizeof(M3D), top_id, "Mesh"                            );
     return 0;                                                                                                           }
 
-int SIN_meshbucket_end  ()                      {
-
-    del_sStack(SIN_MESH_SLOTSTACK);
-    del_sHash (SIN_MEHASH);
+int SIN_end_meshbucket ()                       {
 
     for(uint i = 0;
-        i < SIN_MAX_MESHES; i++)                { M3D* mesh = SIN_meshbucket + i;
+        i < SIN_MAX_MESHES; i++)                { M3D* mesh = ((M3D*) SIN_meshbucket->buff) + i;
 
                                                   if(mesh->id)
                                                 { WARD_EVIL_MFREE(mesh->bounds); }                                      }
 
-    WARD_EVIL_MFREE(SIN_meshbucket);
-    WARD_EVIL_MFREE(MESH_ARCHIVE);
+    ZJC_del_cont(SIN_meshbucket);
 
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
 
-int     SIN_mesh_extract_from(cchar* filename)  { return extraction_start(filename, 0, &MESH_ARCHIVE);                  }
+int SIN_fopen_mesh (cchar* filename)            { return extraction_start(filename, 0, &MESH_ARCHIVE);                  }
 
-int     SIN_mesh_extract_end (cchar* filename)  { return extraction_end(filename, &MESH_ARCHIVE);                       }
-
-//  - --- - --- - --- - --- -
-
-M3D* SIN_meshbucket_find (ushort id)            {
-
-    ushort loc = sh_hashloc(SIN_MEHASH, id);
-    if(loc == 0)                                { return NULL;                                                          }
-
-    return SIN_meshbucket+(loc-1);                                                                                      }
-
-ushort SIN_meshbucket_findloc  (ushort id)      {
-
-    ushort loc = sh_hashloc(SIN_MEHASH, id);
-    if(loc == 0)                                { fprintf(stderr, "Mesh %u not found\n", id);
-                                                  return 0;                                                             }
-
-    return loc-1;                                                                                                       }
-
-M3D* SIN_meshbucket_get  (ushort loc)           {
-
-    if(loc < SIN_MAX_MESHES)
-    { 
-        if(SIN_meshbucket+loc)                  { return SIN_meshbucket+loc;                                            }
-
-        printf("Location %u points to an empty mesh slot\n", loc);
-        return NULL;
-    }
-
-    printf("No mesh at location %u\n", loc);
-    return NULL;                                                                                                        }
+int SIN_fclose_mesh(cchar* filename)            { return extraction_end(filename, &MESH_ARCHIVE);                       }
 
 //  - --- - --- - --- - --- -
 
-M3D*    SIN_buildMesh       (ushort id,
-                             uchar  offset)     {
+M3D* SIN_findItem_meshbucket(uint id,
+                             int shutit)        {        ZJC_findItem_cont(SIN_meshbucket, M3D, id, shutit);            }
 
-    M3D* mesh = SIN_meshbucket_find(id);
+M3D* SIN_getItem_meshbucket (uint loc)          {        ZJC_getItem_cont (SIN_meshbucket, M3D, loc       );            }
+uint SIN_findLoc_meshbucket (uint id )          { return ZJC_findLoc_cont (SIN_meshbucket, id,  0         ) - 1;        }
+
+//  - --- - --- - --- - --- -
+
+M3D*    SIN_build_mesh       (uint  id,
+                              uchar offset)     {
+
+    M3D* mesh = SIN_findItem_meshbucket(id, 0);
 
     if(mesh == NULL)
     {
@@ -112,12 +68,10 @@ M3D*    SIN_buildMesh       (ushort id,
         == SIN_MAX_MESHES)                      { fprintf(stderr, "Cannot create more than %u 3D meshes",
                                                   SIN_MAX_MESHES); return NULL;                                         }
 
-        uint loc = sStack_pop(SIN_MESH_SLOTSTACK);
-        WARD_EVIL_UNSIG(loc, 1);
+        uint loc        = ZJC_push_cont  (SIN_meshbucket, id);
+                          WARD_EVIL_UNSIG(loc,           1  );
 
-        sh_insert(SIN_MEHASH, id, loc);
-
-        mesh            = SIN_meshbucket+loc;
+        mesh            = ((M3D*) SIN_meshbucket->buff) + loc;
 
         mesh->id        = id;
 
@@ -186,29 +140,27 @@ M3D*    SIN_buildMesh       (ushort id,
 
 //  - --- - --- - --- - --- -
 
-void    SIN_drawMesh             (M3D*   mesh)  { glDrawElements(GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
+void SIN_draw_mesh(M3D*   mesh)                 { glDrawElements( GL_TRIANGLES, mesh->indexCount * 3, GL_UNSIGNED_SHORT,
                                                                  (void*) (mesh->drawOffset));                           }
 
-void     del_mesh            (M3D*   mesh,
-                              ushort loc)       {
+void SIN_del_mesh(M3D* mesh,
+                  uint loc)                     {
 
-    WARD_EVIL_MFREE  (mesh->bounds);
-    SIN_unsubMaterial(mesh->matloc);
+    WARD_EVIL_MFREE   (mesh->bounds);
+    SIN_unsub_material(mesh->matloc);
 
-    SIN_meshbucket[loc] = SIN_emptymesh;
-    int memward = sStack_push(SIN_MESH_SLOTSTACK, loc);
-    WARD_EVIL_UNSIG(memward, 1);
-
+    *mesh = SIN_emptymesh;
     SIN_ACTIVE_MESHES--;                                                                                                }
 
-void  SIN_unsubMesh       (ushort loc)          {
+void  SIN_unsub_mesh(uint loc)                  {
 
     M3D* mesh = SIN_meshbucket_get(loc);
 
     if(mesh)
     {
         mesh->users--;
-        if(mesh->users == 0)                    { sh_pop(SIN_MEHASH, mesh->id); del_mesh(mesh, loc);                    }
+        if(mesh->users == 0)                    { if( ZJC_pop_cont(SIN_meshbucket, mesh->id)  )
+                                                {     SIN_del_mesh(mesh,           loc     ); }                         }
     }
 
                                                                                                                         }

@@ -14,8 +14,8 @@
 
 //  - --- - --- - --- - --- -
 
-void terminator(uint errorcode,
-                cchar* info) {
+void __terminator__(uint errorcode,
+                    cchar* info)          {
 
     cchar* mstart;
     if (errorcode < 0x40)                 { mstart = "FATAL EXCEPTION"; gEvilState = FATAL;                 }
@@ -28,22 +28,23 @@ void terminator(uint errorcode,
 
 
     switch(errorcode)                     { 
-        case 0:                             errout("Insuficcient memory.");                      break;
-        case 1:                             errout("Access violation.");                         break;
-        case 2:                             errout("The end times have come.");                  break;
-        case 3:                             errout("You just did something illegal.");           break;
+        case  0:                            errout("Insuficcient memory (%s requested).", info); break;
+        case  1:                            errout("Access violation.");                         break;
+        case  2:                            errout("The end times have come.");                  break;
+        case  3:                            errout("You just did something illegal.");           break;
 
         case 64:                            errout("Couln't open file <%s>",              info); break;
         case 65:                            errout("File couldn't be closed <%s>",        info); break;
-        case 66:                            errout("File couldn't be writen <%s>",        info); break;
-        case 67:                            errout("Wrong file type for archive <%s>",    info); break;
-        case 68:                            errout("Error reading file <%s> overstride.", info); break;
+        case 66:                            errout("Error writting to file <%s>",         info); break;
+        case 67:                            errout("Error reading from file <%s>.",       info); break;
+
+        case 68:                            errout("Inappropriate file signature <%s>",   info); break;
 
 
                                                                                                             }
 
     errout("\nERRLOC TRACKER: %i ENTRIES\n", LOCREG_I);
-    evil_printlocreg(1);
+    __evil_printlocreg__(1);
 
 
     if(gEvilState == FATAL)                 __EVIL_HAS_WON__
@@ -53,28 +54,32 @@ void terminator(uint errorcode,
 
 //  - --- - --- - --- - --- -
 
-void* evil_malloc  (uint count,
-                    uint size)            { void* buff = malloc( count * size ); WARD_EVIL_MALLOC(buff);
+void __zjcitoa__(uint x,
+                 char* buff,
+                 int radix )              { itoa(x, buff, radix);                                           }
+
+void* __evil_malloc__(uint count,
+                      uint size)          { void* buff = malloc( count * size );
                                             memset(buff, 0, count * size); return buff;                     }
 
-void evil_free    (void* buff)            { free(buff);                                                     }
+void __evil_free__(void* buff)            { free(buff);                                                     }
 
 //  - --- - --- - --- - --- -
 
-void evil_geterrloc(cchar* path,
-                    cchar* func,
-                    uint line)            {
+void __evil_geterrloc__(cchar* path,
+                        cchar* func,
+                        uint line  )      {
 
     snprintf(LOCREG[LOCREG_I], 255, "Location %i <%s> on func %s line %i\n",
                                     LOCREG_I, path, func, line); LOCREG_I++;                                }
 
-void evil_printlocreg(int flush)          {
+void __evil_printlocreg__(int flush)      {
 
     for(uint i = 0; i < LOCREG_I; i++)    { fprintf(stderr, LOCREG[i]); if (flush) { LOCREG[i][0] = '\0'; } }
     if(flush)                             { LOCREG_I = 0;                                                   }
                                                                                                             }
 
-void evil_poplocreg()                     {
+void __evil_poplocreg__()                 {
 
     if(LOCREG_I)                          { LOCREG[LOCREG_I-1][0] = '\0'; LOCREG_I--;                       }
                                                                                                             }

@@ -5,20 +5,22 @@
 
 //  - --- - --- - --- - --- -
 
-HASH* ZJC_build_hash(uint size, uint max_value) {
+Hash* ZJC_build_hash(uint size,
+                     uint max_value)            {
 
-    HASH* newhash      = (HASH*) evil_malloc(1,    sizeof(HASH));
-    newhash->table     = (LND**) evil_malloc(size, sizeof(LND*));
+    Hash* hash      = NULL;
 
-    newhash->max_value = max_value;
-    newhash->size      = size;
-    newhash->xfac      = 1;
+    WARD_EVIL_MALLOC                            (hash,        Hash, sizeof(Hash), 1                                     );
+    WARD_EVIL_MALLOC                            (hash->table, LND*, sizeof(LND*), size                                  );
 
-    if(max_value > size)                        { newhash->xfac = max_value / size;                                     }
+    hash->max_value = max_value;
+    hash->size      = size;
+    hash->xfac      = 1;
 
-    return newhash;                                                                                                     }
+    if(max_value > size)                        { hash->xfac = max_value / size;                                        }
+    return hash;                                                                                                        }
 
-void  ZJC_del_hash(HASH* hash)                  {
+void  ZJC_del_hash(Hash* hash)                  {
 
     for(uint i = 0; i < hash->size; i++)        { ZJC_del_linkList(hash->table[i]);                                     }
 
@@ -27,9 +29,9 @@ void  ZJC_del_hash(HASH* hash)                  {
 
 //  - --- - --- - --- - --- -
 
-uint ZJC_hashit(HASH* hash, uint id)            { return (id + (id/hash->xfac)) % hash->size;                           }
+uint ZJC_hashit(Hash* hash, uint id)            { return (id + (id/hash->xfac)) % hash->size;                           }
 
-void ZJC_push_hash(HASH* hash,
+void ZJC_push_hash(Hash* hash,
                    uint id,
                    uint data   )                { uint loc    = ZJC_hashit(hash, id); MEAN_NZID_WARNING("ZJC_Hash", id);
 
@@ -39,14 +41,14 @@ void ZJC_push_hash(HASH* hash,
     else                                        { ZJC_push_linkList(hash->table[loc], id, data);                        }
                                                                                                                         }
 
-uint ZJC_pop_hash(HASH* hash, uint id)          { uint loc         = ZJC_hashit       (hash,              id );
+uint ZJC_pop_hash(Hash* hash, uint id)          { uint loc         = ZJC_hashit       (hash,              id );
 
     uint      data   = 0;                         LND* tmp         = ZJC_find_linkList( hash->table[loc], id );
     if(tmp) { data   = tmp->data;                 hash->table[loc] = ZJC_pop_linkList ( hash->table[loc], 0  );         }
 
     return    data;                                                                                                     }
 
-uint ZJC_find_hash(HASH* hash, uint id)         { uint loc = ZJC_hashit(hash, id);
+uint ZJC_find_hash(Hash* hash, uint id)         { uint loc = ZJC_hashit(hash, id);
 
     LND* tmp = ZJC_find_linkList                ( hash->table[loc], id                                                  );
     if(tmp)                                     { return tmp->data;                                                     }

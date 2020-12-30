@@ -14,18 +14,22 @@ LND* ZJC_build_linkList(uint* id,
                         uint* data,
                         uint  numnodes)         {
 
-    LND* head = (LND*) evil_malloc(1, sizeof(LND));
-    MEAN_NZID_WARNING("ZJC_LinkList", id[0]);
+    LND* head  = NULL;
+
+    WARD_EVIL_MALLOC (head, LND, sizeof(LND), 1)
+    MEAN_NZID_WARNING("ZJC_LinkList", id[0]    );
 
     head->id   = id  [0];
     head->data = data[0];
 
-    curlnd    = head;
+    curlnd     = head;
 
     for(uint i = 1; i < numnodes; i++)
     {
-        curlnd->next = (LND*) evil_malloc(1, sizeof(LND));
-        MEAN_NZID_WARNING("ZJC_LinkList", id[i]);
+        curlnd->next = NULL;
+
+        WARD_EVIL_MALLOC (curlnd->next, LND, sizeof(LND), 1)
+        MEAN_NZID_WARNING("ZJC_LinkList", id[i]            );
 
         curlnd       = curlnd->next;
         curlnd->id   = id  [i];
@@ -47,8 +51,8 @@ LND* ZJC_push_linkList(LND* head,
 
     while(curlnd->next != NULL)                 { prevlnd = curlnd; curlnd = curlnd->next;                              }
 
-    curlnd->next = (LND*) evil_malloc(1, sizeof(LND));
-    MEAN_NZID_WARNING("ZJC_LinkList", id);
+    WARD_EVIL_MALLOC (curlnd->next, LND, sizeof(LND), 1)
+    MEAN_NZID_WARNING("ZJC_LinkList", id               );
 
     curlnd       = curlnd->next;
     curlnd->id   = id;

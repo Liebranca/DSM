@@ -92,7 +92,7 @@ void     build_fvRange(fvRange* fvr,
 
     fvr->mag  = mag;
     fvr->step = (float ) fabs(step);
-    fvr->buff = (float*) evil_malloc(mag, sizeof(float));
+    WARD_EVIL_MALLOC(fvr->buff, float, sizeof(float), mag);
 
     if(step < 0)                        { step = -step;
 

@@ -150,7 +150,7 @@ void SIN_del_texture(Texture* tex,
     glBindTexture   (GL_TEXTURE_2D_ARRAY, 0);
     glDeleteTextures(1, &tex->location     );
 
-    SIN_texbucket[loc] = SIN_emptytex;
+    *tex = SIN_emptytex;
 
     SIN_ACTIVE_TEXTURES--;                                                                                              }
 

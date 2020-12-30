@@ -5,27 +5,42 @@
 extern "C" {
 #endif
 
-#define ZJC_DAFSIZE             256
+#include <stdint.h>
 
-typedef const           char    cchar;
-typedef const           short   cshort;
-typedef const           int     cint;
-typedef const           long    clong;
+#define ZJC_DAFSIZE              256
 
-typedef unsigned        char    uchar;
-typedef unsigned        short   ushort;
-typedef unsigned        int     uint;
-typedef unsigned        long    ulong;
+typedef                 int8_t   schar;         // signed  8-bit
+typedef                 int16_t  sshort;        // signed 16-bit
+typedef                 int32_t  sint;          // signed 32-bit
+typedef                 int64_t  slong;         // signed 64-bit
 
-typedef const unsigned  char    cuchar;
-typedef const unsigned  short   cushort;
-typedef const unsigned  int     cuint;
-typedef const unsigned  long    culong;
+typedef                 uint8_t  uchar;         // unsigned  8-bit
+typedef                 uint16_t ushort;        // unsigned 16-bit
+typedef                 uint32_t uint;          // unsigned 32-bit
+typedef                 uint64_t ulong;         // unsigned 64-bit
+
+typedef const           int8_t   cchar;         // const signed  8-bit
+typedef const           int16_t  cshort;        // const signed 16-bit
+typedef const           int32_t  cint;          // const signed 32-bit
+typedef const           int64_t  clong;         // const signed 64-bit
+
+typedef const           uint8_t  cuchar;        // const unsigned  8-bit
+typedef const           uint16_t cushort;       // const unsigned 16-bit
+typedef const           uint32_t cuint;         // const unsigned 32-bit
+typedef const           uint64_t culong;        // const unsigned 64-bit
 
 //  - --- - --- - --- - --- -
 
 typedef struct ZJC_FLOAT_PAIR   { float x; float y; } fpair;
 typedef struct ZJC_INT_PAIR     { int x;   int   y; } ipair;
+
+//  - --- - --- - --- - --- -
+
+const float FRAC8 = 1.0f / 256;
+const float FRAC7 = 1.0f / 128;
+const float FRAC6 = 1.0f /  64;
+const float FRAC5 = 1.0f /  32;
+const float FRAC4 = 1.0f /  16;
 
 //  - --- - --- - --- - --- -
 

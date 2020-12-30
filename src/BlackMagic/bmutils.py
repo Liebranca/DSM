@@ -22,8 +22,9 @@ debugPrint = True;
 #   ---     ---     ---     ---     ---
 
 def cmodus(a, b): return int(abs(a)%abs(b)*(1,-1)[a<0]);
-def ftb(num):     return struct.pack('<f', num);
-def ftbarr(arr):  return struct.pack('%sf'%len(arr), *arr);
+
+def ftb   (num ): return struct.pack('<f',            num);
+def ftbarr(arr ): return struct.pack('%sf'%len(arr), *arr);
 
 #   ---     ---     ---     ---     ---
 

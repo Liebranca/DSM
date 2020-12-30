@@ -9,9 +9,9 @@
 #include <stdio.h>
 
 static Material   SIN_emptymat          = {0};
-static ushort     SIN_ACTIVE_MATERIALS  = 0;
+static uint       SIN_ACTIVE_MATERIALS  = 0;
 
-static ushort     SIN_OPAQUE_MATERIALS  = 0;
+static uint       SIN_OPAQUE_MATERIALS  = 0;
 
 static Container* SIN_matbucket;
 
@@ -34,7 +34,7 @@ uint SIN_getOpaqueCount_material()              { return SIN_OPAQUE_MATERIALS;  
 //  - --- - --- - --- - --- -
 
 Material* SIN_findItem_matbucket(uint id,
-                                 int shutit)    {        ZJC_findItem_cont(SIN_matbucket, Material, id, shutit );       }
+                                 int  shutit)   {        ZJC_findItem_cont(SIN_matbucket, Material, id, shutit );       }
 
 Material* SIN_getItem_matbucket (uint loc)      {        ZJC_getItem_cont (SIN_matbucket, Material, loc);               }
 uint      SIN_findLoc_matbucket (uint id )      { return ZJC_findLoc_cont (SIN_matbucket, id,       0  ) - 1;           }
@@ -96,10 +96,7 @@ void SIN_del_material(Material* material,
     SIN_unsubShader (material->shdloc);
     SIN_unsubTexture(material->texloc);
 
-    /*SIN_matbucket[loc] = SIN_emptymat;
-    int memward = sStack_push(SIN_MAT_SLOTSTACK, loc);
-    WARD_EVIL_UNSIG(memward, 1);*/
-
+    *material = SIN_emptymat;
     SIN_ACTIVE_MATERIALS--;                                                                                             }
 
 void SIN_unsub_material(uint loc)               {

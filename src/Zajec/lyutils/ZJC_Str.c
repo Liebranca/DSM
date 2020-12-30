@@ -29,19 +29,20 @@ char* subpath(cchar* path, uint levels) {
 
 //      - --- - --- - --- - --- -
 
-char* catpath(cchar* root, cchar* added)       {
+void catpath(cchar* root,
+             cchar* added,
+             char** dst  )                      {
 
     uint  rootlen  = strlen(root);
     uint  addedlen = strlen(added);
 
-    char* catted = (char*) evil_malloc(rootlen + addedlen + 2, sizeof(char));
-    catted[0]    = '\0';
+    WARD_EVIL_MALLOC(*dst, char, sizeof(char), rootlen + addedlen + 2);
 
-    strcat(catted, root);
-    catted[rootlen + 1] = '\0';
+    *dst[0]         = '\0';
 
-    strcat(catted, added);
-    catted[rootlen + addedlen + 1] = '\0';
+    strcat(*dst, root);
+    *dst[rootlen + 1] = '\0';
 
-    return catted;                                                                                                      }
+    strcat(*dst, added);
+    *dst[rootlen + addedlen + 1] = '\0';                                                                                }
 

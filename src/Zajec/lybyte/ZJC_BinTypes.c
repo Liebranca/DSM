@@ -7,67 +7,66 @@
 #include "../lyutils/ZJC_Evil.h"
 #include "ZJC_BinTypes.h"
 
-static fvRange frac_range           = { 0 };
-static fvRange ufrac_range          = { 0 };
-
-static fvRange joj_luma_range       = { 0 };
-static fvRange joj_chroma_range     = { 0 };
-
-static uchar   zjc_convertor_flags  = 0;
-
-int zjc_convertor_init(uchar flags)             {
-
-    if (flags & BUILD_FRAC)                     { build_fvRange(&frac_range,       256, -0.03125f  );
-                                                  build_fvRange(&ufrac_range,      256, 0.00390625f);               }
-
-    if (flags & BUILD_JOJ)                      { build_fvRange(&joj_luma_range,   64,  0.015625f);
-                                                  build_fvRange(&joj_chroma_range, 64, -0.03125f);                  }
-
-    zjc_convertor_flags = flags;
-
-    return 0;                                                                                                       }
-
-int zjc_convertor_end()                         {
-
-    if (zjc_convertor_flags & BUILD_FRAC)       { del_fvRange(&ufrac_range     ); del_fvRange(&frac_range    );     }
-    if (zjc_convertor_flags & BUILD_JOJ)        { del_fvRange(&joj_chroma_range); del_fvRange(&joj_luma_range);     }
-
-    return 0;                                                                                                       }
+#include <math.h>
 
 //  - --- - --- - --- - --- -
 
-VP3D_8 build_vertpacked_3d_8bit(float* values)      {
+void ZJC_pack_rawvert(VP3D* vert,
+                      RWV3D* data)              {
 
-    VP3D_8 vert;
-    vert.co[0]        = float_tofrac  (*(values+0));
-    vert.co[1]        = float_tofrac  (*(values+1));
-    vert.co[2]        = float_tofrac  (*(values+2));
-                      
-    vert.normal[0]    = float_tofrac  (*(values+3));
-    vert.normal[1]    = float_tofrac  (*(values+4));
-    vert.normal[2]    = float_tofrac  (*(values+5));
+    uint   co    = ( (float_tofrac(data->co     [0], 4, FRAC5, 32, 128)      )
+                   | (float_tofrac(data->co     [1], 4, FRAC5, 32, 128) <<  8)
+                   | (float_tofrac(data->co     [2], 4, FRAC5, 32, 128) << 16) );
 
-    vert.tangent[0]   = float_tofrac  (*(values+6));
-    vert.tangent[1]   = float_tofrac  (*(values+7));
-    vert.tangent[2]   = float_tofrac  (*(values+8));
+    uint nnn     = ( (float_tofrac(data->normal [0], 1, FRAC5, 32,  32)      )
+                   | (float_tofrac(data->normal [1], 1, FRAC4, 16,  16) <<  6)
+                   | (            (data->normal [2] < 0               ) << 11)
+                   | (      ((int) data->bhand                        ) << 12) );
 
-    vert.bitangent[0] = float_tofrac  (*(values+9));
-    vert.bitangent[1] = float_tofrac  (*(values+10));
-    vert.bitangent[2] = float_tofrac  (*(values+11));
+    uint ttt     = ( (float_tofrac(data->tangent[0], 1, FRAC5, 32,  32)      )
+                   | (float_tofrac(data->tangent[1], 1, FRAC5, 32,  32) <<  6)
+                   | (            (data->tangent[2] < 0               ) << 12) );
 
-    vert.uv[0]        = float_toufrac (*(values+12));
-    vert.uv[1]        = float_toufrac (*(values+13));
+    uint uvs     = ( (float_tofrac(data->uv     [0], 1, FRAC7, 64,  64)      )
+                   | (float_tofrac(data->uv     [0], 1, FRAC7, 64,  64) <<  7) );
 
-    return vert;                                                                                                    }
+    vert->frac1  = (  (co)                    | ((nnn & 0xFF) << 24)           );
+    vert->frac2  = ( ((nnn & (31 << 8)) >> 8) | (ttt << 5) | (uvs << 18)       );                                   }
 
-pVP3D_8 build_physvert_3d_8bit (float* values)     { 
+void ZJC_pack_rawbox (BP3D*  box,
+                      RWB3D* data)              {
 
-    pVP3D_8 vert;
-    vert.co[0] = float_tofrac(*values);
-    vert.co[1] = float_tofrac(*(values+1));
-    vert.co[2] = float_tofrac(*(values+2));
+    box->frac1 = ( (float_tofrac  (data->co[ 0], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[ 1], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[ 2], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[ 3], 4, FRAC5, 32, 128) << 24) );
 
-    return vert;                                                                                                    }
+    box->frac2 = ( (float_tofrac  (data->co[ 4], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[ 5], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[ 6], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[ 7], 4, FRAC5, 32, 128) << 24) );
+
+    box->frac3 = ( (float_tofrac  (data->co[ 8], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[ 9], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[10], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[11], 4, FRAC5, 32, 128) << 24) );
+
+    box->frac4 = ( (float_tofrac  (data->co[12], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[13], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[14], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[15], 4, FRAC5, 32, 128) << 24) );
+
+    box->frac5 = ( (float_tofrac  (data->co[16], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[17], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[18], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[19], 4, FRAC5, 32, 128) << 24) );
+
+    box->frac6 = ( (float_tofrac  (data->co[20], 4, FRAC5, 32, 128)      )
+                 | (float_tofrac  (data->co[21], 4, FRAC5, 32, 128) <<  8)
+                 | (float_tofrac  (data->co[22], 4, FRAC5, 32, 128) << 16)
+                 | (float_tofrac  (data->co[23], 4, FRAC5, 32, 128) << 24) );
+
+                                                                                                                    }
 
 //  - --- - --- - --- - --- -
 
@@ -104,21 +103,22 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 
 //  - --- - --- - --- - --- -
 
-float frac_tofloat(uchar frac)                  { int i = frac - 128;
+float frac_tofloat(uint  frac,
+                   uint  maxval,
+                   float fac,
+                   uint  shift)                 { if(frac == maxval - 1) { frac = maxval; }
+                                                  return (frac - shift) * fac;                                      }
 
-    if     (i ==      127)                      { i++;                                                              }
-    return  i *  0.03125f;                                                                                          }
-
-float ufrac_tofloat(uchar frac)                 { return frac * 0.00390625f;                                        }
+uchar float_tofrac (float v,
+                    float maxval,
+                    float fraction,
+                    uint  fac,
+                    uint  shift)                { v = clampf(v, -maxval, maxval - fraction);
+                                                  return (uchar) roundf(v * fac) + shift;                           }
 
 //      - --- - --- - --- - --- -
 
-uchar float_tofrac(float v)                     { return fvRange_take_closest_1b(&frac_range, v);                   }
-
-uchar float_toufrac(float v)                    { uchar frac = fvRange_take_closest_1b(&ufrac_range, v);
-                                                  return frac;                                                      }
-
-//      - --- - --- - --- - --- -
+// try packing four pixels at a time someday
 
 JOJPIX rgba_to_joj  (float r,
                      float g,
@@ -127,10 +127,10 @@ JOJPIX rgba_to_joj  (float r,
 
     JOJPIX joj = { 0 };
 
-    joj.luma     = fvRange_take_closest_1b(&joj_luma_range,   ( 0.257f * r) + (0.504f * g) + (0.098f * b));
-    joj.chroma_u = fvRange_take_closest_1b(&joj_chroma_range, (-0.148f * r) - (0.291f * g) + (0.439f * b));
-    joj.chroma_v = fvRange_take_closest_1b(&joj_chroma_range, ( 0.439f * r) - (0.368f * g) - (0.071f * b));
-    joj.alpha    = fvRange_take_closest_1b(&joj_luma_range, a                                            );
+    joj.luma     = float_tofrac(( 0.257f * r) + (0.504f * g) + (0.098f * b), 1, FRAC6, 64,  0);
+    joj.chroma_u = float_tofrac((-0.148f * r) - (0.291f * g) + (0.439f * b), 1, FRAC5, 32, 32);
+    joj.chroma_v = float_tofrac(( 0.439f * r) - (0.368f * g) - (0.071f * b), 1, FRAC5, 32, 32);
+    joj.alpha    = float_tofrac(a,                                           1, FRAC6, 64,  0);
 
     return joj;                                                                                                     }
 

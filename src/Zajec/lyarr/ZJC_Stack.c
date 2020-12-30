@@ -7,9 +7,10 @@
 
 Stack* ZJC_build_stack(uint stacksize)          {
 
-    Stack* stack  = (Stack*) evil_malloc(1,         sizeof(Stack));
+    Stack* stack  = NULL;
 
-    stack->values = (uint* ) evil_malloc(stacksize, sizeof(uint ));
+    WARD_EVIL_MALLOC(stack,         Stack, sizeof(Stack), 1        );
+    WARD_EVIL_MALLOC(stack->values, uint,  sizeof(uint ), stacksize);
 
     stack->size   = stacksize;
     stack->top    = 0;

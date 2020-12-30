@@ -20,9 +20,15 @@ typedef struct DARK_AGE_FILE                    {
 
 typedef struct MESH_FILE_3D                     {
 
-    ushort   vertCount;
-    ushort   indexCount;
-    ushort   matid;
+    ushort boxCount;
+    ushort frameCount;
+    ushort vertCount;
+    ushort triCount;
+
+    uint   matid;
+    uint   numBinds;
+
+    float  binds[48];
 
 } CRK;
 
