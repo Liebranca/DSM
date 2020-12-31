@@ -321,26 +321,11 @@ int openarch(ZBIN*         bin,
         if(isnew && mode == DAF_READ     )      { fprintf(stderr, "Archive %s does not exist.\n", bin->name);
                                                   WARD_EVIL_WRAP(errorstate, remove(bin->name)); return ERROR;          }
 
-        if(mode  == DAF_APPEND           )      { rewind(bin->file);                                                    }
+        rewind                                  (bin->file                                                              );
 
-        fread                                   (curdaf, sizeof(DAF), 1, bin->file                                      );
+        EVIL_FREAD                              (DAF, 1, curdaf, bin                                                    );
 
         if(strcmp(curdaf->sign, archtype))      { __terminator__(68, bin->name); return ERROR;                          }
-
-        curdaf_data                             = NULL;
-        uint32_t datasize                       = curdaf->size - sizeof(DAF);
-
-        /* This block would read the WHOLE file, which is stupid
-           better go by fixed sized blocks when we actually do update/deletion and need to move data around
-           but overall the entire old system is halfarsed to the max, we need to ground-up rewrite it
-
-        if((mode == DAF_UPDATE)
-        || (mode == DAF_DELETE))
-        {
-            EVIL_FREAD                          (uchar,   datasize, curdaf_data, bin->file                              );
-            fseek                               (bin->file, 0,        SEEK_CUR                                          );
-            rewind                              (bin->file                                                              );
-        }*/
 
     }
 
@@ -369,24 +354,56 @@ int ZJC_new_dafblock(uchar*  src,
     else if(mode == DAF_UPDATE)
     {
         // copy first half to tempfile
-        uint blocksize = 0; if(offset > 0)      { blocksize = curdaf->offsets[offset];                                  }
+        uint blocksize = sizeof(DAF);
+        if(offset > 0)                          { blocksize = curdaf->offsets[offset];                                  }
+
         rewind                                  (dst->file                                                              );
         ZJC_copy_block                          (dst, tmpdst, blocksize                                                 );
 
         // write new block
-        fseek                                   (dst->file, 0,       SEEK_CUR                                           );
+        fseek                                   (tmpdst->file, 0,       SEEK_CUR                                        );
         EVIL_FWRITE                             (uchar,     objsize, src, tmpdst                                        );
-        fseek                                   (dst->file, 0,       SEEK_CUR                                           );
+        fseek                                   (tmpdst->file, 0,       SEEK_CUR                                        );
     }
 
     return 0;                                                                                                           }
 
-/*
+int ZJC_end_dafblock(ZBIN*   dst,
+                     ZBIN*   tmpdst,
 
-daf_update_end;
+                     uint    blocksize,
 
-{
-        // if not last block, copy remainder to tempfile
+                     uint8_t mode,
+                     uint8_t offset)            {
+
+    int evilstate = 0;
+
+    if(curdaf->fileCount == ZJC_DAFSIZE
+      && mode != DAF_UPDATE)                    { printf("Archive <%s> is full; addition aborted.\n", dst->name);
+                                                  return 0;                                                             }
+
+    if(mode == DAF_WRITE || mode == DAF_APPEND)
+    {
+
+        if(mode == DAF_APPEND)                  { closebin(dst, 1); openbin(dst, "rb+", 1); /* <- sneaky re-open*/      }
+
+        curdaf->offsets[curdaf->fileCount] = curdaf->size;
+
+        curdaf->fileCount++;
+        curdaf->size += blocksize;
+
+        rewind                                  (dst->file                                                              );
+        EVIL_FWRITE                             (DAF, 1, curdaf, dst                                                    );
+
+    }
+
+//  - --- - --- - --- - --- -
+
+    else if(mode == DAF_UPDATE)                 {
+
+        uint  chunk_start = curdaf->offsets[offset];
+
+        // if @offset is not the last block in DAF, then copy the remainder
         if                                      (!(offset == (ZJC_DAFSIZE - 1) || offset == (curdaf->fileCount - 1)    ))
 
         {   uint leap = curdaf->offsets[offset+1] - blocksize; blocksize = curdaf->size - curdaf->offsets[offset+1];
@@ -396,9 +413,44 @@ daf_update_end;
             fseek                               (dst->file, 0,      SEEK_CUR                                            );
 
             ZJC_copy_block                      (dst,       tmpdst, blocksize                                           );
+
+            uint  newsize;
+            uint  old_end;
+            uint  chunk_end;
+            slong byteshift;
+
+            chunk_end   =                       chunk_start + blocksize;
+            old_end     =                       curdaf->offsets[offset+1];
+            byteshift   =                       chunk_end - old_end;
+            newsize     =                       (curdaf->size - (old_end - chunk_start)) + blocksize;
+
+            // adjust the start of block markers for subsequent blocks in DAF to reflect the new size
+            for                                 (uint i = offset+1; i < curdaf->fileCount; i++                          )
+                                                { curdaf->offsets[i] += byteshift;                                      }
+
+            curdaf->size = newsize;                                                                                     }
+
+//  - --- - --- - --- - --- -
+
+        // no adjustment needed when @offset IS the last block; just assign new size in this case
+        else                                    { curdaf->size = chunk_start + blocksize;                               }
+
+        // write updated DAF
+        rewind                                  (tmpdst->file                                                           );
+        fseek                                   (tmpdst->file, 0,      SEEK_CUR                                         );
+        EVIL_FWRITE                             (DAF, 1, curdaf, tmpdst                                                 );
+        fseek                                   (tmpdst->file, 0,      SEEK_CUR                                         );
+
+        // now close the files, delete the original & rename tmp to take its place
+        WARD_EVIL_WRAP                          (evilstate, closebin(dst,    1) /* <- sneaky fclose*/                   );
+        WARD_EVIL_WRAP                          (evilstate, closebin(tmpdst, 1)                                         );
+
+        WARD_EVIL_WRAP                          (evilstate, remove(dst->name              )                             );
+        WARD_EVIL_WRAP                          (evilstate, rename(tmpdst->name, dst->name)                             );
+
                                                                                                                         }
-}
-*/
+    return 0;                                                                                                           }
+
 
 //  - --- - --- - --- - --- -
 
@@ -425,6 +477,8 @@ int read_crkdump(cchar*  filename,
     ZBIN tmpsrc         =                       { tmpsrc_name, NULL                                                     };
     ZBIN tmpvrt         =                       { tmpvrt_name, NULL                                                     };
     ZBIN tmpdst         =                       { tmpdst_name, NULL                                                     };
+
+    uint blocksize      =                       sizeof(CRK);
 
     WARD_EVIL_WRAP                              (evilstate, openbin(&src, "rb", 0)                                      );
 
@@ -458,6 +512,8 @@ int read_crkdump(cchar*  filename,
     // copy tri idex to file as-is
     ZJC_copy_block                              (&src, trvdst, (curcrk->triCount * 3) * 2                               );
 
+    blocksize +=                                (curcrk->boxCount * sizeof(BP3D) + (curcrk->triCount * 3 * 2)           );
+
 //  - --- - --- - --- - --- -
 
     // read/write verts
@@ -487,24 +543,40 @@ int read_crkdump(cchar*  filename,
 
 //  - --- - --- - --- - --- -
 
-    // with every frame written, compress and write
+    // with every frame written, deflate and write
     ZJC_DEFLATEFILE(&tmpsrc, &tmpvrt, curcrk->vertCount * sizeof(VP3D), curcrk->frameCount, size_i, &size_d);
 
     uint sizes[2] = { size_i, size_d }; EVIL_FWRITE(uint, 2, sizes, trvdst);
     ZJC_copy_block(&tmpvrt, trvdst, size_d);
+
+    blocksize    += size_d + sizeof(sizes) + (curcrk->numBinds * 16 * curcrk->frameCount * sizeof(float));
 
     WARD_EVIL_MFREE(rwbuff); WARD_EVIL_MFREE(vertpacked);                                                               }
 
 //  - --- - --- - --- - --- -
 
     // resolve DAF update
+    ZJC_end_dafblock                            (&dst, &tmpdst, blocksize, mode, offset                                 );
 
-    WARD_EVIL_WRAP                              (evilstate, closebin(filename, 0)                                       );
+    // now clean-up your mess
+    WARD_EVIL_WRAP                              (evilstate, closebin(&src, 0 )                                          );
+    WARD_EVIL_WRAP                              (evilstate, remove  (src.name)                                          );
+    printf                                      ("Deleted file <%s>\n", src.name                                        );
 
-//  - --- - --- - --- - --- -
+    if(mode != DAF_UPDATE)
+    { WARD_EVIL_WRAP                            (evilstate, closebin(&dst,    0 )                                       );
+      WARD_EVIL_WRAP                            (evilstate, closebin(&tmpdst, 1 )                                       );
+      WARD_EVIL_WRAP                            (evilstate, remove  (tmpdst.name)                                       );
+                                                                                                                        }
 
-    WARD_EVIL_WRAP(evilstate, remove(filename));
-    printf("Deleted file <%s>\n", filename);
+    WARD_EVIL_WRAP                              (evilstate, closebin(&tmpsrc, 1 )                                       );
+    WARD_EVIL_WRAP                              (evilstate, closebin(&tmpvrt, 1 )                                       );
+    WARD_EVIL_WRAP                              (evilstate, remove  (tmpsrc.name)                                       );
+    WARD_EVIL_WRAP                              (evilstate, remove  (tmpvrt.name)                                       );
+
+    WARD_EVIL_MFREE                             (tmpsrc_name                                                            );
+    WARD_EVIL_MFREE                             (tmpdst_name                                                            );
+    WARD_EVIL_MFREE                             (tmpvrt_name                                                            );
 
     return 0;                                                                                                           }
 
