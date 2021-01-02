@@ -15,30 +15,25 @@
 #define EVIL_FREAD(type, count, buff, bin)      WARD_EVIL_FREAD(fread(buff, sizeof(type), count, bin->file),             \
                                                                 sizeof(type) * count, bin->name);
 
+#define EVIL_FREAD2(read, type, count, buff, bin) read = fread   (buff, sizeof(type), count, bin->file );                \
+                                                  WARD_EVIL_FREAD(read, sizeof(type) * count, bin->name);
+
 #define EVIL_FWRITE(type, count, buff, bin)     WARD_EVIL_FWRITE(fwrite(buff, sizeof(type), count, bin->file),           \
                                                                  sizeof(type)* count, bin->name);
-//  - --- - --- - --- - --- -
-
-typedef struct ZJC_BINFILE {
-
-    cchar* name;
-    FILE*  file;
-
-} ZBIN;
 
 //  - --- - --- - --- - --- -
 
 #define CHUNK 0x4000
 
-#define CALL_ZLIB(x) {                                                  \
-        int status;                                                     \
-        status = x;                                                     \
-        if (status < 0) {                                               \
-            fprintf (stderr,                                            \
-                     "%s:%d: %s returned a bad status of %d.\n",        \
-                     __FILE__, __LINE__, #x, status);                   \
-            terminator (0, "Bruh, zLib went PLOP!");                    \
-        }                                                               \
+#define CALL_ZLIB(x) {                                                      \
+        int status;                                                         \
+        status = x;                                                         \
+        if (status < 0) {                                                   \
+            fprintf       (stderr,                                          \
+                           "%s:%d: %s returned a bad status of %d.\n",      \
+                           __FILE__, __LINE__, #x, status);                 \
+            __terminator__(0, "Bruh, zLib went PLOP!");                     \
+        }                                                                   \
     }
 
 #define windowBits 15
@@ -90,6 +85,70 @@ int ZJC_INFLATEBUFF(void* source, void* unpckd, uint size_d, uint size_i) {
     return ret;
 }
 
+int ZJC_INFLATEFILE(ZBIN* src,
+                    ZBIN* dst,
+
+                    uint size_i,
+                    uint size_d)                {
+
+    z_stream strm = {0};
+
+    uchar    in [CHUNK];
+    uchar    out[CHUNK];
+
+    uint     readsize = CHUNK;
+    uint     dataleft = size_i;
+
+    strm.zalloc       = Z_NULL;
+    strm.zfree        = Z_NULL;
+    strm.opaque       = Z_NULL;
+
+    strm.next_in      = in;
+    strm.avail_in     = 0;
+
+    CALL_ZLIB(inflateInit2(&strm, 15 | 32));
+
+    while(dataleft)
+    {
+        int  bytes_read;
+        int  zlib_status;
+
+        if(readsize > dataleft)                 { readsize = dataleft;                                                  }
+        EVIL_FREAD2                             (bytes_read, uchar, readsize, in, src                                   );
+
+        dataleft      -= readsize;
+        strm.avail_in  = bytes_read;
+        strm.next_in   = in;
+
+        while(strm.avail_out == 0)
+        {
+            uint have;
+
+            strm.avail_out = CHUNK;
+            strm.next_out  = out;
+            zlib_status    = inflate            (&strm, Z_NO_FLUSH                                                      );
+
+            switch (zlib_status)                {   case Z_OK:
+                                                    case Z_STREAM_END:
+                                                    case Z_BUF_ERROR:
+                                                    break;
+
+                                                    default:
+                                                    inflateEnd (&strm);
+                                                    fprintf    (stderr, "Gzip error %d in '%s'.\n",
+                                                                        zlib_status, src->name    );
+
+                                                    return ERROR;                                                       }
+
+            have = CHUNK - strm.avail_out;
+
+            EVIL_FWRITE                         (uchar, have, out, dst                                                  );
+
+        }
+    }
+
+    return 0;                                                                                                           }
+
 int ZJC_DEFLATEBUFF(void* source, ZBIN* dst, uint size_i, uint* size_d)
 {
     uchar out[CHUNK];
@@ -128,8 +187,8 @@ int ZJC_DEFLATEBUFF(void* source, ZBIN* dst, uint size_i, uint* size_d)
 
 int ZJC_DEFLATEFILE(ZBIN* src, ZBIN* dst, uint blocksize, uint numblocks, uint size_i, uint* size_d)
 {
-    uchar out[CHUNK];
-    uchar readbuff = NULL; WARD_EVIL_MALLOC(readbuff, Bytef, blocksize, 1);
+    uchar    out[CHUNK];
+    uchar*   readbuff  = NULL; WARD_EVIL_MALLOC(readbuff, uchar, blocksize, 1);
 
     z_stream strm;
 
@@ -238,9 +297,6 @@ static DAF*    curdaf         = NULL;
 static CRK*    curcrk         = NULL;
 static JOJ*    curjoj         = NULL;
 
-static uchar*  curdaf_data    = NULL;
-static uchar*  curjoj_data    = NULL;
-
 //  - --- - --- - --- - --- -
 
 uint ZJC_getNext_blockSize(uint elementSize,
@@ -277,11 +333,8 @@ int ZJC_copy_block(ZBIN* src,
 
 //  - --- - --- - --- - --- -
 
-void del_JojFile()                              { WARD_EVIL_MFREE(curjoj_data); WARD_EVIL_MFREE(curjoj);                }
-
 void del_SsxFile(SSX* ssx)                      {
 
-    for(ushort i = 0; i < ssx->count; i++)      { WARD_EVIL_MFREE(ssx->objects[i].fvalues);                             }
     WARD_EVIL_MFREE(ssx->objects);                                                                                      }
 
 //  - --- - --- - --- - --- -
@@ -333,7 +386,7 @@ int openarch(ZBIN*         bin,
 
 //  - --- - --- - --- - --- -
 
-int ZJC_new_dafblock(uchar*  src,
+int ZJC_new_dafblock(void*   src,
                      ZBIN*   dst,
                      ZBIN*   tmpdst,
 
@@ -414,10 +467,10 @@ int ZJC_end_dafblock(ZBIN*   dst,
 
             ZJC_copy_block                      (dst,       tmpdst, blocksize                                           );
 
-            uint  newsize;
-            uint  old_end;
-            uint  chunk_end;
-            slong byteshift;
+            uint newsize;
+            uint old_end;
+            uint chunk_end;
+            uint byteshift;
 
             chunk_end   =                       chunk_start + blocksize;
             old_end     =                       curdaf->offsets[offset+1];
@@ -461,9 +514,9 @@ int read_crkdump(cchar*  filename,
 
     int    evilstate    = 0;
 
-    cchar* tmpsrc_name;
-    cchar* tmpvrt_name;
-    cchar* tmpdst_name;
+    char* tmpsrc_name;
+    char* tmpvrt_name;
+    char* tmpdst_name;
 
     catpath                                     (filename, "TMP",    &tmpsrc_name                                       );
     catpath                                     (filename, "TMPVRT", &tmpvrt_name                                       );
@@ -578,6 +631,9 @@ int read_crkdump(cchar*  filename,
     WARD_EVIL_MFREE                             (tmpdst_name                                                            );
     WARD_EVIL_MFREE                             (tmpvrt_name                                                            );
 
+    WARD_EVIL_MFREE                             (curdaf                                                                 );
+    WARD_EVIL_MFREE                             (curcrk                                                                 );
+
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
@@ -586,7 +642,7 @@ void joj_texPack   (JOJ*   joj,
                     uint   dim,
                     float* pixels)              {
 
-    JOJPIX curcol    = { 0 };
+    /*JOJPIX curcol    = { 0 };
     uchar* imdata    = (uchar*) evil_malloc(dim * joj->imcount * 4, sizeof(uchar));
 
 //  - --- - --- - --- - --- -
@@ -611,7 +667,7 @@ void joj_texPack   (JOJ*   joj,
     curjoj_data = (uchar*) evil_malloc(joj->datasize_i, sizeof(uchar));
     DEFLDAF(imdata, curjoj_data, joj->datasize_i, &joj->datasize_d);
 
-    WARD_EVIL_MFREE(imdata);                                                                                            }
+    WARD_EVIL_MFREE(imdata);*/                                                                                            }
 
 void joj_subTexRead (uint    dim,
                      uchar   imcount,
@@ -730,202 +786,40 @@ int jojmate_to_daf(JOJMATE* mate,
 
 //  - --- - --- - --- - --- -
 
-int writedaf(void*      obj,
-             cchar      sign[8],
-             uint       objsize,
-
-             JOJMATE*   mate,
-             uchar      mateoff,
-
-             uint8_t    mode,
-             uint8_t    offset,
-             cchar*     filename)           {
-
-    int evilstate = 0;
-    int isJOJ     = !strcmp(sign, JOJSIGN);
-
-    {
-        cchar* readmode = get_fmode(mode);
-        WARD_EVIL_WRAP(evilstate, openarch(filename,
-                                           readmode,
-                                           sign,
-                                           mode,
-                                           0        ));
-    }
-
-    if      (curdaf->fileCount == ZJC_DAFSIZE
-            && mode != DAF_UPDATE)              { printf("Archive <%s> is full; addition aborted.\n", filename);
-                                                  return 0;                                                             }
-
-    if      (mode == DAF_WRITE)
-    {
-        if  (isJOJ)                             { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
-        else                                    { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
-
-        curdaf->fileCount++;}
-/*
-        rewind(curfile             );
-        fseek (curfile, 8, SEEK_CUR);
-        fseek (curfile, 0, SEEK_CUR);
-
-        uint32_t newsize_offset[2] = { curdaf->size + objsize, sizeof(DAF) + (JDAF_MATEBLOCK * (mate != NULL)) };
-
-        EVIL_FWRITE(ushort,   1, &curdaf->fileCount, filename);
-        EVIL_FWRITE(uint32_t, 2, newsize_offset,  filename);
-
-    }
-
-    else if (mode == DAF_APPEND)
-    {
-        if  (isJOJ)                             { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
-        else                                    { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
-
-        closebin(filename, 1);
-        openbin (filename, "rb+", 1);
-
-        fseek (curfile, 8, SEEK_CUR);
-        fseek (curfile, 0, SEEK_CUR);
-
-        uint32_t newsize   = curdaf->size + objsize;
-        uint32_t newoffset = curdaf->size;
-
-        uint16_t offset_stride = (curdaf->fileCount) * 4;
-
-        curdaf->fileCount++;
-        EVIL_FWRITE(ushort,   1, &curdaf->fileCount,  filename);
-        EVIL_FWRITE(uint32_t, 1, &newsize,         filename);
-
-        fseek (curfile, 0,             SEEK_CUR);
-        fseek (curfile, offset_stride, SEEK_CUR);
-
-        EVIL_FWRITE(uint32_t, 1, &newoffset,       filename);
-    }
-
-    else if (mode == DAF_UPDATE && offset < ZJC_DAFSIZE)
-    {
-
-        int isLastChunk = offset == (ZJC_DAFSIZE - 1) || offset == (curdaf->fileCount - 1);
-
-        uint32_t chunk_start = curdaf->offsets[offset];
-        uint32_t newsize, byteshift, old_end;
-
-        if(isLastChunk)
-        {
-            newsize   = chunk_start + objsize;
-            old_end   = curdaf->size;
-            byteshift = newsize - old_end;
-
-            fseek (curfile, 0,           SEEK_CUR);
-            fseek (curfile, chunk_start, SEEK_CUR);
-
-            if  (isJOJ)                         { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
-            else                                { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
-
-            fseek (curfile, 0,           SEEK_CUR);
-
-            rewind(curfile);
-            fseek(curfile, 10, SEEK_CUR);
-            fseek(curfile, 0, SEEK_CUR);
-            EVIL_FWRITE(uint32_t, 1, &newsize, filename);
-            fseek(curfile, 0, SEEK_CUR);
-        }
-
-        else
-        {
-            uint32_t chunk_end;
-
-            chunk_end = chunk_start + objsize;
-            old_end   = curdaf->offsets[offset+1];
-            byteshift = chunk_end - old_end;
-            newsize   = (curdaf->size - (old_end - chunk_start)) + objsize;
-
-            fseek(curfile, 0,           SEEK_CUR);
-            fseek(curfile, chunk_start, SEEK_CUR);
-
-            if  (isJOJ)                         { WARD_EVIL_WRAP(evilstate, joj_to_daf(obj, filename)); }
-            else                                { WARD_EVIL_WRAP(evilstate, crk_to_daf(obj, filename)); }
-
-            curdaf_data += (old_end - sizeof(DAF));
-            fseek(curfile, 0,         SEEK_CUR);
-            fseek(curfile, chunk_end, SEEK_CUR);
-            fseek(curfile, 0,         SEEK_CUR);
-            EVIL_FWRITE(uchar, curdaf->size - old_end, curdaf_data, filename);
-            fseek(curfile, 0,         SEEK_CUR);
-
-            for(uint i = offset+1;
-                i < curdaf->fileCount; i++)        { curdaf->offsets[i] += byteshift;                                         }
-
-            rewind(curfile);
-            fseek(curfile, 10, SEEK_CUR);
-            fseek(curfile, 0, SEEK_CUR);
-            EVIL_FWRITE(uint32_t, 1,   &newsize,     filename);
-            EVIL_FWRITE(uint32_t, ZJC_DAFSIZE, curdaf->offsets, filename);
-            fseek(curfile, 0, SEEK_CUR);
-        }
-
-        _chsize_s(_fileno(curfile), curdaf->size + byteshift);
-
-    }
-
-    if(mate)
-    {
-        if(!(mate->flags & 128))                { uint first_stride = sizeof(JOJMATE) * mateoff;
-                                                  uint final_stride = JDAF_MATEBLOCK - (first_stride + sizeof(JOJMATE)  );
-
-                                                  rewind        (curfile                                                );
-                                                  fseek         (curfile,   sizeof(DAF),  SEEK_CUR                      );
-                                                  fseek         (curfile,   0,            SEEK_CUR                      );
-
-                                                  fseek         (curfile,   0,            SEEK_CUR                      );
-                                                  fseek         (curfile,   first_stride, SEEK_CUR                      );
-
-                                                  WARD_EVIL_WRAP(evilstate, jojmate_to_daf(mate, filename)              );
-
-                                                  fseek         (curfile,   final_stride, SEEK_CUR                      );
-                                                  fseek         (curfile,   0,            SEEK_CUR                      );
-
-                                                                                                                        }
-    }
-
-    closebin(filename, 0);*/
-    return 0;                                                                                                           }
-
-//  - --- - --- - --- - --- -
-
 int readssx(SSX* ssx, cchar* filename)          {
 
-    int evilstate = 0;
-    WARD_EVIL_WRAP(evilstate, openbin(filename, "rb", 0));
-/*
     char sign[8];
-    fread(sign, sizeof(cchar), 8, curfile);
 
-    GETLOC;
-    for(uint i = 0; i < 8; i++)                 { if(sign[i] != SSXSIGN[i])
-                                                { __terminator__(68, bin->name); return ERROR; }                             }
+    int  evilstate = 0; 
+    ZBIN src       = { filename, NULL };
 
-    evil_poplocreg();
+    WARD_EVIL_WRAP                              (evilstate, openbin(&src, "rb", 0)                                      );
 
-    fread(&ssx->count, sizeof(ushort), 1, curfile);
 
-    ssx->objects = (SSO*) evil_malloc(ssx->count, sizeof(SSO));
+    EVIL_FREAD                                  (cchar, 8, sign, (&src)                                                 );
+    WARD_EVIL_FSIGN                             (sign, SSXSIGN, src.name                                                );
+
+    EVIL_FREAD                                  (ushort, 1, &ssx->count, (&src)                                         );
+
+    WARD_EVIL_MALLOC                            (ssx->objects, SSO, sizeof(SSO), ssx->count                             );
 
     for(ushort i = 0; i < ssx->count; i++)
     {
 
-        fread(&ssx->objects[i].resinfo, sizeof(ushort), 3, curfile);
+        EVIL_FREAD                              (ushort, 3, &ssx->objects[i].resinfo, (&src)                            );
 
         ushort flags  = ssx->objects[i].resinfo[2];
         uchar  fcount = 10;
 
-        if(flags & 0x0004) { fcount += 12; }
+        if(flags & 0x0004)                      { fcount += 12;                                                         }
 
-        EVIL_FREAD(float, fcount, ssx->objects[i].fvalues);
+        EVIL_FREAD                              (float, fcount, ssx->objects[i].fvalues, (&src)                         );
 
     }
 
-    WARD_EVIL_WRAP(evilstate, closebin(filename, 0));*/
+    WARD_EVIL_WRAP(evilstate, closebin(&src, 0));
     return 0;                                                                                                           }
+
 //  - --- - --- - --- - --- -
 
 int popirf(DAF*    daf,
@@ -1010,23 +904,10 @@ int writecrk(cchar* filename,
              char*  mode,
              char*  offset)                     {
 
-    int    evilstate  = 0;
-
     uint8_t numoffset = (uint8_t) hexstr_tolong (offset                                                                 );
     uint8_t nummode   = (uint8_t) hexstr_tolong (mode                                                                   );
 
-    zjc_convertor_init                          (BUILD_FRAC                                                             );
-    evilstate = read_crkdump                    (filename, archive, numoffset, nummode                                  );
-    zjc_convertor_end                           (                                                                       );
-
-    /*if(!evilstate)                              { evilstate = writedaf(curcrk, CRKSIGN, curcrk_size, NULL,
-                                                                       0, nummode, numoffset, archive      );           }
-
-    if(nummode == DAF_UPDATE || DAF_DELETE)     { WARD_EVIL_MFREE(curdaf_data);                                         }*/
-
-    ZJC_CRK_END                                 (                                                                       );
-
-    return evilstate;                                                                                                   }
+    return read_crkdump(filename, archive, numoffset, nummode);                                                         }
 
 //  - --- - --- - --- - --- -
 
@@ -1045,16 +926,7 @@ int writejoj(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong (offset                                                                 );
     uint8_t nummode   = (uint8_t) hexstr_tolong (mode                                                                   );
 
-    zjc_convertor_init                          (BUILD_JOJ                                                              );
     evilstate = read_jojdump                    (filename, &joj, &mate, &mateoff                                        );
-    zjc_convertor_end                           (                                                                       );
-/*
-    if(!evilstate)                              { evilstate = writedaf(&joj, JOJSIGN, curjoj_size, &mate,
-                                                                       mateoff, nummode, numoffset, archive);           }
-*/
-    if(nummode == DAF_UPDATE || DAF_DELETE)     { WARD_EVIL_MFREE(curdaf_data);                                         }
-
-    del_JojFile                                 (&joj                                                                   );
 
     return evilstate;                                                                                                   }
 
@@ -1070,7 +942,7 @@ cchar* get_archtype(uint8_t archtype)           {
 int    extraction_start (cchar*  filename,
                          uchar   archtype  )    {
 
-    int evilstate   = 0;
+    /*int evilstate   = 0;
     cchar* sign     = get_archtype(archtype);
     cchar* readmode = get_fmode(DAF_READ);
 
@@ -1078,7 +950,7 @@ int    extraction_start (cchar*  filename,
                                        readmode,
                                        sign,
                                        DAF_READ,
-                                       0        ));
+                                       0        ));*/
 
     return 0;                                                                                                           }
 
@@ -1093,36 +965,43 @@ int    extraction_end   (cchar* filename)       {
 
 //  - --- - --- - --- - --- -
 
-int extractcrk (uchar offset, uchar start)      {
+int extractcrk(ZBIN* src,
+               ZBIN* storage,
 
-    //  move pointer to first block (@offset) on first read
-    if(!start)                                  {
-/*
-        if(!curdaf)                             { printf("No DAF currently open. Cannot extract.\n"); return 1;         }
+               MD3D* buff,
+               uchar offset,
+               uchar start )                    {
 
-        rewind                                  (curfile                                                                );
+    //  move pointer to @offset on first read
+    if(start)                                   {
 
-        fseek                                   (curfile, 0,                       SEEK_CUR                             );
-        fseek                                   (curfile, curdaf->offsets[offset], SEEK_CUR                             );
-        fseek                                   (curfile, 0,                       SEEK_CUR                             );
+        if(!curdaf)                             { printf("No DAF currently open. Cannot extract.\n"); return ERROR;     }
+
+        rewind                                  (src->file                                                              );
+
+        fseek                                   (src->file, 0,                       SEEK_CUR                           );
+        fseek                                   (src->file, curdaf->offsets[offset], SEEK_CUR                           );
+        fseek                                   (src->file, 0,                       SEEK_CUR                           );
                                                                                                                         }
-*/
+
 //  - --- - --- - --- - --- -
-/*
+
     // read next item
-    fread                                       (curcrk,              sizeof(CRK    ), 1,                   curfile     );
+    EVIL_FREAD                                  (CRK, 1, curcrk, src                                                    );
 
-    if     (curcrk->vertCount  > MAXVERTS)      { printf("CRK vert count over max! (%u > %u)",
-                                                         curcrk->vertCount, MAXVERTS); return 1;                        }
+    // should never happen. check just in case of corrupted files
+    if(curcrk->vertCount  > CRK_MAXVERTS)       { printf("CRK vert count over max! (%u > %u)",
+                                                         curcrk->vertCount, CRK_MAXVERTS); return ERROR;                }
 
-    else if(curcrk->indexCount > MAXVERTS)      { printf("CRK index count over max! (%u > %u)",
-                                                         curcrk->indexCount, MAXVERTS); return 1;                       }
-*/
-/*
-    fread                                       (curcrk_data.bounds,  sizeof(pVP3D_8), 8,                   curfile     );
-    fread                                       (curcrk_data.verts,   sizeof(VP3D_8 ), curcrk->vertCount,   curfile     );
-    fread                                       (curcrk_data.indices, sizeof(ushort ), curcrk->indexCount,  curfile     );
-*/
+    // read the uncompressed data
+    EVIL_FREAD                                  (BP3D,   curcrk->boxCount,                           buff->boxes,    src);
+    EVIL_FREAD                                  (ushort, curcrk->triCount * 3,                       buff->indices,  src);
+    EVIL_FREAD                                  (float,  curcrk->numBinds * 16 * curcrk->frameCount, buff->bindsmat, src);
+
+    // get the blocksize and decompress verts
+    uint sizes[2] = { 0, 0 }; EVIL_FREAD        (uint, 2, sizes, src                                                    );
+    ZJC_INFLATEFILE                             (src, storage, sizes[0], sizes[1]                                       );
+
     return 0;                                                                                                           }
 
 //  - --- - --- - --- - --- -
@@ -1160,6 +1039,6 @@ int    extractjoj (DAF*    daf,
     zh8_read(&curhpck                               );
 
     hpckdata = zh8_unpack(&curhpck);
-
-    return 0;                                                                                                           }
 */
+    return 0;                                                                                                           }
+

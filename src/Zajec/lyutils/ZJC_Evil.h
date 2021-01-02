@@ -19,6 +19,7 @@ static uint LOCREG_I = 0;
 
 void __terminator__(uint errorcode, cchar* info);
 void __zjcitoa__(uint x, char* buff, int radix);
+int  __zjcstrcmp__(cchar* a, cchar* b);
 
 static cchar* __evil_shpath__(cchar* path) {
     cchar* file = path;
@@ -83,6 +84,10 @@ static cuint ERROR = 0x02;
 #define WARD_EVIL_FREAD(read, readsize, filename)           { GETLOC;                                                    \
                                                                                                                          \
     if(read != readsize) { __terminator__(0x43, filename); return ERROR; } __evil_poplocreg__();                        }
+
+#define WARD_EVIL_FSIGN(a, b, fname)                        { GETLOC;                                                    \
+                                                                                                                         \
+    if(__zjcstrcmp__(a, b)) { __terminator__(0x44, fname); } __evil_poplocreg__();                                      }
 
 //  - --- - --- - --- - --- -
 

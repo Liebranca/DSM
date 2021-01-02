@@ -54,9 +54,11 @@ void __terminator__(uint errorcode,
 
 //  - --- - --- - --- - --- -
 
+int __zjcstrcmp__(cchar* a, cchar* b)     { return strcmp(a, b);                                            }
+
 void __zjcitoa__(uint x,
                  char* buff,
-                 int radix )              { itoa(x, buff, radix);                                           }
+                 int radix )              { _itoa(x, buff, radix);                                          }
 
 void* __evil_malloc__(uint count,
                       uint size)          { void* buff = malloc( count * size );

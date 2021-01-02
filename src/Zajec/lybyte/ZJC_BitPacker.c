@@ -20,7 +20,7 @@ void zh8_pack(H8PACK* hpck,
               uint*   protodict,
               uchar*  data       )              {
 
-    hpck->dict        = (uchar*) evil_malloc(hpck->dictsize, sizeof(uchar));
+    WARD_EVIL_MALLOC                            (hpck->dict, uchar, sizeof(uchar), hpck->dictsize                       );
 
     for(ushort i = 0; i < hpck->dictsize; i++)
     {
@@ -82,7 +82,7 @@ void zh8_pack(H8PACK* hpck,
 
     printf("Final bytecount: %u/", numbytes);
 
-    hpck->data     = (uchar*) evil_malloc(numbytes+1, sizeof(uchar));
+    WARD_EVIL_MALLOC                            (hpck->data, uchar, sizeof(uchar), numbytes+1                           );
 
     numbytes       = 0;
     curbit         = 0;
@@ -119,7 +119,7 @@ uchar* zh8_unpack(H8PACK* hpck)                 {
     uint   numbytes = 0;
     uint   curbit   = 0;
 
-    uchar* unpacked = (uchar*) evil_malloc(hpck->usize, sizeof(uchar));
+    uchar* unpacked = NULL; WARD_EVIL_MALLOC    (unpacked, uchar, sizeof(uchar), hpck->usize                            );
 
     uchar  hilength = 3 + usbitsize(hpck->dictsize-1);
     uint   index    = 0;
