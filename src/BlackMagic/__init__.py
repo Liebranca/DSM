@@ -3,7 +3,7 @@ version     = "0.1 BETA";
 
 #   ---     ---     ---     ---     ---
 
-filepath    = "D:\\lieb_git\\dsm\\src\\OrangeBox";
+filepath    = "D:\\lieb_git\\dsm\\src\\OrangeBox\\data";
 filename    = "dsm_hexdump";
 writemode   = "0x00";
 

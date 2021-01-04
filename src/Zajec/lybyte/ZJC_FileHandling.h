@@ -19,7 +19,7 @@ typedef struct ZJC_BINFILE {
 typedef struct DARK_AGE_FILE                    {
 
     uchar    sign[8];
-    ushort   fileCount;
+    uint     fileCount;
     uint     size;
     uint     offsets[ZJC_DAFSIZE];
 
@@ -43,13 +43,15 @@ typedef struct MESH_FILE_3D                     {
 
 typedef struct MESH_DATA_3D {
 
-    BP3D*  boxes;
-    ushort indices;
+    BP3D*   boxes;
+    ushort* indices;
 
-    float* bindsmat;
-    VP3D*  verts;
+    float*  bindsmat;
+    VP3D*   verts;
 
 } MD3D;
+
+//  - --- - --- - --- - --- -
 
 typedef struct TEXTURE_FILE_24BITYUVA           {
 
@@ -92,16 +94,27 @@ typedef struct SCENE_OBJECTS_FILE               {
 
 //  - --- - --- - --- - --- -
 
+int    openbin          (ZBIN* bin, cchar* mode, int shutit);
+int    closebin         (ZBIN* bin, int shutit);
+
 int    writecrk         (cchar* filename, cchar* archive, char* mode, char* offset);
 int    writejoj         (cchar* filename, cchar* archive, char* mode, char* offset);
 
-int    extraction_start (cchar* filename, uchar archtype);
-int    extraction_end   (cchar* filename);
+int    ZJC_open_daf     (ZBIN* src, uchar archtype);
+int    ZJC_close_daf    (ZBIN* src, int isLast);
 
-int    extractcrk       (ZBIN* src, MD3D* buff, uchar offset, uchar start);
+void   ZJC_init_crk     ();
+void   ZJC_end_crk      ();
 
+MD3D*  ZJC_get_crkdata  ();
+CRK*   ZJC_get_curcrk   ();
+
+int    ZJC_extract_crk  (ZBIN* src, ZBIN* storage, uchar offset, uchar start);
+int    ZJC_read_crkframe(ZBIN* storage);
+
+/* outdated func. rewrite
 int    extractjoj       (DAF* daf, uchar offset, uchar* imcount, uint* size, ushort* width,
-                         ushort* height, uchar* flags, float fvalues[4], ushort* shdid);
+                         ushort* height, uchar* flags, float fvalues[4], ushort* shdid);*/
 
 void   joj_subTexRead   (uint dim, uchar imcount, uchar curim, float** pixels);
 

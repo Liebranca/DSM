@@ -60,7 +60,7 @@ static cuint ERROR = 0x02;
 
 //  - --- - --- - --- - --- -
 
-#define WARD_EVIL_MALLOC(buff, type, size, count)           { GETLOC; char sizestr[33];                                  \
+#define WARD_EVIL_MALLOC(buff, type, size, count)           { GETLOC; static char sizestr[33];                           \
                                                                                                                          \
     buff     = (type*) __evil_malloc__(count, size);                                                                     \
     if(buff == NULL) { __zjcitoa__(size * count, sizestr, 10); __terminator__(0x00, sizestr); } __evil_poplocreg__();   }

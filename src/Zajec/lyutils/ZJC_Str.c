@@ -1,6 +1,7 @@
 #include "ZJC_Str.h"
 #include "ZJC_Evil.h"
 
+#include <stdio.h>
 #include <string.h>
 
 //      - --- - --- - --- - --- -
@@ -33,16 +34,12 @@ void catpath(cchar* root,
              cchar* added,
              char** dst  )                      {
 
-    uint  rootlen  = strlen(root);
-    uint  addedlen = strlen(added);
+    uint  rootlen  = strlen                     (root                                                                   );
+    uint  addedlen = strlen                     (added                                                                  );
 
-    WARD_EVIL_MALLOC(*dst, char, sizeof(char), rootlen + addedlen + 2);
+    WARD_EVIL_MALLOC                            (*dst, char, sizeof(char), rootlen + addedlen + 2                       );
 
-    *dst[0]         = '\0';
-
-    strcat(*dst, root);
-    *dst[rootlen + 1] = '\0';
-
-    strcat(*dst, added);
-    *dst[rootlen + addedlen + 1] = '\0';                                                                                }
+    strcat                                      (*dst, root                                                             );
+    strcat                                      (*dst, added                                                            );
+                                                                                                                        }
 

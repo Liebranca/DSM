@@ -130,6 +130,12 @@ def writecrk():
 
         if ob.parent: reset_pose(ob);
 
+#placeholder start
+        numBoxes   = 1;
+        numFrames  = 1;
+        numBinds   = 0;
+#placeholder end
+
         numVerts   = len(mesh.vertices);
         numIndices = len(mesh.polygons);
 
@@ -137,25 +143,29 @@ def writecrk():
 
         sf = 1/1 if "actors" in obkls else 1/1;
 
-        gaolerSize             = 96;
-        header                 = bytearray(6 + gaolerSize);
+        header                 = bytearray(208 + 96);
 
-        header[0:2]            = numVerts.to_bytes(2, "little");
-        header[2:4]            = numIndices.to_bytes(2, "little");
-        header[4:6]            = (mesh.materials[0].BlackMagic.matid).to_bytes(2, "little");
-        ii                     = 6;
+        header[ 0: 2]          = numBoxes.  to_bytes(2, "little");
+        header[ 2: 4]          = numFrames. to_bytes(2, "little");
+        header[ 4: 6]          = numVerts.  to_bytes(2, "little");
+        header[ 6: 8]          = numIndices.to_bytes(2, "little");
+
+        header[ 8:12]          = (mesh.materials[0].BlackMagic.matid).to_bytes(4, "little");
+
+        header[12:16]          = numBinds.  to_bytes(4, "little");
+        ii                     = 208;
 
         l = []; i = 0;
         for v in ob.bound_box:
-            header[ii+0:ii+4 ] = ftb(v[0] *sf);
-            header[ii+4:ii+8 ] = ftb(v[2] *sf);
+            header[ii+0:ii+4 ] = ftb( v[0]*sf);
+            header[ii+4:ii+8 ] = ftb( v[2]*sf);
             header[ii+8:ii+12] = ftb(-v[1]*sf);
             ii                += 12;
         
         faces        = [poly  for poly in mesh.polygons];
         olverts      = {};
 
-        stride       = 56;
+        stride       = 48;
         indexBuff    = bytearray(6*numIndices); i = 0;
         vertBuff     = bytearray(numVerts*stride);
 
@@ -178,12 +188,11 @@ def writecrk():
                 vertBuff[svi+16:svi+20] = ftb( n[2]*sf);
                 vertBuff[svi+20:svi+24] = ftb(-n[1]*sf);
 
-                vertBuff[svi+48:svi+52] = ftb(uv[loop_index].uv[0]);
-                vertBuff[svi+52:svi+56] = ftb(uv[loop_index].uv[1]);
+                vertBuff[svi+40:svi+44] = ftb(uv[loop_index].uv[0]);
+                vertBuff[svi+44:svi+48] = ftb(uv[loop_index].uv[1]);
 
                 indexBuff[i:i+2] = vi.to_bytes(2, "little"); i += 2;
 
-        del sumdic;
         mesh.calc_tangents();
 
 #   ---     ---     ---     ---     ---
@@ -192,20 +201,26 @@ def writecrk():
 
             for vi, loop_index in zip(face.vertices, face.loop_indices):
 
-                loop                    =  mesh.loops[loop_index];
-                svi                     =  vi * stride;
+                loop                    = mesh.loops[loop_index];
+                vert                    = mesh.vertices[vi];
+                svi                     = vi * stride;
+                n                       = sumdic[(vert.co[0], vert.co[1], vert.co[2])]
 
                 vertBuff[svi+24:svi+28] = ftb( loop.tangent[0]*sf);
                 vertBuff[svi+28:svi+32] = ftb( loop.tangent[2]*sf);
                 vertBuff[svi+32:svi+36] = ftb(-loop.tangent[1]*sf);
 
-                vertBuff[svi+36:svi+40] = ftb( loop.bitangent[0]*sf);
-                vertBuff[svi+40:svi+44] = ftb( loop.bitangent[2]*sf);
-                vertBuff[svi+44:svi+48] = ftb(-loop.bitangent[1]*sf);
+                t                       = [loop.tangent  [0]*sf, loop.tangent  [2]*sf, -loop.tangent  [1]*sf]
+                b                       = [loop.bitangent[0]*sf, loop.bitangent[2]*sf, -loop.bitangent[1]*sf]
+                n                       = [n             [0]*sf, n             [2]*sf, -n             [1]*sf]
+
+                vertBuff[svi+36:svi+40] = ftb(bhand(t, b, n));
+
+        del sumdic;
 
 #   ---     ---     ---     ---     ---
 
-        with open(filepath + "\\" + filename + ".crk", "wb+") as file: file.write(header + vertBuff + indexBuff)
+        with open(filepath + "\\" + filename + ".crk", "wb+") as file: file.write(header + indexBuff + vertBuff)
         mesh_restore(mesh)
 
         end = time.time(); py_execTimer = end - start
