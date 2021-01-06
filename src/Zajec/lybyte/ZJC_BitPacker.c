@@ -5,60 +5,63 @@
 #include "../lymath/ZJC_GOPS.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
+
+//      - --- - --- - --- - --- -
+
+static uint* protodict    = NULL;
+static uint  protosize    = 0;
+
+void zh8_buildProto ()                          { WARD_EVIL_MALLOC(protodict, uint, sizeof(uint), 256); protosize = 0;  }
+void zh8_cleanProto ()                          { memset          (protodict, 0, sizeof(*protodict)  ); protosize = 0;  }
+void zh8_delProto   ()                          { WARD_EVIL_MFREE (protodict                         );                 }
+
+void zh8_insertProto(uint value)                { uint freq        = protodict[value]; if(!freq) { protosize++;         }
+                                                  protodict[value]++;                                                   }
+
+H8PACK* zh8_dictFromProto()                     {
+
+    H8PACK* hpck   = NULL; WARD_EVIL_MALLOC     (hpck,       H8PACK, sizeof(H8PACK), 1                                  );
+    WARD_EVIL_MALLOC                            (hpck->dict, uchar,  sizeof(uchar ), protosize                          );
+
+    hpck->dictsize = protosize; uint k = 0;
+
+    for(uint i = 0; i < 256; i++)               {
+
+        uint value  = i;
+        uint hifreq = protodict[i];
+
+        for(uint j = 0; j < 256; j++) { uint freq = protodict[j]; if(freq > hifreq) { hifreq = freq; value = j; }       }
+        if(hifreq)                    { hpck->dict[k] = value; k++; protodict[value] = 0;                       }       }
+
+    return hpck;
+
+    }
 
 //      - --- - --- - --- - --- -
 
 uchar  sizebyprob   (uint prob, uint size)      { float fpercent  = roundf( ((float) prob / size) * 100 );
                                                   ushort percent  = (ushort) fpercent; return usbitsize(percent);       }
 
-void   zh8_delPacker(H8PACK* hpck)              { WARD_EVIL_MFREE(hpck->data); WARD_EVIL_MFREE(hpck->dict);             }
+void   zh8_delPacker(H8PACK* hpck)              { WARD_EVIL_MFREE(hpck->data); WARD_EVIL_MFREE(hpck->dict);
+                                                  WARD_EVIL_MFREE(hpck);                                                }
 
 //      - --- - --- - --- - --- -
 
 void zh8_pack(H8PACK* hpck,
-              uint*   protodict,
-              uchar*  data       )              {
-
-    WARD_EVIL_MALLOC                            (hpck->dict, uchar, sizeof(uchar), hpck->dictsize                       );
-
-    for(ushort i = 0; i < hpck->dictsize; i++)
-    {
-
-        uchar  mostfrequent = 0;
-        ushort hifrequency  = 0;
-        ushort popi         = 0;
-
-        for(ushort j = 0; j < hpck->dictsize; j++)
-        {
-            if(protodict[j])                    { uchar  value     =  protodict[j] & 0x000000FF;
-                                                  ushort frequency = (protodict[j] & 0xFFFFFF00) >> 8;
-
-                                                  if(frequency > hifrequency)
-                                                { mostfrequent = value; hifrequency = frequency; popi = j; }            }
-        }
-
-        hpck->dict[i]        = mostfrequent; protodict[popi] = 0;
-    }
-
-//      - --- - --- - --- - --- -
+              uchar*  data)                     {
 
     uchar  hilength = 3 + usbitsize(hpck->dictsize-1);
 
     uint   numbytes = 0;
-    uint   curbit   = 0;
+    uint   curbit   = 0; uint fuck = 0;
 
     for(uint i = 0; i < hpck->usize; i++)
     {
 
         for(uchar j = 0; j < hpck->dictsize; j++)
-        {
-            if(data[i] == hpck->dict[j])
-            {
-                data[i] = j;
-                break;
-            }
-        }
+        {   if(data[i] == hpck->dict[j])        { data[i] = j; break; }                                                 }
 
         uchar value    = data[i];
 
@@ -82,15 +85,17 @@ void zh8_pack(H8PACK* hpck,
 
     printf("Final bytecount: %u/", numbytes);
 
-    WARD_EVIL_MALLOC                            (hpck->data, uchar, sizeof(uchar), numbytes+1                           );
+    WARD_EVIL_MALLOC                            (hpck->data, uchar, sizeof(uchar), numbytes                             );
 
     numbytes       = 0;
     curbit         = 0;
 
     for(uint i = 0; i < hpck->usize; i++)
     {
+
         uchar value    = 0;
         uchar length   = 1;
+
 
         if     (data[i] == 0)                   { value =  1; length =  1;                                              }
 
@@ -110,7 +115,7 @@ void zh8_pack(H8PACK* hpck,
     }
 
     printf("%u\n", hpck->usize);
-    hpck->datasize = numbytes+1;                                                                                        }
+    hpck->datasize = numbytes;                                                                                          }
 
 //      - --- - --- - --- - --- -
 

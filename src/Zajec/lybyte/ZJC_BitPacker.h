@@ -23,7 +23,16 @@ typedef struct ZAJEC_BIT_PACKER {
 
 //      - --- - --- - --- - --- -
 
-void   zh8_pack     (H8PACK* hpck, uint* protodict, uchar*  data);
+void zh8_buildProto ();
+void zh8_cleanProto ();
+void zh8_delProto   ();
+
+void zh8_insertProto(uint value);
+H8PACK* zh8_dictFromProto();
+
+//      - --- - --- - --- - --- -
+
+void   zh8_pack     (H8PACK* hpck, uchar*  data);
 uchar* zh8_unpack   (H8PACK* hpck);
 
 void   zh8_delPacker(H8PACK* hpck);

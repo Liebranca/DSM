@@ -106,8 +106,8 @@ int takebits(uchar b, uint iStart, uint iEnd)   {
 float frac_tofloat(uint  frac,
                    uint  maxval,
                    float fac,
-                   uint  shift)                 { if(frac == maxval - 1) { frac = maxval; } printf("%u\n", frac);
-                                                  return (frac - shift) * fac;                                      }
+                   uint  shift)                 { if(frac == maxval - 1) { frac = maxval; }
+                                                  return ((int)(frac - shift)) * fac;                               }
 
 uchar float_tofrac (float v,
                     float maxval,

@@ -12,14 +12,14 @@
 
 //  - --- - --- - --- - --- -
 
-#define EVIL_FREAD(type, count, buff, bin)      WARD_EVIL_FREAD(fread(buff, sizeof(type), count, bin->file),             \
-                                                                count, bin->name);
+#define EVIL_FREAD(type, count, buff, bin)      WARD_EVIL_FREAD(   fread(buff, sizeof(type), count, bin->file ),         \
+                                                                   count, bin->name                           );
 
-#define EVIL_FREAD2(readcount, type, count, buff, bin) readcount = fread(buff, sizeof(type), count, bin->file );              \
-                                                  WARD_EVIL_FREAD  (readcount, count, bin->name          );
+#define EVIL_FREAD2(readcount, type, count, buff, bin) readcount = fread(buff, sizeof(type), count, bin->file );         \
+                                                WARD_EVIL_FREAD(   readcount, count, bin->name                );
 
-#define EVIL_FWRITE(type, count, buff, bin)     WARD_EVIL_FWRITE(fwrite(buff, sizeof(type), count, bin->file),           \
-                                                                 count, bin->name                           );
+#define EVIL_FWRITE(type, count, buff, bin)     WARD_EVIL_FWRITE(  fwrite(buff, sizeof(type), count, bin->file),         \
+                                                                   count, bin->name                           );
 
 //  - --- - --- - --- - --- -
 
@@ -38,6 +38,7 @@
 
 #define windowBits 15
 #define GZIP_ENCODING 16
+#define ENABLE_ZLIB_GZIP 32
 
 static void defstrm_init (z_stream * strm)
 {
@@ -47,6 +48,14 @@ static void defstrm_init (z_stream * strm)
     CALL_ZLIB (deflateInit2 (strm, Z_BEST_COMPRESSION, Z_DEFLATED,
                              windowBits | GZIP_ENCODING, 8,
                              Z_DEFAULT_STRATEGY));
+}
+
+static void infstrm_init(z_stream* strm)
+{
+    strm->zalloc       = Z_NULL;
+    strm->zfree        = Z_NULL;
+    strm->opaque       = Z_NULL;
+    CALL_ZLIB(inflateInit2(strm, windowBits | ENABLE_ZLIB_GZIP));
 }
 
 int ZJC_INFLATEBUFF(void* source, void* unpckd, uint size_d, uint size_i) {
@@ -91,30 +100,24 @@ int ZJC_INFLATEFILE(ZBIN* src,
                     uint size_i,
                     uint size_d)                {
 
-    z_stream strm = {0};
-
     uchar    in [CHUNK];
     uchar    out[CHUNK];
 
     uint     readsize = CHUNK;
-    uint     dataleft = size_i;
+    uint     dataleft = size_d;
 
-    strm.zalloc       = Z_NULL;
-    strm.zfree        = Z_NULL;
-    strm.opaque       = Z_NULL;
+    z_stream strm;
+    infstrm_init(&strm);
 
     strm.next_in      = in;
     strm.avail_in     = 0;
 
-    CALL_ZLIB(inflateInit2(&strm, 15 | 32));
-
     while(dataleft)
     {
         int  bytes_read;
-        int  zlib_status;
 
         if(readsize > dataleft)                 { readsize = dataleft;                                                  }
-        EVIL_FREAD2                             (bytes_read, uchar, readsize, in, src                                   );
+        EVIL_FREAD2                             ( bytes_read, uchar, readsize, in, src                                  );
 
         dataleft      -= readsize;
         strm.avail_in  = bytes_read;
@@ -126,19 +129,7 @@ int ZJC_INFLATEFILE(ZBIN* src,
 
             strm.avail_out = CHUNK;
             strm.next_out  = out;
-            zlib_status    = inflate            (&strm, Z_NO_FLUSH                                                      );
-
-            switch (zlib_status)                {   case Z_OK:
-                                                    case Z_STREAM_END:
-                                                    case Z_BUF_ERROR:
-                                                    break;
-
-                                                    default:
-                                                    inflateEnd (&strm);
-                                                    fprintf    (stderr, "Gzip error %d in '%s'.\n",
-                                                                        zlib_status, src->name    );
-
-                                                    return ERROR;                                                       }
+            CALL_ZLIB(inflate(&strm, Z_NO_FLUSH));
 
             have = CHUNK - strm.avail_out;
 
@@ -146,6 +137,8 @@ int ZJC_INFLATEFILE(ZBIN* src,
 
         }
     }
+
+    inflateEnd (& strm);
 
     return 0;                                                                                                           }
 
@@ -212,7 +205,7 @@ int ZJC_DEFLATEFILE(ZBIN* src, ZBIN* dst, uint blocksize, uint numblocks, uint s
             strm.avail_out = CHUNK;
             strm.next_out  = out;
 
-            CALL_ZLIB (deflate (& strm, Z_NO_FLUSH));
+            CALL_ZLIB (deflate (& strm, Z_FINISH));
 
             have           = CHUNK - strm.avail_out;
             (*size_d)     += have;
@@ -224,13 +217,12 @@ int ZJC_DEFLATEFILE(ZBIN* src, ZBIN* dst, uint blocksize, uint numblocks, uint s
 
     deflateEnd (&strm);
 
-    printf("DEFLATE: %u/%u | approx. %u%% file size reduction\n",
+    int finalsize = (int) (100.0 - (( (float) ( *size_d) / (float) (size_i) ) * 100));
 
-           *size_d, size_i,
+    if(finalsize < 0) { printf("BAD DEFLATE: %u/%u | approx. %i%% file size increase\n",   *size_d, size_i, -finalsize);}
+    else              { printf("GOOD DEFLATE: %u/%u | approx. %i%% file size reduction\n", *size_d, size_i,  finalsize);}
 
-           (uint) (100.0 - (( (float) ( *size_d) / (float) (size_i) ) * 100))
-
-          );
+    WARD_EVIL_MFREE(readbuff);
 
     return 0;                                                                                                           }
 
@@ -306,11 +298,6 @@ static JOJ*    curjoj         = NULL;
 
 //  - --- - --- - --- - --- -
 
-uint ZJC_getNext_blockSize(uint elementSize,
-                           uint elementCount,
-                           int* endRead     )   { uint avail = CHUNK / elementSize; uint req = elementCount * elementSize;
-                                                  if(req <= CHUNK) { *endRead = 1; return elementCount; } return avail; }
-
 int ZJC_copy_block(ZBIN* src,
                    ZBIN* dst,
                    uint  size)                  {
@@ -384,7 +371,7 @@ int openarch(ZBIN*         bin,
 
         EVIL_FREAD                              (DAF, 1, curdaf, bin                                                    );
 
-        if(strcmp(curdaf->sign, archtype))      { __terminator__(68, bin->name); return ERROR;                          }
+        WARD_EVIL_FSIGN                         (curdaf->sign, archtype, 8, bin->name                                   );
 
     }
 
@@ -413,8 +400,7 @@ int ZJC_new_dafblock(void*   src,
     else if(mode == DAF_UPDATE)
     {
         // copy first half to tempfile
-        uint blocksize = sizeof(DAF);
-        if(offset > 0)                          { blocksize = curdaf->offsets[offset];                                  }
+        uint blocksize = curdaf->offsets[offset];
 
         rewind                                  (dst->file                                                              );
         ZJC_copy_block                          (dst, tmpdst, blocksize                                                 );
@@ -464,13 +450,14 @@ int ZJC_end_dafblock(ZBIN*   dst,
         // if @offset is not the last block in DAF, then copy the remainder
         if                                      (!(offset == (ZJC_DAFSIZE - 1) || offset == (curdaf->fileCount - 1)    ))
 
-        {   uint leap = curdaf->offsets[offset+1] - blocksize; blocksize = curdaf->size - curdaf->offsets[offset+1];
+        {   uint leap     = curdaf->offsets[offset+1] - curdaf->offsets[offset];
+            uint copysize = curdaf->size - curdaf->offsets[offset+1];
 
             fseek                               (dst->file, 0,      SEEK_CUR                                            );
             fseek                               (dst->file, leap,   SEEK_CUR                                            );
             fseek                               (dst->file, 0,      SEEK_CUR                                            );
 
-            ZJC_copy_block                      (dst,       tmpdst, blocksize                                           );
+            ZJC_copy_block                      (dst,       tmpdst, copysize                                            );
 
             uint newsize;
             uint old_end;
@@ -593,8 +580,9 @@ int read_crkdump(cchar*  filename,
 
         EVIL_FWRITE(float, curcrk->numBinds * 16, bindsmat, trvdst);
 
+        // pack into 8-byte format and insert each byte into a H8PACK table
         for(uint i = 0; i < curcrk->vertCount; i++) { ZJC_pack_rawvert(vertpacked + i, rwbuff + i);                     }
-        EVIL_FWRITE                                 (VP3D, curcrk->vertCount, vertpacked, (&tmpsrc)                     );
+        EVIL_FWRITE                                 ( VP3D, curcrk->vertCount, vertpacked, (&tmpsrc)                    );
 
         size_i += curcrk->vertCount * sizeof(VP3D);
     }
@@ -803,7 +791,7 @@ int readssx(SSX* ssx, cchar* filename)          {
 
 
     EVIL_FREAD                                  (cchar, 8, sign, (&src)                                                 );
-    WARD_EVIL_FSIGN                             (sign, SSXSIGN, src.name                                                );
+    WARD_EVIL_FSIGN                             (sign, SSXSIGN, 8, src.name                                             );
 
     EVIL_FREAD                                  (ushort, 1, &ssx->count, (&src)                                         );
 
@@ -913,7 +901,7 @@ int writecrk(cchar* filename,
     uint8_t numoffset = (uint8_t) hexstr_tolong (offset                                                                 );
     uint8_t nummode   = (uint8_t) hexstr_tolong (mode                                                                   );
 
-    return read_crkdump(filename, archive, numoffset, nummode);                                                         }
+    return read_crkdump(filename, archive, nummode, numoffset);                                                         }
 
 //  - --- - --- - --- - --- -
 
@@ -1006,7 +994,7 @@ int ZJC_extract_crk(ZBIN* src,
         fseek                                   (src->file, 0,                       SEEK_CUR                           );
 
         // open a new cache tempfile if storage isn't already open
-        if(!storage->file)                      { int evilstate; WARD_EVIL_WRAP(evilstate, openbin(storage, "wb+", 1)); }
+        if(!storage->file)                      { openbin(storage, "wb+", 1);                                           }
                                                                                                                         }
 //  - --- - --- - --- - --- -
 
@@ -1033,7 +1021,8 @@ int ZJC_extract_crk(ZBIN* src,
 
     return 0;                                                                                                           }
 
-int ZJC_read_crkframe(ZBIN* storage)            { EVIL_FREAD(VP3D, curcrk->vertCount, curcrk_data, storage); return 0;  }
+int ZJC_read_crkframe(ZBIN* storage)            { EVIL_FREAD(VP3D, curcrk->vertCount, curcrk_data->verts, storage);
+                                                  return 0;                                                             }
 
 //  - --- - --- - --- - --- -
 /*

@@ -28,30 +28,31 @@ int main(int argc, char* argv[])
     #if 0
     // TESTBLOCK |
     //           v
+    /**/    printf("\n");
     /**/    ZBIN daf    =                       { archive,  NULL                                                        };
     /**/    ZJC_open_daf                        ( &daf,     0                                                           );
     /**/
     /**/    char* strgname; catpath             ( archive,  "STRG", &strgname                                           );
     /**/    ZBIN strg   =                       { strgname, NULL                                                        };
     /**/
+    /**/    openbin                             ( &strg, "wb+", 1                                                       );
     /**/    ZJC_init_crk                        (                                                                       );
     /**/
-    /**/    ZJC_extract_crk                     ( &daf,     &strg,  0, 1                                                );
+    /**/    ZJC_extract_crk                     ( &daf,     &strg, (uchar) hexstr_tolong(writeoffset), 1                );
     /**/    ZJC_read_crkframe                   ( &strg                                                                 );
     /**/
     /**/    MD3D* mdata = ZJC_get_crkdata       (                                                                       );
-    /**/    uint co     = mdata->verts[0].frac1 & 0x00FFFFFF;
+    /**/    uint co     = mdata->verts[0].frac1;
     /**/
     /**/    float x     = frac_tofloat          (  co & 0x0000FF,        256, FRAC5, 128                                );
     /**/    float y     = frac_tofloat          ( (co & 0x00FF00) >>  8, 256, FRAC5, 128                                );
     /**/    float z     = frac_tofloat          ( (co & 0xFF0000) >> 16, 256, FRAC5, 128                                );
-    /**/
-    /**/    printf                              ( "[%f, %f, %f]\n", x, y, z                                               );
-    /**/
+    /**/printf("[%f, %f, %f]\n", x, y, z);
     /**/    ZJC_close_daf                       ( &daf, 1                                                               );
     /**/    ZJC_end_crk                         (                                                                       );
     /**/
     /**/    closebin                            ( &strg, 1                                                              );
+    /**/    remove                              ( strgname                                                              );
     /**/    WARD_EVIL_MFREE                     ( strgname                                                              );
     //           ^
     // TESTBLOCK |

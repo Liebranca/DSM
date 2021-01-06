@@ -67,8 +67,8 @@ def writecrk():
         with open(filepath + "\\" + archive  + ".daf", "rb") as f:
             f.seek(8);
 
-            x        = f.read(2);
-            fcounter = x[0] + (x[1] << 8);
+            x        = f.read(4);
+            fcounter = int.from_bytes(x, "little");
 
             if fcounter <= writeoffset: writemode = '0x01';
             else:                       writemode = '0x02';

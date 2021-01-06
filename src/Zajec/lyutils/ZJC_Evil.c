@@ -54,7 +54,11 @@ void __terminator__(uint errorcode,
 
 //  - --- - --- - --- - --- -
 
-int __zjcstrcmp__(cchar* a, cchar* b)     { return strcmp(a, b);                                            }
+int __zjcstrcmp__(cchar* a,
+                  cchar* b,
+                  uint   length)          { for(uint i = 0; i < length; i++) { if(a[i] != b[i]) { return 1; }
+                                                                                                            }
+                                            return 0;                                                       }
 
 void __zjcitoa__(uint x,
                  char* buff,

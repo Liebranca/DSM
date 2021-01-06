@@ -119,7 +119,6 @@ typedef struct VertexPacked3D {
 // and all that explaining just for two ints in a struct!
 // guess I could make this a single long but GLSL wouldn't like that
 
-
 typedef struct BoxPacked3D {
 
     uint frac1;                                 // v1x  v1y  v1z  v2x
