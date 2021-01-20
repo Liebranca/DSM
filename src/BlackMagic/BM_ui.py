@@ -2,16 +2,16 @@ import bpy, sys
 
 from bpy.utils import register_class, unregister_class
 
-from . import bmtypes
-from . import bmpopup
-from . import bmcommops
+from . import BM_types
+from . import BM_popup
+from . import BM_commops
 
 #   ---     ---     ---     ---     ---
     
-class DA_scenePanel(bpy.types.Panel):
+class BM_scenePanel(bpy.types.Panel):
 
     bl_label       = 'Global';
-    bl_idname      = 'DA_scenePanel';
+    bl_idname      = 'BM_scenePanel';
     bl_space_type  = 'VIEW_3D';
     bl_region_type = 'TOOLS';
     bl_category    = 'BlackMagic';
@@ -41,10 +41,10 @@ class DA_scenePanel(bpy.types.Panel):
 
 #   ---     ---     ---     ---     ---
 
-class DA_objectPanel(bpy.types.Panel):
+class BM_objectPanel(bpy.types.Panel):
 
     bl_label       = 'Object';
-    bl_idname      = 'DA_objectPanel';
+    bl_idname      = 'BM_objectPanel';
     bl_space_type  = 'VIEW_3D';
     bl_region_type = 'TOOLS';
     bl_category    = 'BlackMagic';
@@ -79,10 +79,10 @@ class DA_objectPanel(bpy.types.Panel):
 
 #   ---     ---     ---     ---     ---
 
-class DA_materialPanel(bpy.types.Panel):
+class BM_materialPanel(bpy.types.Panel):
 
     bl_label       = 'Material';
-    bl_idname      = 'DA_materialPanel';
+    bl_idname      = 'BM_materialPanel';
     bl_space_type  = 'VIEW_3D';
     bl_region_type = 'TOOLS';
     bl_category    = 'BlackMagic';
@@ -131,7 +131,7 @@ class DA_materialPanel(bpy.types.Panel):
 
             layout.separator();
 
-            if mate.BlackMagic.flags & bmtypes.DA_MaterialFlags["Specular"]:
+            if mate.BlackMagic.flags & BM_types.BM_MaterialFlags["Specular"]:
                 row = layout.row();
                 row.label(text = "Specular:");
                 row.prop(mate.BlackMagic, "spec_mult");
@@ -140,12 +140,12 @@ class DA_materialPanel(bpy.types.Panel):
             row.label(text = "Diffuse:");
             row.prop(mate.BlackMagic, "diff_mult");
 
-            if mate.BlackMagic.flags & bmtypes.DA_MaterialFlags["Reflective"]:
+            if mate.BlackMagic.flags & BM_types.BM_MaterialFlags["Reflective"]:
                 row = layout.row();
                 row.label(text = "Reflection:");
                 row.prop(mate.BlackMagic, "ref_mult");
 
-            if mate.BlackMagic.flags & bmtypes.DA_MaterialFlags["Radiance"]:
+            if mate.BlackMagic.flags & BM_types.BM_MaterialFlags["Radiance"]:
                 row = layout.row();
                 row.label(text = "Radiance:");
                 row.prop(mate.BlackMagic, "glow_rea");
@@ -160,25 +160,14 @@ class DA_materialPanel(bpy.types.Panel):
 #   ---     ---     ---     ---     ---
 
 def register():
-    bmtypes.register  ();
-    bmpopup.register  ();
-    bmcommops.register();
-
-    register_class(DA_scenePanel   );
-    register_class(DA_objectPanel  );
-    register_class(DA_materialPanel);
+    BM_types.register  ();
+    BM_popup.register  ();
+    BM_commops.register();
 
 
 def unregister():
-    bmtypes.unregister  ();
-    bmpopup.unregister  ();
-    bmcommops.unregister();
-
-    unregister_class(DA_scenePanel   );
-    unregister_class(DA_objectPanel  );
-    unregister_class(DA_materialPanel);
-
-if __name__ == "__main__":
-    register();
+    BM_types.unregister  ();
+    BM_popup.unregister  ();
+    BM_commops.unregister();
 
 #   ---     ---     ---     ---     ---

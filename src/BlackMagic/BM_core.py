@@ -1,5 +1,5 @@
 from . import bmpath, set_bm_ars
-from .bmutils   import meshfrac
+from .BM_utils   import meshfrac
 from .crkwriter import writecrk, masscrk
 from .jojwriter import writejoj
 from .ssxwriter import writessx

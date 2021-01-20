@@ -9,7 +9,7 @@ from .crkwriter import writecrk
 
 #   ---     ---     ---     ---     ---
 
-class DA_objectExport(Operator):
+class BM_objectExport(Operator):
 
     bl_idname      = "blackmagic.exportmesh";
     bl_label       = "Export selected object's mesh to DarkAge";
@@ -45,7 +45,7 @@ class DA_objectExport(Operator):
 
 #   ---     ---     ---     ---     ---
 
-class DA_materialExport(Operator):
+class BM_materialExport(Operator):
 
     bl_idname      = "blackmagic.exportmaterial";
     bl_label       = "Export selected material to DarkAge";
@@ -81,14 +81,8 @@ class DA_materialExport(Operator):
 
 #   ---     ---     ---     ---     ---
 
-def register():
+def register(): pass;
 
-    register_class(DA_objectExport);
-    register_class(DA_materialExport);
-
-def unregister():
-
-    unregister_class(DA_objectExport);
-    unregister_class(DA_materialExport);
+def unregister(): pass;
 
 #   ---     ---     ---     ---     ---

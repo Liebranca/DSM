@@ -12,8 +12,27 @@ if dsm_srcpath not in sys.path: sys.path.append(dsm_srcpath);
 print("\n# - -- - --- - -- - = - -- - --- - -- -\n");
 print("Loading up dsm extensions:");
 
+import DarkAge
+print(">DarkAge v%s"%DarkAge.version)
+
+if DarkAge.darkpath != dsm_srcpath + "\\\\DarkAge":
+
+    lines = [];
+    with open(dsm_srcpath + "\\DarkAge" + "\\__init__.py", "r") as file:
+        lines = file.readlines();
+
+    lines[14] = 'darkpath    = "%s";\n'%("\\\\".join(dsm_srcpath.split("\\")) + "\\\\DarkAge")
+
+    with open(dsm_srcpath + "\\DarkAge" + "\\__init__.py", "r+") as file:
+        file.writelines(lines);
+
+    importlib.reload(DarkAge);
+
+    from DarkAge import register as DA_register
+    DA_register();
+
 import BlackMagic
-print(">BlackMagic v%s\n"%BlackMagic.version)
+print(">BlackMagic v%s"%BlackMagic.version)
 
 if BlackMagic.bmpath != dsm_srcpath + "\\\\BlackMagic":
 
@@ -28,10 +47,10 @@ if BlackMagic.bmpath != dsm_srcpath + "\\\\BlackMagic":
 
     importlib.reload(BlackMagic);
 
-    from BlackMagic.dsm_ui import register as dsm_register_ui
-    dsm_register_ui();
+    from BlackMagic import register as bm_register
+    bm_register();
     
-print("Done!");
+print("\nDone!");
 print("\n# - -- - --- - -- - = - -- - --- - -- -\n");
 
 #   ---     ---     ---     ---     ---

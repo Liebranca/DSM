@@ -4,11 +4,11 @@ from bpy.types import Operator
 from bpy.props import BoolProperty
 from bpy.utils import register_class, unregister_class
 
-from .bmtypes import DA_MaterialFlags
+from .BM_types import BM_MaterialFlags
 
 #   ---     ---     ---     ---     ---
 
-class DA_materialFlagSetter(Operator):
+class BM_materialFlagSetter(Operator):
 
     bl_idname      = "blackmagic.setmateflags";
     bl_label       = "Set DarkAge material flags";
@@ -35,14 +35,14 @@ class DA_materialFlagSetter(Operator):
             self.report({'ERROR'}, "No material selected in BlackMagic panel!");
             self.valid = 0; return;
 
-        self.specular   = (self.mate.BlackMagic.flags & DA_MaterialFlags["Specular"  ]) != 0;
-        self.opaque     = (self.mate.BlackMagic.flags & DA_MaterialFlags["Opaque"    ]) != 0;
-        self.reflective = (self.mate.BlackMagic.flags & DA_MaterialFlags["Reflective"]) != 0;
-        self.metallic   = (self.mate.BlackMagic.flags & DA_MaterialFlags["Metallic"  ]) != 0;
-        self.radiance   = (self.mate.BlackMagic.flags & DA_MaterialFlags["Radiance"  ]) != 0;
-        self.animated   = (self.mate.BlackMagic.flags & DA_MaterialFlags["Animated"  ]) != 0;
-        self.sprite     = (self.mate.BlackMagic.flags & DA_MaterialFlags["Sprite"    ]) != 0;
-        self.nonmat     = (self.mate.BlackMagic.flags & DA_MaterialFlags["NonMat"    ]) != 0;
+        self.specular   = (self.mate.BlackMagic.flags & BM_MaterialFlags["Specular"  ]) != 0;
+        self.opaque     = (self.mate.BlackMagic.flags & BM_MaterialFlags["Opaque"    ]) != 0;
+        self.reflective = (self.mate.BlackMagic.flags & BM_MaterialFlags["Reflective"]) != 0;
+        self.metallic   = (self.mate.BlackMagic.flags & BM_MaterialFlags["Metallic"  ]) != 0;
+        self.radiance   = (self.mate.BlackMagic.flags & BM_MaterialFlags["Radiance"  ]) != 0;
+        self.animated   = (self.mate.BlackMagic.flags & BM_MaterialFlags["Animated"  ]) != 0;
+        self.sprite     = (self.mate.BlackMagic.flags & BM_MaterialFlags["Sprite"    ]) != 0;
+        self.nonmat     = (self.mate.BlackMagic.flags & BM_MaterialFlags["NonMat"    ]) != 0;
 
         super().__init__();
 
@@ -50,14 +50,14 @@ class DA_materialFlagSetter(Operator):
 
     def execute(self, context):
 
-        self.mate.BlackMagic.flags = ( (self.specular   * DA_MaterialFlags["Specular"  ])
-                                   |   (self.opaque     * DA_MaterialFlags["Opaque"    ])
-                                   |   (self.reflective * DA_MaterialFlags["Reflective"])
-                                   |   (self.metallic   * DA_MaterialFlags["Metallic"  ])
-                                   |   (self.radiance   * DA_MaterialFlags["Radiance"  ])
-                                   |   (self.animated   * DA_MaterialFlags["Animated"  ])
-                                   |   (self.sprite     * DA_MaterialFlags["Sprite"    ])
-                                   |   (self.nonmat     * DA_MaterialFlags["NonMat"    ]) );
+        self.mate.BlackMagic.flags = ( (self.specular   * BM_MaterialFlags["Specular"  ])
+                                   |   (self.opaque     * BM_MaterialFlags["Opaque"    ])
+                                   |   (self.reflective * BM_MaterialFlags["Reflective"])
+                                   |   (self.metallic   * BM_MaterialFlags["Metallic"  ])
+                                   |   (self.radiance   * BM_MaterialFlags["Radiance"  ])
+                                   |   (self.animated   * BM_MaterialFlags["Animated"  ])
+                                   |   (self.sprite     * BM_MaterialFlags["Sprite"    ])
+                                   |   (self.nonmat     * BM_MaterialFlags["NonMat"    ]) );
 
         self.report({'INFO'}, "Flags set for material %s"%self.mate.name);
 
@@ -72,12 +72,8 @@ class DA_materialFlagSetter(Operator):
 
 #   ---     ---     ---     ---     ---
 
-def register():
+def register(): pass;
 
-    register_class(DA_materialFlagSetter);
-
-def unregister():
-
-    unregister_class(DA_materialFlagSetter);
+def unregister(): pass;
 
 #   ---     ---     ---     ---     ---

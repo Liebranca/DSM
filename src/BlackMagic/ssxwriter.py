@@ -1,4 +1,4 @@
-from .bmutils import *
+from .BM_utils import *
 
 obj_proplist  = ["resid", "obarci", "flags"]
 lamp_proplist = ["lradius", "latten"]

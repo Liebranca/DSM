@@ -1,4 +1,4 @@
-from .bmutils import *
+from .BM_utils import *
 JOJ_MAX_SIZE = 1024;
 
 #   ---     ---     ---     ---     ---

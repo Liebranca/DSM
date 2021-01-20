@@ -5,25 +5,25 @@ from bpy.props import StringProperty, EnumProperty, FloatProperty, IntProperty, 
 #   ---     ---     ---     ---     ---
 # utils I had to write because your API sucks way too hard at convenience.
 
-def bm_setUshort(self, value):
+def BM_setUshort(self, value):
     self = max(0, min(value, 65536));
 
 #   ---     ---     ---     ---     ---
 
-DA_Classes =    [
+BM_Classes =    [
                     ("static", "Static", "Terrain, building or background prop"),
                     ("actor", "Actor", "Player or NPC"),
                     ("arma", "Armature", "Custom armature logic"),
                 ];
 
-DA_ObjectAttrs = [
+BM_ObjectAttrs = [
                     ["meshid", IntProperty,
                     {"name":"Mesh Nº", "default":0,
                     "description":"Object's position in the mesh archive."
                     + " May not be higher than 255 or the archive's element count"}],
 
                     ["kls", EnumProperty,
-                    {"items":DA_Classes, "name":"Type",
+                    {"items":BM_Classes, "name":"Type",
                     "description":"Class mutation to be applied ingame"}],
 
                     ["displayName", StringProperty,
@@ -39,18 +39,18 @@ static_attrs = ["displayName", "weight"];
 
 #   ---     ---     ---     ---     ---
 
-class DA_ObjectSettings(PropertyGroup):
+class BM_ObjectSettings(PropertyGroup):
 
     arc_offset   = IntProperty  (name        = "",                 default = 0, min = 0, max = 255,
                                  description = "DAF file mesh slot"                                              );
 
 #   ---     ---     ---     ---     ---
 
-class DA_SceneSettings(PropertyGroup):
+class BM_SceneSettings(PropertyGroup):
 
     resourceID   = IntProperty    (name        = "ResourceID",  default = 0, min = 0, max = 65535,
                                    description = "ID of the resource this object belongs to;"
-                                              + " used as index into a DA_Resource array"               );
+                                              + " used as index into a BM_Resource array"               );
 
     mesharch     = StringProperty (name        = "MeshArchive", default = "M000",
                                    description = "Name of DAF mesh file to write to"                    );
@@ -66,7 +66,7 @@ class DA_SceneSettings(PropertyGroup):
 
 #   ---     ---     ---     ---     ---
 
-DA_MaterialPresets = [
+BM_MaterialPresets = [
                         ("default",    "Default",    "Specular, opaque, no faux reflections"            ),
                         ("glass",      "Glass",      "Specular, transparency, faux reflections"         ),
                         ("glow",       "Glow",       "No specular, transparency, radiance"              ),
@@ -79,7 +79,7 @@ DA_MaterialPresets = [
                         ("billboard", "Billboard",   "Cam-aligned plane, no animations"                 ),
                      ];
 
-DA_MaterialFlags   = { 
+BM_MaterialFlags   = { 
                        "Specular"   : 0x01,
                        "Opaque"     : 0x02,
                        "Reflective" : 0x04,
@@ -90,7 +90,7 @@ DA_MaterialFlags   = {
                        "NonMat"     : 0x80
                      };
 
-def DA_Material_onPresetChange(self, context):
+def BM_Material_onPresetChange(self, context):
 
     scene  = context.scene;
     mate   = scene.BlackMagic.curmat;
@@ -103,58 +103,58 @@ def DA_Material_onPresetChange(self, context):
 
         if   newkls == "default"   :
             mate.BlackMagic.shader = 0;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Opaque"    ]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Opaque"    ]);
 
         elif newkls == "glass"     :
             mate.BlackMagic.shader = 1;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Reflective"]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Reflective"]);
 
         elif newkls == "metalness" :
             mate.BlackMagic.shader = 2;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Opaque"    ]
-                                   |  DA_MaterialFlags["Metallic"  ]
-                                   |  DA_MaterialFlags["Reflective"]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Opaque"    ]
+                                   |  BM_MaterialFlags["Metallic"  ]
+                                   |  BM_MaterialFlags["Reflective"]);
 
         elif newkls == "metalglass":
             mate.BlackMagic.shader = 3;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Metallic"  ]
-                                   |  DA_MaterialFlags["Reflective"]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Metallic"  ]
+                                   |  BM_MaterialFlags["Reflective"]);
 
         elif newkls == "metalglow" :
             mate.BlackMagic.shader = 4;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Metallic"  ]
-                                   |  DA_MaterialFlags["Reflective"]
-                                   |  DA_MaterialFlags["Radiance"  ]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Metallic"  ]
+                                   |  BM_MaterialFlags["Reflective"]
+                                   |  BM_MaterialFlags["Radiance"  ]);
 
         elif newkls == "billboard" :
             mate.BlackMagic.shader = 5;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Opaque"    ]
-                                   |  DA_MaterialFlags["Sprite"    ]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Opaque"    ]
+                                   |  BM_MaterialFlags["Sprite"    ]);
 
         elif newkls == "sprite"    :
             mate.BlackMagic.shader = 6;
-            mate.BlackMagic.flags  = (DA_MaterialFlags["Specular"  ]
-                                   |  DA_MaterialFlags["Opaque"    ]
-                                   |  DA_MaterialFlags["Sprite"    ]
-                                   |  DA_MaterialFlags["Animated"  ]);
+            mate.BlackMagic.flags  = (BM_MaterialFlags["Specular"  ]
+                                   |  BM_MaterialFlags["Opaque"    ]
+                                   |  BM_MaterialFlags["Sprite"    ]
+                                   |  BM_MaterialFlags["Animated"  ]);
 
     elif newkls == "glow":
 
         mate.BlackMagic.shader       = 7;
         mate.BlackMagic.num_textures = 2;
-        mate.BlackMagic.flags        = DA_MaterialFlags["Radiance"];
+        mate.BlackMagic.flags        = BM_MaterialFlags["Radiance"];
 
-class DA_MaterialSettings(PropertyGroup):
+class BM_MaterialSettings(PropertyGroup):
 
-    preset       = EnumProperty (items       = DA_MaterialPresets, name    = "", default = "default",
+    preset       = EnumProperty (items       = BM_MaterialPresets, name    = "", default = "default",
                                  description = "Determines SIN shader for this material & some export settings",
-                                 update      = DA_Material_onPresetChange                                        );
+                                 update      = BM_Material_onPresetChange                                        );
 
     num_textures = IntProperty  (name        = "",                 default = 3, min = 0, max = 255,
                                  description = "Number of texture maps to export"                                );
@@ -168,7 +168,7 @@ class DA_MaterialSettings(PropertyGroup):
     matid        = IntProperty  (name        = "",                 default = 1, min = 1, max = 65535,
                                  description = "Unique material ID (nonzero)"                                    );
 
-    flags        = IntProperty  (default     = DA_MaterialFlags["Specular"] | DA_MaterialFlags["Opaque"]         );
+    flags        = IntProperty  (default     = BM_MaterialFlags["Specular"] | BM_MaterialFlags["Opaque"]         );
 
     shader       = IntProperty  (default     = 0                                                                 );
 
@@ -188,22 +188,14 @@ class DA_MaterialSettings(PropertyGroup):
 
 def register():
 
-    register_class(DA_SceneSettings   );
-    register_class(DA_ObjectSettings  );
-    register_class(DA_MaterialSettings);
-
-    Scene.BlackMagic    = PointerProperty(type = DA_SceneSettings   );
-    Object.BlackMagic   = PointerProperty(type = DA_ObjectSettings  );
-    Material.BlackMagic = PointerProperty(type = DA_MaterialSettings);
+    Scene.BlackMagic    = PointerProperty(type = BM_SceneSettings   );
+    Object.BlackMagic   = PointerProperty(type = BM_ObjectSettings  );
+    Material.BlackMagic = PointerProperty(type = BM_MaterialSettings);
 
 def unregister():
     
     del Scene.BlackMagic;
     del Object.BlackMagic;
     del Material.BlackMagic;
-
-    unregister_class(DA_SceneSettings   );
-    unregister_class(DA_ObjectSettings  );
-    unregister_class(DA_MaterialSettings);
 
 #   ---     ---     ---     ---     ---

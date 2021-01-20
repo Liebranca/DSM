@@ -1,9 +1,70 @@
 from math import degrees, sqrt
 import bmesh, itertools
 
-from .bmutils import *
+from .BM_utils import *
 
 #   ---     ---     ---     ---     ---
+
+"""
+
+ANIMCHART
+
+idle_p      6
+idle_c      6
+
+casting     6
+
+defeat      6
+victory     6
+
+total       36 frames
+---------------------------
+
+walk        6
+run         6
+
+step_f      3
+step_b      3
+step_r      3
+step_l      3
+
+jump        6
+air         3
+land        6
+
+total       33 frames
+---------------------------
+
+attack_a    8
+attack_b    8
+attack_c    8
+attack_d    8
+
+guard       6
+guard_hit   6
+
+hit_a       3
+hit_b       3
+stun        6
+
+death_a     8
+death_b     8
+death_c     8
+
+total       80 frames
+---------------------------
+
+climb_high  8
+climb_low   8
+vault       8
+
+special_a   9
+special_b   9
+
+total       42 frames
+---------------------------
+
+"""
 
 original_mesh = None
 obj_proplist  = ["obarc", "obarci", "matid"]
@@ -19,7 +80,7 @@ def mesh_triangulate(ob, me):
 
     bm = bmesh.new()
     bm.from_object(ob, bpy.context.scene, face_normals=False)
-    bmesh.ops.triangulate(bm, faces=bm.faces)
+    bmesh.ops.triangulate(bm, deform=True, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
 
