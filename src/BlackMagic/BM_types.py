@@ -3,7 +3,6 @@ from bpy.types import Scene, Object, Material, PropertyGroup
 from bpy.props import StringProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, BoolProperty
 
 #   ---     ---     ---     ---     ---
-# utils I had to write because your API sucks way too hard at convenience.
 
 def BM_setUshort(self, value):
     self = max(0, min(value, 65536));

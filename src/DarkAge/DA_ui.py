@@ -3,9 +3,35 @@ import bpy, sys
 from bpy.utils import register_class, unregister_class
 from bpy.types import UIList
 
-from . import DA_ops, DA_types
+from . import DA_ops, DA_types;
+from .DA_utils import read_strList;
 
 #   ---     ---     ---     ---     ---
+
+class GamePropList(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+
+        if item:
+
+            ic   = "RADIOBUT_OFF"
+            ob   = context.object.DarkAge;
+            prop = ob.props[ob.curprop]
+
+            if item == prop:
+                ic = "RADIOBUT_ON"
+
+            if self.layout_type in {'DEFAULT', 'COMPACT'}:
+
+                value = item.value;
+
+                if item.kls == 'LIST': value = str(read_strList(item.value));
+
+                layout.prop(item, "name", icon=ic, emboss=False, text=""); layout.label(value);
+
+            elif self.layout_type == 'GRID':
+                layout.alignment = 'CENTER';
+                layout.label(text="", icon=ic);
 
 class TriggerList(UIList):
 
@@ -20,12 +46,12 @@ class TriggerList(UIList):
             if item == state.triggers[state.active_trigger]:
                 ic = "RADIOBUT_ON"
 
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.prop(item, "name", text="", emboss=False, icon=ic);
+            if self.layout_type in {'DEFAULT', 'COMPACT'}:
+                layout.prop(item, "name", text="", emboss=False, icon=ic);
 
-        elif self.layout_type == 'GRID':
-            layout.alignment = 'CENTER';
-            layout.label(text="", icon=ic);
+            elif self.layout_type == 'GRID':
+                layout.alignment = 'CENTER';
+                layout.label(text="", icon=ic);
 
 #   ---     ---     ---     ---     ---
 
@@ -57,6 +83,22 @@ class SB_Panel(bpy.types.Panel):
 #   ---     ---     ---     ---     ---
 
         else:
+
+            layout.separator();
+            row = layout.row(); row.label("Game Properties");
+
+            row = layout.row();
+            row.template_list("GamePropList", "", ob, "props", ob, "curprop", rows=1, maxrows=4, type='DEFAULT')
+
+            col = row.column(True);
+
+            col.operator("darkage.addgameprop",  text = "", icon = "ZOOMIN"   );
+            col.operator("darkage.delgameprop",  text = "", icon = "ZOOMOUT"  );
+            col.operator("darkage.editgameprop", text = "", icon = "SCRIPTWIN");
+
+#   ---     ---     ---     ---     ---
+
+            layout.separator();
 
             curstate      = int            (ob.curstate);
             state         = ob.states      [curstate   ];
@@ -98,6 +140,7 @@ class SB_Panel(bpy.types.Panel):
 #   ---     ---     ---     ---     ---
 
             layout.separator();
+            row = layout.row(); row.label("Triggers for %s %s"%(state.name, "State" if state.name[0].isupper() else "state"));
 
             row = layout.row();
             row.template_list("TriggerList", "", state, "triggers", state, "active_trigger", rows=1, maxrows=4, type='DEFAULT')
