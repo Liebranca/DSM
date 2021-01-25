@@ -1,3 +1,11 @@
+import re;
+
+reg_letters = re.compile("[^a-zA-Z]");
+reg_ops     = re.compile(r"[\+\-\*\/]");
+
+op_chars    = ['+', '-', '*', '/'];
+
+#   ---     ---     ---     ---     ---
 
 def ensureNameUnique(colle, idex):
 
@@ -5,7 +13,11 @@ def ensureNameUnique(colle, idex):
 
     for v in colle:
 
-        name = v.name.split(".")[0];
+        if not isinstance(v, str):
+            name = v.name.split(".")[0];
+
+        else:
+            name = v.split(".")[0];
 
         if name in l:
 
@@ -19,17 +31,73 @@ def ensureNameUnique(colle, idex):
 
         i += 1;
 
-    return colle[idex].name;
+    if not isinstance(v, str):
+        return colle[idex].name;
+    
+    return colle[idex];
 
 #   ---     ---     ---     ---     ---
 
-# TODO START
-# work out string to operator funcs
-# game props are all interpreted from strings so we might need to bring regex in as well
-import operator;
-opchars = {"+" : operator.add, "-" : operator.sub, "*" : operator.mul, "/" : operator.truediv}
-# TODOO END
+def read_numex(ex):
 
+    ex = ''.join(reg_letters.findall(ex));
+    s  = ''; i = 0;
+
+    while i < len(ex):
+
+        c = ex[i];
+
+#   ---     ---     ---     ---     ---
+# whitespace-breaker. do not allow two separated numbers
+# (eg 0 1) unless theres an operator in the middle (0 + 1)
+
+        if c == ' ':
+
+            if (i+1) >= len(ex): break;
+
+            if ex[i+1] != ' ':
+
+                if ex[i+1].isdigit():
+                    s  = s + ex[i+1];
+                    i += 2;
+
+                else:
+
+                    m  = reg_ops.search(ex[i+1:]); i += 1;
+
+                    if m and ( i < (len(ex) - 1) ):
+                        s += ex[i];
+                        i += 1;
+
+                    else: break;
+
+            else: i += 1;
+
+#   ---     ---     ---     ---     ---
+# also check that there's no lone operators @ end of string
+
+        elif c in op_chars:
+            if (i+1) >= len(ex): break;
+
+            s  = s + c;
+            i += 1;
+
+        else:
+            s  = s + c;
+            i += 1;
+
+    i = len(s) - 1;
+    while len(s):
+
+        if s[i] in op_chars:
+            s  = s[0:-1];
+            i -= 1
+
+        else: break;
+
+    return s;
+
+#   ---     ---     ---     ---     ---
 
 def propStr_toBool(x):
 
@@ -37,29 +105,19 @@ def propStr_toBool(x):
     return False;
 
 def propStr_toInt(x):
-
+    
+    x = read_numex(x);
     if not x: return 0;
-    sign = -1 if x[0] == '-' else 1;
-    x = ''.join(c for c in x.split(".")[0] if c.isdigit());
-
-    if not x: return 0;
-    return int(x) * sign;
+    return int(eval(x));
 
 def propStr_toFloat(x):
 
+    x = read_numex(x);
     if not x: return 0.0;
-    sign = -1 if x[0] == '-' else 1;
 
-    w = x.split(".");
-    i = ''.join(c for c in w[0] if c.isdigit());
-    d = '.'
+    return float(eval(x));
 
-    if(len(w) > 1): d += ''.join(c for c in x.split(".")[1] if c.isdigit());
-
-    if not i   : i  = '0';
-    if d == '.': d += '0';
-
-    return float(i+d) * sign;
+#   ---     ---     ---     ---     ---
 
 def propStr_toList(x):
 
@@ -78,7 +136,7 @@ def propStr_toList(x):
         elif s[0] == 'b':
             s = s[0] + str( propStr_toBool (s[1:]) );
 
-    return '[' + (', '.join(s for s in w)) + ']'
+    return '[' + (', '.join(s for s in w)) + ']';
 
 #   ---     ---     ---     ---     ---
 
@@ -90,82 +148,120 @@ def read_strList(x):
     l = [];
 
     for s in w:
-
-        if   s[0] == 'i': l.append(propStr_toInt  (s[1:]));
-        elif s[0] == 'f': l.append(propStr_toFloat(s[1:]));
-        elif s[0] == 'b': l.append(propStr_toBool (s[1:]));
-
-        else            : l.append(                s[1:] );
+        if len(s) <= 1: s = "i0";
+        if   s[0] != 's': l.append(eval(s[1:]));
+        else            : l.append(     s[1:] );
 
     return l;
 
 #   ---     ---     ---     ---     ---
 
-PropTypes     = [
-                    ("INT",    "Integer", "Integer property"),
-                    ("FLOAT",  "Float",   "Float property"  ),
-                    ("TIMER",  "Timer",   "Timer property"  ),
-                    ("VECTOR", "Vector",  "Vector property" ),
-                    ("LIST",   "List",    "List property"   ),
-                    ("STRING", "String",  "String property" ),
-                    ("BOOL",   "Boolean", "Boolean property")
-                ]
+def read_strDict(x):
 
-BasePropTypes = [
-                    ("INT",    "Integer", "Integer property"),
-                    ("FLOAT",  "Float",   "Float property"  ),
-                    ("STRING", "String",  "String property" ),
-                    ("BOOL",   "Boolean", "Boolean property")
-                ]
+    if ( x[0] != '{' ) or ( x[-1] != '}' ): return (0);    
+    x = (x.lstrip("{")).rstrip("}"); w = x.split(", ");
+
+    d = {};
+
+    for s in w:
+
+        key, value = s.split(":"); y = None; z = None;
+
+        if   value[0] != 's': y = eval(value[1:]);
+        else                : y =      value[1:] ;
+
+        d[key] = y;
+
+    return d;
+
+#   ---     ---     ---     ---     ---
+
+PropTypes     = [
+                    ("INT",    "Integer", "Integer property"   ),
+                    ("FLOAT",  "Float",   "Float property"     ),
+                    ("TIMER",  "Timer",   "Timer property"     ),
+                    ("VECTOR", "Vector",  "Vector property"    ),
+                    ("LIST",   "List",    "List property"      ),
+                    ("DICT",   "Dict",    "Dictionary property"),
+                    ("STRING", "String",  "String property"    ),
+                    ("BOOL",   "Boolean", "Boolean property"   )
+                ];
+
+BasePropTypes = [ "INT", "FLOAT", "STRING", "BOOL" ];
 
 #   ---     ---     ---     ---     ---
 
 def baseGamePropTrans(kls, value):
 
-    if   kls == 'INT'  : value = str(propStr_toInt  (value));
-    elif kls == 'FLOAT': value = str(propStr_toFloat(value));
-    elif kls == 'BOOL' : value = str(propStr_toBool (value));
+    if   kls == 'INT'   : value = str(propStr_toInt  (value));
+    elif kls == 'FLOAT' : value = str(propStr_toFloat(value));
+    elif kls == 'BOOL'  : value = str(propStr_toBool (value));
 
     return value;
 
 #   ---     ---     ---     ---     ---
 
-def morphGamePropValue(self, context):
+def morphGamePropValue(self, context, propiter):
 
     ob   = context.object.DarkAge;
     prop = ob.props[ob.curprop];
 
     if self.kls in ['INT', 'FLOAT', 'BOOL', 'STRING']:
 
-        if   (self.slot0 == prop.value) and (self.kls == prop.kls): return None;
-        value = "%s"%self.slot0;
+        value = "%s"%self.input_block;
 
         if   self.kls == 'INT'  : value = str(propStr_toInt  (value));
         elif self.kls == 'FLOAT': value = str(propStr_toFloat(value));
         elif self.kls == 'BOOL' : value = str(propStr_toBool (value));
 
+        self.input_block = value;
+
+#   ---     ---     ---     ---     ---
+
     elif self.kls == 'LIST':
 
-        if (self.listUpdated) and (self.kls == prop.kls): return None;
-        value = "";
+        value = "["; i = 0;
 
-        for i in range(1, self.lval_num+1):
+        for v in propiter.values:
 
-            subkls = getattr(self, "lval_%i"%i);
-            subval = getattr(self, "slot%i"%i );
+            if i == propiter.ptr: self.input_block = str(v);
 
-            if subkls   == 'INT'   : value = value + "i" + subval;
-            elif subkls == 'FLOAT' : value = value + "f" + subval;
-            elif subkls == 'BOOL'  : value = value + "b" + subval;
-            elif subkls == 'STRING': value = value + "s" + subval;
+            if   isinstance(v, int  ): value = value + "i" + str(v);
+            elif isinstance(v, float): value = value + "f" + str(v);
+            elif isinstance(v, bool ): value = value + "b" + str(v);
+            elif isinstance(v, str  ): value = value + "s" + v;
 
-            if i < self.lval_num: value += ', ';
+            if i < propiter.size - 1: value += ', ';
+            i += 1;
 
-        value = propStr_toList(value); self.listUpdated = True;
+        value = value + "]";
 
-    prop.kls   = self.kls;
-    prop.value = value;
+#   ---     ---     ---     ---     ---
 
-    super(type(self), self).__setattr__("slot0", value);
+    elif self.kls == 'DICT':
+
+        value = "{"; i = 0;
+
+        for v in propiter.values:
+
+            if i == propiter.ptr: self.input_block = str(v);
+
+            key  = propiter.value_keys[i] + ":";
+
+            if   isinstance(v, int  ): value = value + key + "i" + str(v);
+            elif isinstance(v, float): value = value + key + "f" + str(v);
+            elif isinstance(v, bool ): value = value + key + "b" + str(v);
+            elif isinstance(v, str  ): value = value + key + "s" + v;
+
+            if i < propiter.size - 1: value += ', ';
+            i += 1;
+
+        value = value + "}";
+
+
+    prop.kls         = self.kls;
+    prop.value       = value;
+
+    super(type(self), self).__setattr__("value", value);
 
 #   ---     ---     ---     ---     ---

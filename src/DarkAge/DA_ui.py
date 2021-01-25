@@ -4,7 +4,7 @@ from bpy.utils import register_class, unregister_class
 from bpy.types import UIList
 
 from . import DA_ops, DA_types;
-from .DA_utils import read_strList;
+from .DA_utils import read_strList, read_strDict;
 
 #   ---     ---     ---     ---     ---
 
@@ -25,7 +25,8 @@ class GamePropList(UIList):
 
                 value = item.value;
 
-                if item.kls == 'LIST': value = str(read_strList(item.value));
+                if item.kls   == 'LIST': value = str(read_strList(item.value));
+                elif item.kls == 'DICT': value = str(read_strDict(item.value));
 
                 layout.prop(item, "name", icon=ic, emboss=False, text=""); layout.label(value);
 
