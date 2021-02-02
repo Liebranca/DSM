@@ -1,33 +1,12 @@
-import bpy
-
 from bpy.types import Operator
 from bpy.props import BoolProperty, IntProperty, EnumProperty, StringProperty
-from bpy.utils import register_class, unregister_class
 
-from .DA_utils import ensureNameUnique, PropTypes, BasePropTypes, read_strList, read_strDict, baseGamePropTrans, morphGamePropValue;
-from .DA_iterprop import Iterprop;
+from DarkAge.bl.utils.lystr import ensureNameUnique;
 
-#   ---     ---     ---     ---     ---
+from DarkAge.bl.types.prop import PropTypes, read_strList;
+from DarkAge.bl.types.prop import read_strDict, morphGamePropValue;
 
-class DA_objectInit(Operator):
-
-    bl_idname      = "darkage.objectinit";
-    bl_label       = "Initializer for DarkAge";
-
-    bl_description = "An object initializer necessary to bypass the utter madness of this API";
-
-#   ---     ---     ---     ---     ---
-
-    def execute(self, context):
-
-        ob = context.object.DarkAge;
-
-        for i in range(30):
-            new_state = ob.states.add();
-            new_state.name = "State %i"%i;
-
-        self.report({'INFO'}, "Object was initialized");
-        return {'FINISHED'}
+import DarkAge as DA
 
 #   ---     ---     ---     ---     ---
 
@@ -42,7 +21,7 @@ class DA_addGameProp(Operator):
 
     def execute(self, context):
 
-        ob            = context.object.DarkAge;
+        ob            = DA.gbptr;
         new_prop      = ob.props.add();
         new_prop.idex = len(ob.props) - 1;
 
@@ -63,7 +42,7 @@ class DA_delGameProp(Operator):
 
     def execute(self, context):
 
-        ob            = context.object.DarkAge;
+        ob            = DA.gbptr;
         idex          = ob.curprop
 
         if len(ob.props): ob.props.remove(idex);
@@ -151,17 +130,21 @@ class DA_iterPropDecSize(Operator):
 class DA_iterPropAdvPtr(Operator):
 
     bl_idname      = "darkage.ipadvptr";
-    bl_label       = "Move to next item in array";
+    bl_label       = "Moves the selected item down";
 
-    bl_description = "Go to next item";
+    bl_description = "Move this item down";
 
 #   ---     ---     ---     ---     ---
 
     def execute(self, context):
 
         global curiter, iterop;
-        curiter.adv_ptr();
 
+        idex = curiter.ptr + 1;
+        if idex >= curiter.size:
+            idex = 0;
+
+        curiter.positionSwap(idex); curiter.adv_ptr();
         iterop.input_block = str(curiter.curValue());
 
         iterop.check(context);
@@ -173,17 +156,21 @@ class DA_iterPropAdvPtr(Operator):
 class DA_iterPropBakPtr(Operator):
 
     bl_idname      = "darkage.ipbakptr";
-    bl_label       = "Move to previous item in array";
+    bl_label       = "Moves the selected item up";
 
-    bl_description = "Go to previous item";
+    bl_description = "Move this item up";
 
 #   ---     ---     ---     ---     ---
 
     def execute(self, context):
 
         global curiter, iterop;
-        curiter.bak_ptr();
 
+        idex = curiter.ptr - 1;
+        if idex < 0:
+            idex = curiter.size - 1;
+
+        curiter.positionSwap(idex); curiter.bak_ptr();
         iterop.input_block = str(curiter.curValue());
 
         iterop.check(context);
@@ -274,6 +261,8 @@ def set_ikeyFlag  (self, context):
 
 #   ---     ---     ---     ---     ---
 
+def ScrewYou(self, context): return [(kls, '', '') for kls in PropTypes];
+
 class DA_editGameProp(Operator):
 
     bl_idname      = "darkage.editgameprop";
@@ -281,8 +270,8 @@ class DA_editGameProp(Operator):
 
     bl_description = "Brings up the property edit menu";
 
-    kls            = EnumProperty  (name    = "Type",    default = "INT",
-                                    items   = PropTypes, update  = set_klsFlag                          );
+    kls            = EnumProperty  (name    = "Type",
+                                    items   = ScrewYou,  update  = set_klsFlag                          );
 
     value          = StringProperty(default = "0"                                                       );
     input_block    = StringProperty(default = "0",       update  = set_iblockFlag                       );
@@ -314,7 +303,7 @@ class DA_editGameProp(Operator):
 
         global curiter;
 
-        ob               = context.object.DarkAge;
+        ob               = DA.gbptr;
         prop             = ob.props[ob.curprop];
 
         layout           = self.layout;
@@ -398,13 +387,14 @@ class DA_editGameProp(Operator):
 
     def invoke(self, context, event):
 
-        ob = context.object.DarkAge;
+        ob = DA.gbptr;
         if not len(ob.props): return {'CANCELLED'};
 
         global curiter, iterop;
 
         if curiter:
             del curiter;
+            curiter = None;
 
         iterop = self;
 
@@ -449,90 +439,3 @@ class DA_editGameProp(Operator):
         return wm.invoke_props_dialog(self, width=600);
 
 #   ---     ---     ---     ---     ---
-
-class DA_addTrigger(Operator):
-
-    bl_idname      = "darkage.addtrigger";
-    bl_label       = "Add a new trigger";
-
-    bl_description = "Adds a new trigger to the current state";
-
-#   ---     ---     ---     ---     ---
-
-    def execute(self, context):
-
-        ob               = context.object.DarkAge;
-        state            = ob.states[int(ob.curstate)];
-        new_trigger      = state.triggers.add();
-        new_trigger.idex = len(state.triggers) - 1;
-
-        new_trigger.name = ensureNameUnique(state.triggers, new_trigger.idex);
-
-        return {'FINISHED'}
-
-class DA_delTrigger(Operator):
-
-    bl_idname      = "darkage.deltrigger";
-    bl_label       = "Removes a trigger";
-
-    bl_description = "Removes active trigger from current state";
-
-#   ---     ---     ---     ---     ---
-
-    def execute(self, context):
-
-        ob          = context.object.DarkAge;
-        state       = ob.states[int(ob.curstate)];
-
-        if len(state.triggers): state.triggers.remove(state.active_trigger);
-
-        return {'FINISHED'}
-
-#   ---     ---     ---     ---     ---
-
-class SB_editTrigger(Operator):
-
-    bl_idname      = "darkage.edittrigger";
-    bl_label       = "Edit selected trigger";
-
-    bl_description = "Brings up the trigger editing pop-up";
-
-#   ---     ---     ---     ---     ---
-
-    def draw(self, context):
-
-        ob           = context.object.DarkAge;
-        state        = ob.states[int(ob.curstate)];
-        trigger      = state.triggers[state.active_trigger];
-
-        layout       = self.layout;
-        row          = layout.row();
-
-        row.prop(trigger, "name"); row.prop(trigger, "kls");
-
-#   ---     ---     ---     ---     ---
-
-        layout.separator();
-
-        if trigger.kls == "mess":
-            pass;
-
-#   ---     ---     ---     ---     ---
-
-    def execute(self, context): return {'FINISHED'};
-
-    def invoke(self, context, event):
-
-        ob           = context.object.DarkAge;
-        state        = ob.states[int(ob.curstate)];
-
-        if not len(state.triggers): return {'CANCELLED'};
-
-        wm = context.window_manager;
-        return wm.invoke_props_dialog(self, width=600);
-
-#   ---     ---     ---     ---     ---
-
-def register(): pass;   
-
-def unregister(): pass;

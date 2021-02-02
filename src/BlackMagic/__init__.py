@@ -1,5 +1,5 @@
 bmpath      = "D:\\lieb_git\\dsm\\src\\BlackMagic";
-version     = "0.1 BETA";
+version     = "0.1a";
 
 #   ---     ---     ---     ---     ---
 

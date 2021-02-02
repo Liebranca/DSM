@@ -13,17 +13,36 @@ bl_info = {
 #   ---     ---     ---     ---     ---
 
 darkpath    = "D:\\lieb_git\\dsm\\src\\DarkAge";
-version     = "0.1 BETA";
+version     = "0.1a";
 
 #   ---     ---     ---     ---     ---
 
-from bpy.utils import register_class, unregister_class, register_module, unregister_module
-from . import DA_ui;
+gbptr = None; _globals = None; conts = []; inputMorph = {};
 
 def register():
+
+    from bpy.utils import register_module
+
+    from .bl import utils, types, ui, ops;
+    from .bl.types import gblock as GameLogic;
+
     register_module(__name__);
-    DA_ui.register();
+    GameLogic.register();
+
+    ui.panels.GlobalsPanel_Cont.addBox(_globals.props);
+    conts.append(ui.panels.GlobalsPanel_Cont);
+
+    global inputMorph;
+    
+    from .bl.types.prop import propStr_toInt, propStr_toFloat, propStr_toBool, morphGamePropValue;
+    inputMorph = { 'INT':propStr_toInt, 'FLOAT':propStr_toFloat, 'BOOL':propStr_toBool, 'PROP':morphGamePropValue };
 
 def unregister():
-    DA_ui.unregister();
+
+    from bpy.utils import unregister_module
+    from .bl.types import gblock as GameLogic;
+
+    GameLogic.unregister();
     unregister_module(__name__);
+
+#   ---     ---     ---     ---     ---

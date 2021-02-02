@@ -43,6 +43,9 @@ float fround(float x);
 int   clampi(int v, int start, int end);
 float clampf(float v, float start, float end);
 
+// (int) Add (-/+) steps to v and loop around range(start, end)
+int   clampwrapi(int v, int steps, int start, int end);
+
 int   approai(int v1, int v2, int m);
 int   approaf(float v1, float v2, float m);
 

@@ -69,6 +69,45 @@ float clampf(float v,
                                           return v;                                                         }
 
 //  - --- - --- - --- - --- -
+/* add steps to v while wrapping around range
+
+   so if 1 in (0, 9) - 17 gets you 2; 1 in (0, 9) + 18 gets you 1
+   very specific func for a looping colle; i.e. add to ptr until end of array, then loop back
+
+   maybe there's a smarter way of doing it but i'm too sleepy to care right now */
+
+int   clampwrapi(int v,
+
+                 int steps,
+
+                 int start,
+                 int end    )           {
+
+    int diff = 0;
+
+    while(steps)
+    {
+
+//  - --- - --- - --- - --- -
+// get (-) start to v | (+) v to end distance
+
+        if     (steps < 0)  { diff = 1 + abs(start - v);                                                    }
+        else                { diff = 1 + abs(end   - v);                                                    }
+
+        v += steps;
+
+//  - --- - --- - --- - --- -
+// if v not in (start, end) then substract distance from steps and run again, else break
+
+        if     (v < start)  { steps += diff; v = end;                                                       }
+        else if(v > end  )  { steps -= diff; v = start;                                                     }
+        else                { break;                                                                        }
+
+    }
+
+    return v;                                                                                               }
+
+//  - --- - --- - --- - --- -
 
 int   approai(int v1, int v2, int m)    { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
 
