@@ -1,3 +1,0 @@
-class SPCTR:
-
-    DEFKLS = 'GHOSTVAL';

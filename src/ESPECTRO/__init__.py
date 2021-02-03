@@ -3,13 +3,21 @@ version     = "0.1a";
 
 #   ---     ---     ---     ---     ---
 
-from . import pyge;
+# them four lines by Jim Anderson. Thanks, Jim.
+def wrap_cfunc(lib, funcname, restype, argtypes):
 
-def register():
+    func          = lib.__getattr__(funcname)
+    func.restype  = restype
+    func.argtypes = argtypes
 
-    # TEST
-    import ctypes; lib = ctypes.WinDLL("D:\\lieb_git\\dsm\\src\\ESPECTRO\\ESPECTRO.dll");
-    lib.dooku.restype = ctypes.c_char_p; x = lib.dooku(); print(x); del lib;
-    # TEST
+    return func
+
+from ctypes import WinDLL; CSIDE = WinDLL(pectropath + "\\ESPECTRO.dll");
+from .      import PYZJC;
+from .      import pyge;
+
+#   ---     ---     ---     ---     -----
+
+def register(): pass;
 
 #   ---     ---     ---     ---     -----

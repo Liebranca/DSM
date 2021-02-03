@@ -3,17 +3,11 @@
 
 #define EXPORT __declspec(dllexport)
 
-#include "ZJC_CommonTypes.h"
-
 //  ---     ---     ---     ---     ---
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//  ---     ---     ---     ---     ---
-// just a dummy func so i can test out ctypes python-side
-EXPORT cuchar* dooku();
 
 //  ---     ---     ---     ---     ---
 

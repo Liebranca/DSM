@@ -9,12 +9,14 @@ cuchar** ValueTypes     [] = { GamePropTypes };
 
 //  ---     ---     ---     ---     ---
 
-ushort SPCTR_getsize_valType(ushort i)          { return ((uchar)ValueTypes[i][0]);                                     }
+EXPORT ushort SPCTR_getsize_valType(ushort i)   { return ((uchar)ValueTypes[i][0]);                                     }
 
-cuchar* SPCTR_moveptr_KLS(KLS* kls, int steps)  { ushort size   = SPCTR_getsize_valType(kls->arr_idex                   );
-                                                  kls->itm_idex = clampwrapi           (kls->itm_idex, steps, 1, size   );
+EXPORT cuchar* SPCTR_moveptr_KLS(KLS* kls,
+                                 sint steps)    { ushort size   = SPCTR_getsize_valType(kls->arr_idex                   );
+                                                  kls->itm_idex = wrapi                (kls->itm_idex, steps, 1, size   );
 
-                                                  return ValueTypes[kls->arr_idex][kls->itm_idex];                      }
+                                                  return SPCTR_getcurr_KLS(kls);                                        }
+
+EXPORT cuchar* SPCTR_getcurr_KLS(KLS* kls)      { return ValueTypes[kls->arr_idex][kls->itm_idex];                      }
 
 //  ---     ---     ---     ---     ---
-

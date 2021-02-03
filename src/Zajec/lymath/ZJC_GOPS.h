@@ -21,35 +21,60 @@ void  fv3_normalize(float* vec);
 
 //  - --- - --- - --- - --- -
 
-int   maxi(int v1, int v2);
+// (max_int) Get greater of (v1, v2)
+sint maxi(sint v1, sint v2);
+
+// (max_float) Get greater of (v1, v2)
 float maxf(float v1, float v2);
 
-int   mini(int v1, int v2);
+// (min_int) Get lesser of (v1, v2)
+sint mini(sint v1, sint v2);
+
+// (min_float) Get lesser of (v1, v2)
 float minf(float v1, float v2);
 
-int   submini(int v1, int v2);
+// (submin_int) Returns max(v1, v2) minus min(v1, v2)
+sint submini(sint v1, sint v2);
+
+// (submin_float) Returns max(v1, v2) minus min(v1, v2)
 float subminf(float v1, float v2);
 
-int   submaxi(int v1, int v2);
+// (submax_int) Returns min(v1, v2) minus max(v1, v2)
+sint submaxi(sint v1, sint v2);
+
+// (submax_float) Returns min(v1, v2) minus max(v1, v2)
 float submaxf(float v1, float v2);
 
-int   flipifi(int v1, int boo);
-float flipiff(float v1, int boo);
+// (flip_int_if) Inverts sign of v1 if boo
+sint flipifi(sint v1, sint boo);
 
+// (flip_float_if) Inverts sign of v1 if boo
+float flipiff(float v1, sint boo);
+
+// Round x to nearest integer (APPARENTLY)
 float fround(float x);
 
 //  - --- - --- - --- - --- -
 
-int   clampi(int v, int start, int end);
+// (clamp_int) Clamp v to range(start, end)
+sint clampi(sint v, sint start, sint end);
+
+// (clamp_float) Clamp v to range(start, end)
 float clampf(float v, float start, float end);
 
-// (int) Add (-/+) steps to v and loop around range(start, end)
-int   clampwrapi(int v, int steps, int start, int end);
+// (wrap_int) Add (-/+) steps to v and loop around range(start, end)
+sint wrapi(sint v, sint steps, sint start, sint end);
 
-int   approai(int v1, int v2, int m);
-int   approaf(float v1, float v2, float m);
+// (approach_int) Get v1 is at least (-/+) m distance of v2
+sint approai(sint v1, sint v2, sint m);
 
-int   approadi(int v1, int v2, int m);
+// (approach_float) Get v1 is at least (-/+) m distance of v2
+sint approaf(float v1, float v2, float m);
+
+// (approach_distance_int) Get distance if v1 is at least (-/+) m distance of v2
+sint approadi(sint v1, sint v2, sint m);
+
+// (approach_distance_float) Get distance if v1 is at least (-/+) m distance of v2
 float approadf(float v1, float v2, float m);
 
 //  - --- - --- - --- - --- -

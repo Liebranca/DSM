@@ -2,6 +2,7 @@
 #define __SPCTR_BASEKLS_H__
 
 #include "ZJC_CommonTypes.h"
+#include "../ESPECTRO.h"
 
 //  ---     ---     ---     ---     ---
 
@@ -19,10 +20,13 @@ typedef struct ESPECTRO_KLS {
 //  ---     ---     ---     ---     ---
 
 // Get size of ValueType array
-ushort      SPCTR_getsize_valType       (ushort idex                );
+EXPORT ushort SPCTR_getsize_valType(ushort idex);
 
 // Shift KLS by (-/+) steps across ValueType
-cuchar*     SPCTR_moveptr_KLS           (KLS*   kls, int steps      );
+EXPORT cuchar* SPCTR_moveptr_KLS(KLS* kls, sint steps);
+
+// Get current (char) value within ValueType array
+EXPORT cuchar* SPCTR_getcurr_KLS(KLS* kls);
 
 //  ---     ---     ---     ---     ---
 

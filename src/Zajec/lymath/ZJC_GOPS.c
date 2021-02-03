@@ -37,28 +37,28 @@ void fv3_normalize(float* vec)          { float length  = fv3_length(vec);
 
 //  - --- - --- - --- - --- -
 
-int   maxi(int v1, int v2)              { if(v1 > v2) { return v1; } return v2;                             }
-float maxf(float v1, float v2)          { if(v1 > v2) { return v1; } return v2;                             }
+sint  maxi   (sint  v1,  sint v2)       { if(v1 > v2) { return v1; } return v2;                             }
+float maxf   (float v1, float v2)       { if(v1 > v2) { return v1; } return v2;                             }
 
-int   mini(int v1, int v2)              { if(v1 < v2) { return v1; } return v2;                             }
-float minf(float v1, float v2)          { if(v1 < v2) { return v1; } return v2;                             }
+sint  mini   (sint  v1,  sint v2)       { if(v1 < v2) { return v1; } return v2;                             }
+float minf   (float v1, float v2)       { if(v1 < v2) { return v1; } return v2;                             }
 
-int   submini(int v1, int v2)           { return maxi(v1, v2) - mini(v1, v2);                               }
+sint  submini(sint  v1,  sint v2)       { return maxi(v1, v2) - mini(v1, v2);                               }
 float subminf(float v1, float v2)       { return maxf(v1, v2) - minf(v1, v2);                               }
 
-int   submaxi(int v1, int v2)           { return mini(v1, v2) - maxi(v1, v2);                               }
+sint  submaxi(sint  v1,  sint v2)       { return mini(v1, v2) - maxi(v1, v2);                               }
 float submaxf(float v1, float v2)       { return minf(v1, v2) - maxf(v1, v2);                               }
 
-int   flipifi(int v1, int boo)          { return v1 * (1 - (2 * (boo != 0)) );                              }
-float flipiff(float v1, int boo)        { return v1 * (1 - (2 * (boo != 0)) );                              }
+sint  flipifi(sint  v1, sint boo)       { return v1 * (1 - (2 * (boo != 0)) );                              }
+float flipiff(float v1, sint boo)       { return v1 * (1 - (2 * (boo != 0)) );                              }
 
-float fround(float x)                   { int y = (int)(x * 100 + .5f); return (float)(y * 0.01f);          }
+float fround(float x)                   { int y = (sint)(x * 100 + .5f); return (float)(y * 0.01f);         }
 
 //  - --- - --- - --- - --- -
 
-int   clampi(int v,
-             int start,
-             int end)                   { if      (v < start) { v = start; }
+int   clampi(sint v,
+             sint start,
+             sint end)                  { if      (v < start) { v = start; }
                                           else if (v > end  ) { v = end;   }
                                           return v;                                                         }
 
@@ -76,12 +76,12 @@ float clampf(float v,
 
    maybe there's a smarter way of doing it but i'm too sleepy to care right now */
 
-int   clampwrapi(int v,
+int wrapi(sint v,
 
-                 int steps,
+          sint steps,
 
-                 int start,
-                 int end    )           {
+          sint start,
+          sint end    )                         {
 
     int diff = 0;
 
@@ -109,13 +109,17 @@ int   clampwrapi(int v,
 
 //  - --- - --- - --- - --- -
 
-int   approai(int v1, int v2, int m)    { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
+sint  approai(sint v1,
+              sint v2,
+              sint m )                  { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
 
-int   approaf(float v1,
+sint  approaf(float v1,
               float v2,
               float m)                  { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
 
-int   approadi(int v1, int v2, int m)   { if(approai(v1, v2, m)) { return submini(v1, v2); }
+sint  approadi(sint v1,
+               sint v2,
+               sint m )                 { if(approai(v1, v2, m)) { return submini(v1, v2); }
                                           return 999;                                                       }
 
 float approadf(float v1,

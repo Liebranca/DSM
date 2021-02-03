@@ -35,8 +35,8 @@ void ZJC_push_hash(Hash* hash,
                    uint id,
                    uint data   )                { uint loc    = ZJC_hashit(hash, id); MEAN_NZID_WARNING("ZJC_Hash", id);
 
-    if(hash->table[loc] == NULL)                { uint nid[1] = { id }; uint ndata[1] = { data };
-    hash->table[loc]     = ZJC_build_linkList   ( nid, ndata, 1 );                                                      }
+    if(hash->table[loc] == NULL)                { uint  nid  [1  ] = { id }; uint ndata[1] = { data };
+                                                  hash->table[loc] = ZJC_build_linkList( nid, ndata, 1 );               }
 
     else                                        { ZJC_push_linkList(hash->table[loc], id, data);                        }
                                                                                                                         }
