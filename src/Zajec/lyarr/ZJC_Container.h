@@ -8,6 +8,8 @@ extern "C" {
 #include "ZJC_Stack.h"
 #include "ZJC_Hash.h"
 
+#include <stdio.h>
+
 //  - --- - --- - --- - --- -
 
 typedef struct ZJC_CONTAINER {
@@ -36,7 +38,7 @@ uint        ZJC_findLoc_cont    (Container*  cont, uint id,        int shutit   
 #define ZJC_findItem_cont(cont, type, id, mute) {                                                                        \
                                                                                                                          \
     if(id)                                      { uint loc = ZJC_findLoc_cont(cont, id, mute);                           \
-                                                  if(!loc) { return (void*) 0; }                                         \
+                                                  if(!loc) { return (void*) 0; } loc--;                                  \
                                                   return ((type*) cont->buff) + loc;                                    }\
                                                                                                                          \
     return (void*) 0;                                                                                                   }
@@ -46,7 +48,7 @@ uint        ZJC_findLoc_cont    (Container*  cont, uint id,        int shutit   
     if(loc > cont->stack->size || !loc)         { printf("Location %u out of bounds for %s container.\n",                \
                                                          loc, cont->objname);                                           }\
                                                                                                                          \
-    else if(((type*) cont->buff) + loc )        { return ((type*) cont->buff) + loc;                                    }\
+    else if(((type*) cont->buff) + (loc - 1))   { return ((type*) cont->buff) + (loc - 1);                              }\
                                                                                                                          \
     printf("Location %u points to an empty %s.\n", loc, cont->objname);                                                  \
                                                                                                                          \

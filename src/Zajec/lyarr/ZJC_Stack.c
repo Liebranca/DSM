@@ -21,8 +21,8 @@ void ZJC_del_stack(Stack* stack)                { WARD_EVIL_MFREE(stack->values)
 
 //  - --- - --- - --- - --- -
 
-int ZJC_push_stack(Stack* stack,
-                  uint   value)                 {
+sint ZJC_push_stack(Stack* stack,
+                    uint   value)               {
 
     if(stack->top >= stack->size)               { fprintf(stderr, "Can't push to a full stack\n"); return 0;            }
 

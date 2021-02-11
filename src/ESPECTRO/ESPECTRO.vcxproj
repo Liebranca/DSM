@@ -116,11 +116,13 @@
     <ClCompile Include="ESPECTRO.c" />
     <ClCompile Include="types\SPCTR_BaseHED.c" />
     <ClCompile Include="types\SPCTR_BaseKLS.c" />
+    <ClCompile Include="types\SPCTR_Numerics.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ESPECTRO.h" />
     <ClInclude Include="types\SPCTR_BaseKLS.h" />
     <ClInclude Include="types\SPCTR_BaseHED.h" />
+    <ClInclude Include="types\SPCTR_Numerics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

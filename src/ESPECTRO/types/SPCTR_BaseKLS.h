@@ -2,7 +2,9 @@
 #define __SPCTR_BASEKLS_H__
 
 #include "ZJC_CommonTypes.h"
-#include "../ESPECTRO.h"
+#include "lyutils/ZJC_Str.h"
+
+#include "SPCTR_Numerics.h"
 
 //  ---     ---     ---     ---     ---
 
@@ -18,15 +20,31 @@ typedef struct ESPECTRO_KLS {
 } KLS;
 
 //  ---     ---     ---     ---     ---
+// generic type-casting macros.
+
+#define KLS_CAST_INT(X) (IBAR*) X
+
+#define KLS_CAST(TYPE, X) CAT(KLS_CAST_, TYPE)##(X)
+
+#define KLS_FINDTYPE(kls, v) {  switch kls->arr_idex:                                                                    \
+                                case 0:                                                                                  \
+                                    switch kls->itm_idex:                                                                \
+                                    case 0: KLS_CAST(INT, v)\
+                             }
+
+//  ---     ---     ---     ---     ---
 
 // Get size of ValueType array
-EXPORT ushort SPCTR_getsize_valType(ushort idex);
+ushort SPCTR_getsize_valType(ushort idex);
 
 // Shift KLS by (-/+) steps across ValueType
-EXPORT cuchar* SPCTR_moveptr_KLS(KLS* kls, sint steps);
+cuchar* SPCTR_moveptr_KLS(KLS* kls, sint steps);
+
+// Set KLS to idex
+cuchar* SPCTR_setptr_KLS(KLS* kls, sint idex);
 
 // Get current (char) value within ValueType array
-EXPORT cuchar* SPCTR_getcurr_KLS(KLS* kls);
+cuchar* SPCTR_getcurr_KLS(KLS* kls);
 
 //  ---     ---     ---     ---     ---
 

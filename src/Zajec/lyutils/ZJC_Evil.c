@@ -32,6 +32,7 @@ void __terminator__(uint errorcode,
         case  1:                            errout("Access violation.");                         break;
         case  2:                            errout("The end times have come.");                  break;
         case  3:                            errout("You just did something illegal.");           break;
+        case  4:                            errout("Failed realloc (%s requested) .", info);     break;
 
         case 64:                            errout("Couln't open file <%s>",              info); break;
         case 65:                            errout("File couldn't be closed <%s>",        info); break;
@@ -67,6 +68,10 @@ void __zjcitoa__(uint x,
 void* __evil_malloc__(uint count,
                       uint size)          { void* buff = malloc( count * size );
                                             memset(buff, 0, count * size); return buff;                     }
+
+void* __evil_realloc__(void* ptr,
+                       uint  count,
+                       uint  size )       { return realloc(ptr, count * size);                              }
 
 void __evil_free__(void* buff)            { free(buff);                                                     }
 

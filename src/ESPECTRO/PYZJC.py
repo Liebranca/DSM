@@ -34,7 +34,14 @@ from ctypes import (
 
     c_float,
 
-    byref
+    byref,
+    pointer,
+    cast
     );
+
+#   ---     ---     ---     ---     ---
+
+def cstr (s): return bytes   (s, "utf-8");
+def mcstr(s): return charstar(cstr(s)   );
 
 #   ---     ---     ---     ---     ---

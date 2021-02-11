@@ -42,6 +42,7 @@ static cchar* __evil_shpath__(cchar* path) {
 }
 
 void* __evil_malloc__(uint count, uint size);
+void* __evil_realloc__(void* ptr, uint count, uint size);
 void  __evil_free__(void* buff);
 
 void  __evil_geterrloc__(cchar* path, cchar* func, uint line);
@@ -64,6 +65,11 @@ static cuint ERROR = 0x02;
                                                                                                                          \
     buff     = (type*) __evil_malloc__(count, size);                                                                     \
     if(buff == NULL) { __zjcitoa__(size * count, sizestr, 10); __terminator__(0x00, sizestr); } __evil_poplocreg__();   }
+
+#define WARD_EVIL_REALLOC(buff, type, size, count)          { GETLOC; static char sizestr[33];                           \
+                                                                                                                         \
+    buff     = (type*) __evil_realloc__(buff, count, siize);                                                             \
+    if(buff == NULL) { __zjcitoa__(size * count, sizestr, 10); __terminator__(0x04, sizestr); } __evil_poplocreg__();   }
 
 #define WARD_EVIL_MFREE(x)              if(x != NULL)       { __evil_free__((void*) x); x = NULL;                       }
 

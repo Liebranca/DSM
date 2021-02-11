@@ -30,6 +30,9 @@
     <ClInclude Include="types\SPCTR_BaseHED.h">
       <Filter>Header Files\types</Filter>
     </ClInclude>
+    <ClInclude Include="types\SPCTR_Numerics.h">
+      <Filter>Header Files\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ESPECTRO.c">
@@ -39,6 +42,9 @@
       <Filter>Source Files\types</Filter>
     </ClCompile>
     <ClCompile Include="types\SPCTR_BaseKLS.c">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
+    <ClCompile Include="types\SPCTR_Numerics.c">
       <Filter>Source Files\types</Filter>
     </ClCompile>
   </ItemGroup>

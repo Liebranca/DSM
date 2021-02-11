@@ -37,155 +37,277 @@ void fv3_normalize(float* vec)          { float length  = fv3_length(vec);
 
 //  - --- - --- - --- - --- -
 
-sint  maxi   (sint  v1,  sint v2)       { if(v1 > v2) { return v1; } return v2;                             }
-float maxf   (float v1, float v2)       { if(v1 > v2) { return v1; } return v2;                             }
+#define GOPSMAX_DEFN(T, ide) GENFUNC_DEFN(                                                                   \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, max, ide,                                                                                             \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    if(v1 > v2) { return v1; } return v2;,                                                                   \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2)
 
-sint  mini   (sint  v1,  sint v2)       { if(v1 < v2) { return v1; } return v2;                             }
-float minf   (float v1, float v2)       { if(v1 < v2) { return v1; } return v2;                             }
+// (int) Get greater of (v1, v2)
+GOPSMAX_DEFN(sint,  i);
 
-sint  submini(sint  v1,  sint v2)       { return maxi(v1, v2) - mini(v1, v2);                               }
-float subminf(float v1, float v2)       { return maxf(v1, v2) - minf(v1, v2);                               }
+// (float) Get greater of (v1, v2)
+GOPSMAX_DEFN(float, f);
 
-sint  submaxi(sint  v1,  sint v2)       { return mini(v1, v2) - maxi(v1, v2);                               }
-float submaxf(float v1, float v2)       { return minf(v1, v2) - maxf(v1, v2);                               }
+//  - --- - --- - --- - --- -
 
-sint  flipifi(sint  v1, sint boo)       { return v1 * (1 - (2 * (boo != 0)) );                              }
-float flipiff(float v1, sint boo)       { return v1 * (1 - (2 * (boo != 0)) );                              }
+#define GOPSMIN_DEFN(T, ide) GENFUNC_DEFN(                                                                   \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, min, ide,                                                                                             \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    if(v1 < v2) { return v1; } return v2;,                                                                   \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2)
+
+// (int) Get lesser of (v1, v2)
+GOPSMIN_DEFN(sint,  i);
+
+// (float) Get lesser of (v1, v2)
+GOPSMIN_DEFN(float, f);
+
+//  - --- - --- - --- - --- -
+
+#define GOPSSUBMIN_DEFN(T, ide) GENFUNC_DEFN(                                                                \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, submin, ide,                                                                                          \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    return max##ide(v1, v2) - min##ide(v1, v2);,                                                             \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2)
+
+// (int) Returns max(v1, v2) minus min(v1, v2)
+GOPSSUBMIN_DEFN(sint,  i);
+
+// (float) Returns max(v1, v2) minus min(v1, v2)
+GOPSSUBMIN_DEFN(float, f);
+
+//  - --- - --- - --- - --- -
+
+#define GOPSSUBMAX_DEFN(T, ide) GENFUNC_DEFN(                                                                \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, submax, ide,                                                                                          \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    return min##ide(v1, v2) - max##ide(v1, v2);,                                                             \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2)
+
+// (int) Returns min(v1, v2) minus max(v1, v2)
+GOPSSUBMAX_DEFN(sint,  i);
+
+// (float) Returns min(v1, v2) minus max(v1, v2)
+GOPSSUBMAX_DEFN(float, f);
+
+//  - --- - --- - --- - --- -
+
+#define GOPSFLIPIF_DEFN(T, ide) GENFUNC_DEFN(                                                                \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, flipif, ide,                                                                                          \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    return v1 * (1 - (2 * (boo != 0)) );,                                                                    \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, sint boo)
+
+// (int) Inverts sign of v1 if boo
+GOPSFLIPIF_DEFN(sint,  i);
+
+// (float) Inverts sign of v1 if boo
+GOPSFLIPIF_DEFN(float, f);
+
+//  - --- - --- - --- - --- -
 
 float fround(float x)                   { int y = (sint)(x * 100 + .5f); return (float)(y * 0.01f);         }
 
 //  - --- - --- - --- - --- -
 
-int   clampi(sint v,
-             sint start,
-             sint end)                  { if      (v < start) { v = start; }
-                                          else if (v > end  ) { v = end;   }
-                                          return v;                                                         }
+#define GOPSCLAMP_DEFN(T, ide) GENFUNC_DEFN(                                                                 \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, clamp, ide,                                                                                           \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    if      (v < start) { v = start; }                                                                       \
+    else if (v > end  ) { v = end;   }                                                                       \
+    return v;,                                                                                               \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v, T start, T end)
 
-float clampf(float v,
-             float start,
-             float end)                 { if      (v < start) { v = start; }
-                                          else if (v > end  ) { v = end;   }
-                                          return v;                                                         }
+// (int) Clamp v to range(start, end)
+GOPSCLAMP_DEFN(sint,  i);
+
+// (float) Clamp v to range(start, end)
+GOPSCLAMP_DEFN(float, f);
 
 //  - --- - --- - --- - --- -
 /* add steps to v while wrapping around range
 
    so if 1 in (0, 9) - 17 gets you 2; 1 in (0, 9) + 18 gets you 1
-   very specific func for a looping colle; i.e. add to ptr until end of array, then loop back
+   very specific func for a looping colle; i.e. add to ptr until end of array, then loop back              */
 
-   maybe there's a smarter way of doing it but i'm too sleepy to care right now */
+#define GOPSWRAP_DEFN(T, ide) GENFUNC_DEFN(                                                                  \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, wrap, ide,                                                                                            \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    T diff;                                                                                                  \
+                                                                                                             \
+    while(steps)                                                                                             \
+    {                                                                                                        \
+                                                                                                             \
+/*  - --- - --- - --- - --- -                                                                              */\
+/* get (-) start to v | (+) v to end distance                                                              */\
+                                                                                                             \
+        if     (steps < 0)  { diff = 1 + submin##ide(start, v);                                             }\
+        else                { diff = 1 + submin##ide(end,   v);                                             }\
+                                                                                                             \
+        v += steps;                                                                                          \
+                                                                                                             \
+/*  - --- - --- - --- - --- -                                                                              */\
+/* if v not in (start, end) then substract distance from steps and run again, else break                   */\
+                                                                                                             \
+        if     (v < start)  { steps += diff; v = end;                                                       }\
+        else if(v > end  )  { steps -= diff; v = start;                                                     }\
+        else                { break;                                                                        }\
+                                                                                                             \
+    }                                                                                                        \
+                                                                                                             \
+    return v;,                                                                                               \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v, T steps, T start, T end)
 
-int wrapi(sint v,
+// (int) Add (-/+) steps to v and loop around range(start, end)
+GOPSWRAP_DEFN(sint,  i);
 
-          sint steps,
-
-          sint start,
-          sint end    )                         {
-
-    int diff = 0;
-
-    while(steps)
-    {
-
-//  - --- - --- - --- - --- -
-// get (-) start to v | (+) v to end distance
-
-        if     (steps < 0)  { diff = 1 + abs(start - v);                                                    }
-        else                { diff = 1 + abs(end   - v);                                                    }
-
-        v += steps;
-
-//  - --- - --- - --- - --- -
-// if v not in (start, end) then substract distance from steps and run again, else break
-
-        if     (v < start)  { steps += diff; v = end;                                                       }
-        else if(v > end  )  { steps -= diff; v = start;                                                     }
-        else                { break;                                                                        }
-
-    }
-
-    return v;                                                                                               }
-
-//  - --- - --- - --- - --- -
-
-sint  approai(sint v1,
-              sint v2,
-              sint m )                  { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
-
-sint  approaf(float v1,
-              float v2,
-              float m)                  { return ( (v2 - m) < v1) && (v1 < (v2 + m) );                      }
-
-sint  approadi(sint v1,
-               sint v2,
-               sint m )                 { if(approai(v1, v2, m)) { return submini(v1, v2); }
-                                          return 999;                                                       }
-
-float approadf(float v1,
-               float v2,
-               float m)                 { if(approaf(v1, v2, m)) { return subminf(v1, v2); }
-                                          return 999;                                                       }
+// (float) Add (-/+) steps to v and loop around range(start, end)
+GOPSWRAP_DEFN(float, f);
 
 //  - --- - --- - --- - --- -
 
-void     build_fvRange(fvRange* fvr,
-                       uint     mag,
-                       float    step)   {
+#define GOPSAPPROA_DEFN(T, ide) GENFUNC_DEFN(                                                                \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    sint, approa, ide,                                                                                       \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    return ( (v2 - m) < v1) && (v1 < (v2 + m) );,                                                            \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2, T m)
 
-    fvr->mag  = mag;
-    fvr->step = (float ) fabs(step);
-    WARD_EVIL_MALLOC(fvr->buff, float, sizeof(float), mag);
+// (int) Get v1 is at least (-/+) m distance of v2
+GOPSAPPROA_DEFN(sint,  i);
 
-    if(step < 0)                        { step = -step;
+// (float) Get v1 is at least (-/+) m distance of v2
+GOPSAPPROA_DEFN(float, f);
 
-                                          for(int i = (int)(-(int)(mag) / 2); i < (int)(mag / 2); i++)
-                                        { fvr->buff[i + (mag / 2)] = (i*step); }                              }
+//  - --- - --- - --- - --- -
 
-    else                                { for(uint i = 0; i < mag; i++)
-                                        { fvr->buff[i] = (i*step); }                                        }
-                                                                                                            }
+#define GOPSAPPROAD_DEFN(T, ide) GENFUNC_DEFN(                                                               \
+                                                                                                             \
+    /* Type, name & identifier */                                                                            \
+    T, approad, ide,                                                                                         \
+                                                                                                             \
+    /* Function body */                                                                                      \
+    if(approa##ide(v1, v2, m)) { return submin##ide(v1, v2); } return (T)999;,                               \
+                                                                                                             \
+    /* Arguments */                                                                                          \
+    T v1, T v2, T m)
 
-void del_fvRange(fvRange* fvr)          { WARD_EVIL_MFREE(fvr->buff);                                       }
+// (int) Get distance if v1 is at least (-/+) m distance of v2
+GOPSAPPROAD_DEFN(sint,  i);
 
-uint fvRange_take_closest(
-                          fvRange* fvr,
-                          float v)      {
+// (float) Get distance if v1 is at least (-/+) m distance of v2
+GOPSAPPROAD_DEFN(float, f);
 
-    if (v >= fvr->buff[fvr->mag-1])     { return fvr->mag-1;                                                }
-    if (v <= fvr->buff[0]         )     { return 0;                                                         }
+/*  - --- - --- - --- - --- -   START GENERIC STRUCT   - --- - --- - --- - --- -   */
 
-    float s = fvr->step * 0.5f;
-    float dist = 999.0f;
-    float newdist;
-    uint closest = 0;
+#define VRANGE_DEFN_PROTO(T, ide, name, asarg)                                                               \
+                                                                                                             \
+/*  - --- - --- - --- - --- -      Method */                                                                 \
+                                GENFUNC_DEFN2(                                                               \
+                                                                                                             \
+/* Type, module, descriptor & name */                                                                        \
+    name*, ZJC_, build_, name,                                                                               \
+                                                                                                             \
+/* Function body */                                                                                          \
+    name* asarg;                                                                                             \
+                                                                                                             \
+    WARD_EVIL_MALLOC(asarg->buff, T, sizeof(T), mag);                                                        \
+                                                                                                             \
+    asarg->mag  = mag;                                                                                       \
+                                                                                                             \
+    if(step < 0)                        { step = -step;                                                      \
+                                                                                                             \
+                                          for(int i = (int)(-(int)(mag) / 2); i < (int)(mag / 2); i++)       \
+                                        { asarg->buff[i + (mag / 2)] = (i*step); }                          }\
+                                                                                                             \
+    else                                { for(uint i = 0; i < mag; i++)                                      \
+                                        { asarg->buff[i] = (i*step); }                                      }\
+    asarg->step = step;                                                                                      \
+    return asarg;,                                                                                           \
+                                                                                                             \
+/* Arguments */                                                                                              \
+    uint mag, T step);                                                                                       \
+                                                                                                             \
+/*  - --- - --- - --- - --- -      Method */                                                                 \
+                                GENFUNC_DEFN2(                                                               \
+                                                                                                             \
+/* Type, module, descriptor & name */                                                                        \
+    void, ZJC_, del_, name,                                                                                  \
+                                                                                                             \
+/* Function body */                                                                                          \
+    WARD_EVIL_MFREE(asarg->buff);,                                                                           \
+                                                                                                             \
+/* Arguments */                                                                                              \
+    name* asarg);                                                                                            \
+                                                                                                             \
+/*  - --- - --- - --- - --- -      Method */                                                                 \
+                                GENFUNC_DEFN2(                                                               \
+                                                                                                             \
+/* Type, module, descriptor & name */                                                                        \
+    uint, ZJC_, find_, name,                                                                                 \
+                                                                                                             \
+/* Function body */                                                                                          \
+    if (v >= asarg->buff[asarg->mag-1]) { return asarg->mag-1;                                              }\
+    if (v <= asarg->buff[0]           ) { return 0;                                                         }\
+                                                                                                             \
+    T s    = (T) (asarg->step * 0.5f);                                                                       \
+    T dist = 999;                                                                                            \
+                                                                                                             \
+    T newdist;                                                                                               \
+                                                                                                             \
+    uint  closest = 0;                                                                                       \
+                                                                                                             \
+    for (uint i = 0; i < asarg->mag; i++) { newdist = approadf(v, asarg->buff[i], s);                        \
+                                       if ( newdist < dist ) { dist = newdist; closest = i; }               }\
+                                                                                                             \
+    return closest;,                                                                                         \
+                                                                                                             \
+/* Arguments */                                                                                              \
+    name* asarg, T v);                                                                                       \
 
-    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, fvr->buff[i], s);
-                                          if ( newdist < dist ) { dist = newdist; closest = i; }            }
+#define VRANGE_DEFN(T, ide) VRANGE_DEFN_PROTO(T, ide, ide##vRange, ide##vr)
 
-    return closest;
-}
+/*  - --- - --- - --- - --- -   END GENERIC STRUCT     - --- - --- - --- - --- -   */
 
-uchar fvRange_take_closest_1b(fvRange* fvr,
-                              float v)  {
-
-    if (v >= fvr->buff[fvr->mag-1])     { return (uchar)fvr->mag-1;                                         }
-    if (v <= fvr->buff[0]         )     { return (uchar)0;                                                  }
-
-    if (fvr->mag > 256)                 { fprintf(stderr,
-
-                                                  "fvRange_take_closest_1b rejects float scales outside\
-                                                   the index range(0, 256)\n"                               );
-
-                                          return 0;                                                         }
-
-    float s = fvr->step * 0.5f;
-    float dist = 999.0f;
-    float newdist;
-    uint closest = 0;
-
-    for (uint i = 0; i < fvr->mag; i++) { newdist = approadf(v, fvr->buff[i], s);
-                                          if ( newdist < dist ) { dist = newdist; closest = i; }            }
-
-    return closest;                                                                                         }
-
+// (float) Value range
+VRANGE_DEFN(float, f);

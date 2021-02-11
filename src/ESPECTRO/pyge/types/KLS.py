@@ -17,12 +17,9 @@ class KLS(struct):
     _fields_ = [ ("arr_idex", ushort),
                  ("itm_idex", ushort) ];
 
-    def __init__(self, arr_idex, itm_idex):
-        self.arr_idex = arr_idex; self.itm_idex = itm_idex;
-
 #   ---     ---     ---     ---     ---
 # 1-1 map to C side funcs
-
+    """
     def getsize(self       ): return SPCTR_getsize_valType(self.arr_idex     );
     def getcurr(self       ): return SPCTR_getcurr_KLS    (byref(self)       ).decode("utf-8");
     def moveptr(self, steps): return SPCTR_moveptr_KLS    (byref(self), steps).decode("utf-8");
@@ -38,3 +35,4 @@ class KLS(struct):
 SPCTR_getsize_valType = wrap_cfunc(CSIDE, "SPCTR_getsize_valType", ushort,   [ushort         ]);
 SPCTR_moveptr_KLS     = wrap_cfunc(CSIDE, "SPCTR_moveptr_KLS",     charstar, [star(KLS), sint]);
 SPCTR_getcurr_KLS     = wrap_cfunc(CSIDE, "SPCTR_getcurr_KLS",     charstar, [star(KLS)      ]);
+    """

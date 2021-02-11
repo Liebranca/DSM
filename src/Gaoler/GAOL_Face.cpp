@@ -44,7 +44,7 @@ RAYDATA GAOL_COLLISION_FACE::rayIsectPoint
     if (abs(denom) <= 1e-4f)                    { return RAYDATA(false, {0,0,0});                                       }
 
     float t = -(dot(normal, ray->p1) + d) / denom;
-    if (t <= 1e-4)                              { return RAYDATA(false, {0,0,0});                                       }
+    if (t <= 1e-4f)                              { return RAYDATA(false, {0,0,0});                                       }
 
     return RAYDATA(true, ray->p1 + t * ray->normal);                                                                    }
 
